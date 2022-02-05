@@ -34,7 +34,7 @@ class TestFileHandler(TestCase):
         '\n '
         '    sodales, augue velit cursus nunc,')
 
-    test_file_path: str = '/res/test_text.txt'
+    test_file_path: str = './res/test_text.txt'
 
     def test_create_file(self):
         print('Testing file creation...')
