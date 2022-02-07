@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 # Pycharm config folder
-.idea
+.idea/
 # VsCode config folder
-.vscode
+.vscode/
