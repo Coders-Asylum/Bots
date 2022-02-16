@@ -8,13 +8,16 @@ WORKDIR /home
 ENV PYTHONUNBUFFERED True
 
 # install all the packages.
-COPY ./requirements.txt requirements.txt
+COPY ./bin/docker/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project files to dir.
 ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY  ../../ ./secretary-app/
+ENV SEC_HOME /app/secretary-app
 
+WORKDIR $APP_HOME
+COPY  . secretary-app/
+
+WORKDIR $SEC_HOME
 # running the app
-RUN python ./secretary-app/app.py
+CMD [ "python", "./app.py" ]
