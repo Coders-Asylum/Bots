@@ -1,18 +1,23 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.9-slim-buster
+FROM python:3.9-slim
 
 WORKDIR /home
 
-# upgrade pip.
-RUN python -m pip3 install --upgrade pip
+# Allow statements and log messages to immediately appear in the Knative logs
+ENV PYTHONUNBUFFERED True
 
 # install all the packages.
-COPY ./requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+COPY ./bin/docker/requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project files to dir.
-COPY  ../../ ./app/secretary-app/
+ENV APP_HOME /app
+ENV SEC_HOME /app/secretary-app
 
+WORKDIR $APP_HOME
+COPY  . secretary-app/
+
+WORKDIR $SEC_HOME
 # running the app
-RUN python ./app/secretary-app/app.py
+CMD [ "python", "./app.py" ]
