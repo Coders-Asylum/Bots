@@ -21,3 +21,4 @@ COPY  . secretary-app/
 WORKDIR $SEC_HOME
 # running the app
 CMD [ "python", "./app.py" ]
+
