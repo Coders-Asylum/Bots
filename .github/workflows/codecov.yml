@@ -5,13 +5,15 @@ on:
   pull_request:
     branches: [master]
 
-  run:
+jobs:
+  upload_coverage:
     runs-on: ubuntu-latest
     env:
       OS: ubuntu-latest
       PYTHON: '3.9'
     steps:
-    - uses: checkout@v2
+    - name: Checkout Repo
+      uses: checkout@v2
       with:
         fetch-depth: ‘2’
 
