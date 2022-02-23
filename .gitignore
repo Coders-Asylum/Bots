@@ -146,7 +146,6 @@ __queuestorage__
 __azurite_db*__.json
 .python_packages
 
-# Pycharm config folder
-.idea/
-# VsCode config folder
-.vscode/
+# pem certificate file
+*.pem
+.pem
