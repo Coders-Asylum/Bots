@@ -1,4 +1,4 @@
-from bin.handlers.response_handler import ResponseHandlers, Response
+from bin.handlers import ResponseHandlers, Response
 from shlex import split
 
 
