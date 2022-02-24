@@ -149,3 +149,7 @@ __azurite_db*__.json
 # pem certificate file
 *.pem
 .pem
+
+#ignoring file test res file paths
+# These are the resource files created or changed during running of unittests
+/tests/bin_tests/handlers_test/res/*
