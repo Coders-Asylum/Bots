@@ -37,6 +37,12 @@ jobs:
     docker:
        - image: cimg/python:3.9.10
     steps:
+      - run:
+          name: "Install coverage.py and generate report"
+          command: |
+              pip install coverage
+              run -m unittest discover tests/
+
       - codecov/upload
 
 
