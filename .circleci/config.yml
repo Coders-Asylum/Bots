@@ -14,7 +14,11 @@ jobs:
       - run:
           name: "Python version"
           command: "python3 --version"
-      - run: ls -R
+      - run:
+          name: "Create Virtual Env."
+          command: |
+            python -m venv venv
+            source ./venv/bin/activate
       - run:
           name: "Install Packages"
           command: pip install -r requirements.txt  
