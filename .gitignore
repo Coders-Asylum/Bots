@@ -152,4 +152,4 @@ __azurite_db*__.json
 
 #ignoring file test res file paths
 # These are the resource files created or changed during running of unittests
-/tests/bin_tests/handlers_test/res/*
+/tests/bin_tests/handlers_test/res/*/**
