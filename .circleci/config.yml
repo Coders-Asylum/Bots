@@ -15,21 +15,19 @@ jobs:
           name: "Python version"
           command: "python3 --version"
       - run: ls -R
-      # - run:
-      #     name: "Install Packages"
-      #     command: |
-      #         cd bots/
-      #         pip install -r requirements.txt  
-      # # install local packages
-      # - run:
-      #     name: "Install local packages"
-      #     command: |
-      #         pip install .
-      #         pip install ./secretaryBot
+      - run:
+          name: "Install Packages"
+          command: pip install -r requirements.txt  
+      # install local packages
+      - run:
+          name: "Install local Modules"
+          command: |
+              pip install .
+              pip install ./secretaryBot
       
-      # - run:
-      #     name: "Run Unit tests in tests/ folder"
-      #     command: "python -m unittest discover tests/"
+      - run:
+          name: "Run Unit tests in tests/ folder"
+          command: "python -m unittest discover tests/"
   
   upload-coverage-report:
     docker:
