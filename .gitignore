@@ -146,7 +146,11 @@ __queuestorage__
 __azurite_db*__.json
 .python_packages
 
-# Pycharm config folder
-.idea/
-# VsCode config folder
-.vscode/
+
+# pem certificate file
+*.pem
+.pem
+
+#ignoring file test res file paths
+# These are the resource files created or changed during running of unittests
+/tests/bin_tests/handlers_test/res/*/**

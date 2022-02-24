@@ -2,7 +2,7 @@ from unittest import TestCase, main
 from io import StringIO
 from unittest.mock import patch
 
-from bin.output import Output
+from bin import Output
 
 
 class unittests(TestCase):
