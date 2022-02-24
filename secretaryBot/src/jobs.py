@@ -1,4 +1,3 @@
-from bin.handlers import github_api_handler
 from azure  import functions as func
 
 class jobs:
