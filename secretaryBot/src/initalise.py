@@ -1,4 +1,4 @@
-from bin import Exception_Handler, ExceptionType
+from bin.handlers import Exception_Handler, ExceptionType
 
 from bin import install_package
 
