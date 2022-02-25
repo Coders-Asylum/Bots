@@ -1,6 +1,9 @@
 [run]
 branch = True
-source = .
+source =
+    .
+    bin/
+    secretaryBot/
 
 [report]
 exclude_lines =
@@ -9,5 +12,10 @@ exclude_lines =
     raise NotImplementedError
     if __name__ == .__main__.:
 ignore_errors = True
+skip_empty = True
 omit =
     tests/*
+    */setup.py
+
+[xml]
+output = "coverage.xml"
