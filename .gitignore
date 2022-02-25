@@ -157,3 +157,4 @@ __azurite_db*__.json
 
 # ignore coverage report files
 /htmlcov
+res/test_text.txt
