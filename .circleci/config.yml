@@ -54,6 +54,8 @@ jobs:
           command: |
               pip install coverage
               coverage run -m unittest discover -s tests/ 
+              coverage report
+              coverage xml
 
       - codecov/upload:
           file: ./coverage.xml
