@@ -1,6 +1,6 @@
-from bin.handlers import Exception_Handler, ExceptionType
+from lib.handlers import Exception_Handler, ExceptionType
 
-from bin import install_package
+from lib import install_package
 
 
 class initialise:
