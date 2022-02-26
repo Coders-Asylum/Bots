@@ -65,4 +65,7 @@ workflows:
   run-tests-workflow:
     jobs:
       - run-unittests
-      - upload-coverage-report
+      - upload-coverage-report:
+          requires: 
+            - run-unittests  
+
