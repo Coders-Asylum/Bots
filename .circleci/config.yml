@@ -31,21 +31,6 @@ jobs:
               pip install ./secretaryBot
       
       - run:
-          name: "Create Virtual Env."
-          command: |
-            python -m venv venv
-            source ./venv/bin/activate
-      - run:
-          name: "Install Packages"
-          command: pip install -r requirements.txt  
-      # install local packages
-      - run:
-          name: "Install local Modules"
-          command: |
-              pip install .
-              pip install ./secretaryBot
-      
-      - run:
           name: "Run Unit tests in tests/ folder"
           command: "python -m unittest discover tests/"
   
@@ -55,6 +40,15 @@ jobs:
        - image: cimg/python:3.9.10
     steps:
       - checkout
+      - run:
+          name: "Install Packages"
+          command: pip install -r requirements.txt  
+      # install local packages
+      - run:
+          name: "Install local Modules"
+          command: |
+              pip install .
+              pip install ./secretaryBot
       - run:
           name: "Install coverage.py and generate report"
           command: |
