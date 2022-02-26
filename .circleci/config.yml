@@ -2,11 +2,12 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 orbs:
-  codecov: codecov/codecov@3.0.0
+  codecov: codecov/codecov@3.2.2
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   run-unittests:
+    resource_class: medium
     docker:
       - image: cimg/python:3.9.10
     steps:
@@ -14,11 +15,11 @@ jobs:
       - run:
           name: "Python version"
           command: "python3 --version"
-      - run:
-          name: "Create Virtual Env."
-          command: |
-            python -m venv venv
-            source ./venv/bin/activate
+      # - run:
+      #     name: "Create Virtual Env."
+      #     command: |
+      #       python -m venv venv
+      #       source ./venv/bin/activate
       - run:
           name: "Install Packages"
           command: pip install -r requirements.txt  
@@ -34,16 +35,28 @@ jobs:
           command: "python -m unittest discover tests/"
   
   upload-coverage-report:
+    resource_class: medium
     docker:
        - image: cimg/python:3.9.10
     steps:
+      - checkout
+      - run:
+          name: "Install Packages"
+          command: pip install -r requirements.txt  
+      # install local packages
+      - run:
+          name: "Install local Modules"
+          command: |
+              pip install .
+              pip install ./secretaryBot
       - run:
           name: "Install coverage.py and generate report"
           command: |
               pip install coverage
-              coverage run -m unittest discover tests/
+              coverage run -m unittest discover -s tests/ 
 
-      - codecov/upload
+      - codecov/upload:
+          file: ./coverage.xml
 
 
 # Invoke jobs via workflows
@@ -52,4 +65,7 @@ workflows:
   run-tests-workflow:
     jobs:
       - run-unittests
-      - upload-coverage-report
+      - upload-coverage-report:
+          requires: 
+            - run-unittests  
+
