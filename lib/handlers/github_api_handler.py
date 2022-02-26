@@ -1,5 +1,5 @@
 from .response_handler import ResponseHandlers, Response
-from lib.handlers.authHandler import generate_jwt_token
+from .authHandler import generate_jwt_token
 from datetime import datetime
 from requests.structures import CaseInsensitiveDict
 from json import loads, dumps
