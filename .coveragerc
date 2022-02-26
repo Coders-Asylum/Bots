@@ -18,4 +18,4 @@ omit =
     */setup.py
 
 [xml]
-output = "coverage.xml"
+output = coverage.xml
