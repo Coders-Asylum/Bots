@@ -10,6 +10,8 @@ class initialise:
         try:
             import requests
         except ImportError as err:
+            print(f"[E] Error while initialising: {err.name}- {err.msg}")
+            print("[I] Trying to import package...")
             check = install_package(requests)
             if check is 0:
                 pass

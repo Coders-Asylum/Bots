@@ -79,4 +79,4 @@ class ResponseHandlers:
         :param Response response: the response object that needs to be converted
         :return --> func.HttpResponse
         """
-        return func.HttpResponse(status_code=response.status_code,body=response.data)
+        return func.HttpResponse(status_code=response.status_code, body=response.data)

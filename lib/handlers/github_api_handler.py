@@ -239,7 +239,7 @@ class GithubAppApi:
     _time = int(round(datetime.now().timestamp()))
     payload: dict = {"iat": _time, "exp": _time + (60 * 10), "iss": appId}
 
-    def __init__(self, app_id: str) -> object:
+    def __init__(self, app_id: str):
         self.appId = app_id
 
     def get_app_installations(self) -> list[GithubAppInstalations]:
