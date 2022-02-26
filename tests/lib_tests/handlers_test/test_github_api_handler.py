@@ -3,7 +3,7 @@ from requests import get
 from json import loads
 from requests.structures import CaseInsensitiveDict
 from os import environ
-from bin.handlers import GithubAPIHandler, GithubRefObject, GithubAppApi
+from lib.handlers import GithubAPIHandler, GithubRefObject, GithubAppApi
 # from datetime import datetime
 # from cryptography.hazmat.primitives import serialization
 # from cryptography.hazmat.backends import default_backend

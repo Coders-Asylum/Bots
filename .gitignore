@@ -19,7 +19,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -153,8 +152,8 @@ __azurite_db*__.json
 
 #ignoring file test res file paths
 # These are the resource files created or changed during running of unittests
-/tests/bin_tests/handlers_test/res/
+/tests/lib_tests/handlers_test/res/
+res/test_text.txt
 
 # ignore coverage report files
 /htmlcov
-res/test_text.txt

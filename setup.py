@@ -1,4 +1,3 @@
 from setuptools import setup
 
-setup(name='bin', version="0.1a", packages=['bin','bin.handlers'])
-
+setup(name='lib', version="0.1a", packages=['lib', 'lib.handlers'])

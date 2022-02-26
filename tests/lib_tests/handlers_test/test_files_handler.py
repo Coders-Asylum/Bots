@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 from os import path
-from bin.handlers import FileHandler
+from lib.handlers import FileHandler
 
 
 class TestFileHandler(TestCase):
