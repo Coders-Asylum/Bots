@@ -60,8 +60,8 @@ jobs:
               pip install coverage
               coverage run -m unittest discover ~/tests/ 
 
-      - codecov/upload
-          file: "./coverage.xml"
+      - codecov/upload:
+          file: ./coverage.xml
 
 
 # Invoke jobs via workflows
