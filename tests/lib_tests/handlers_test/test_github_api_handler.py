@@ -227,7 +227,7 @@ class TestAccessTokenPermission(TestCase):
 
 
 class TestGithubAppApi(TestCase):
-    app = GithubAppApi(app_id=environ.get('APP_ID'))
+    # app = GithubAppApi(app_id=environ.get('APP_ID'))
 
     def test_get_app_installations(self):
         pass
