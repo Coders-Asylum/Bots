@@ -1,5 +1,5 @@
-from .response_handler import ResponseHandlers, Response
-from .authHandler import generate_jwt_token
+from lib.handlers.response_handler import ResponseHandlers, Response
+from lib.handlers.authHandler import generate_jwt_token
 from datetime import datetime
 from requests.structures import CaseInsensitiveDict
 from json import loads, dumps
@@ -90,7 +90,7 @@ class GitTree:
             self.sha = sha
 
 
-class GithubAppInstalations:
+class GithubAppInstallations:
     org: str
     install_id: int
     acc_tkn_url: str
@@ -99,6 +99,100 @@ class GithubAppInstalations:
         self.org = org
         self.install_id = id
         self.acc_tkn_url = tkn
+
+    def __str__(self):
+        _s: str = f'Installed on: Organization: {self.org}, Installation id: {self.install_id}'
+        return _s
+
+
+class AccessType(Enum):
+    """Type of access need for the permission
+
+    Attributes
+    ----------
+    READ : Give read access for the permission
+    WRITE: Give write access.
+    NULL : No access against the permission
+
+    """
+    READ = "read"
+    WRITE = "write"
+    NULL = "NULL"
+
+
+class Permission:
+    name: str
+    access_type: AccessType
+
+    def __init__(self, name: str, access_type: AccessType):
+        self.name = name
+        self.access_type = access_type
+
+
+class GithubPermissions(Enum):
+    """
+    These are the _permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
+       To know about the permission look in to this part of the `Github api <https://docs.github.com/en/rest/reference/permissions-required-for-github-apps>`
+
+       Note: Add the permission to the following class if not found in the class but is available in the Github APP api docs.
+    """
+
+    CONTENTS = 'contents'
+    ISSUES = 'issues'
+    PAGES = 'pages'
+    PULL_REQUESTS = 'pull_requests'
+    MEMBERS = 'members'
+
+
+class AccessTokenPermission:
+    """
+       Permissions that the access token will be assigned for
+       These are the _permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
+       To know about the permission look in to this part of the `Github api <https://docs.github.com/en/rest/reference/permissions-required-for-github-apps>`
+    """
+    _permissions: dict = {}
+
+    def __init__(self):
+        self._permissions = {}
+
+    def set(self, permission: GithubPermissions, access: AccessType) -> None:
+        """
+        Set and update the permission for the current object.
+
+        Args:
+            permission (GithubPermissions): Permissions to be added or changed from the available GithubPermissions.
+            access (AccessType): Access type can be read or write, to remove a permission set `AccessType.NULL` .
+        """
+        if permission.value in self._permissions.keys():
+            if access != AccessType.NULL:
+                self._permissions.update({permission.value: access.value})
+            else:
+                self._permissions.pop(permission.value)
+        else:
+            self._permissions[permission.value] = access.value
+
+    def payload(self) -> dict:
+        """
+        The payload that needs to be passed to permission parameter.
+
+        Returns:
+        dict_object (dict): A mapped payload for containing all the permissions with the access type.
+
+        """
+        if len(self._permissions) == 0:
+            return {}
+        for permission, access in self._permissions.items():
+            if access == 'NULL':
+                # todo: change this with custom exception handler and then stop app or process.
+                raise Exception(f'A Null type permission present for permission key:{permission}')
+
+        return self._permissions
+
+
+class GithubAccessToken:
+
+    def payload(self):
+        pass
 
 
 class GithubAPIHandler:
@@ -235,26 +329,49 @@ class GithubAPIHandler:
 
 
 class GithubAppApi:
-    appId: str = None
+    """
+    Methods to access Github App api endpints.
+    """
+    _appId: str = None
     _time = int(round(datetime.now().timestamp()))
-    payload: dict = {"iat": _time, "exp": _time + (60 * 10), "iss": appId}
+    payload: dict
+    headers = CaseInsensitiveDict()
 
     def __init__(self, app_id: str):
-        self.appId = app_id
+        self._appId = app_id
+        self.payload = {"iat": self._time, "exp": self._time + (60 * 10), "iss": app_id}
+        self.headers["Accept"] = "application/vnd.github.v3+json"
+        self.headers["Authorization"] = "Bearer " + generate_jwt_token(payload=self.payload)
 
-    def get_app_installations(self) -> list[GithubAppInstalations]:
+    def get_app_installations(self) -> list[GithubAppInstallations]:
+        """
+        Gets the app installations for the initialised app id
 
-        _li: list[GithubAppInstalations] = []
-        headers = CaseInsensitiveDict()
-        headers["Authorization"] = "Bearer " + generate_jwt_token(payload=self.payload)
-        headers["Accept"] = "application/vnd.github.v3+json"
-
+        :return: -> list[GithubAppInstallations]
+        """
+        _li: list[GithubAppInstallations] = []
+        # endpoint url.
         url = "https://api.github.com/app/installations"
-        res = ResponseHandlers.curl_get_response(url, headers)
+
+        res = ResponseHandlers.curl_get_response(url, self.headers)
         if res.status_code != 200:
             print(f'App installation was not received: {res.status_code} {res.status}')
 
         _data: list = loads(res.data)
         for d in _data:
-            _li.append(GithubAppInstalations(id=d['id'], org=d['account']['login'], tkn=d['access_tokens_url']))
+            _li.append(GithubAppInstallations(id=d['id'], org=d['account']['login'], tkn=d['access_tokens_url']))
         return _li
+
+    def create_access_token(self, repos: list[str]):
+        """
+        Creates access tokens for the app installations to authenticate as an app in a repo
+
+        :param repos: List is repos names to get access for the repos
+        :param
+        """
+
+
+if __name__ == '__main__':
+    app = GithubAppApi(app_id='173901')
+
+    li = app.get_app_installations()
