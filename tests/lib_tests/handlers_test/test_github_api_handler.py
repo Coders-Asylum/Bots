@@ -3,7 +3,9 @@ from requests import get
 from json import loads
 from requests.structures import CaseInsensitiveDict
 from os import environ
-from lib.handlers import GithubAPIHandler, GithubRefObject, GithubAppApi
+from lib.handlers import *
+
+
 # from datetime import datetime
 # from cryptography.hazmat.primitives import serialization
 # from cryptography.hazmat.backends import default_backend
@@ -153,10 +155,81 @@ class TestGithubAPIHandler(TestCase):
         pass
 
 
+class TestAccessTokenPermission(TestCase):
+
+    def test_AccessTokenPermission_all_read(self):
+        expected_payload = {'contents': 'read', 'issues': 'read', 'pages': 'read', 'pull_requests': 'read', 'members': 'read'}
+        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+
+        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.READ)
+
+        actual_payload = access_tkn1.payload()
+
+        self.assertEqual(expected_payload, actual_payload)
+
+    def test_AccessTokenPermission_all_write(self):
+        expected_payload = {'contents': 'write', 'issues': 'write', 'pages': 'write', 'pull_requests': 'write', 'members': 'write'}
+        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+
+        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
+
+        actual_payload = access_tkn1.payload()
+
+        self.assertEqual(expected_payload, actual_payload)
+
+    def test_AccessTokenPermission_on_change(self):
+        expected_payload = {'contents': 'read', 'issues': 'write', 'pages': 'read', 'pull_requests': 'write', 'members': 'write'}
+        expected_payload_on_change = {'contents': 'read', 'issues': 'write', 'pull_requests': 'read', 'pages': 'read', 'members': 'write'}
+        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+
+        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
+
+        actual_payload = access_tkn1.payload()
+
+        self.assertEqual(expected_payload, actual_payload)
+        # remove pages permission for the object
+        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.READ)
+        actual_payload = access_tkn1.payload()
+
+        self.assertEqual(expected_payload_on_change, actual_payload)
+
+    def test_AccessTokenPermission_all_del(self):
+        expected_payload = {'contents': 'read', 'issues': 'write', 'pages': 'read', 'pull_requests': 'write', 'members': 'write'}
+        expected_payload_on_del = {'contents': 'read', 'issues': 'write', 'pull_requests': 'write', 'members': 'write'}
+        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+
+        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
+        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
+        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
+
+        actual_payload = access_tkn1.payload()
+
+        self.assertEqual(expected_payload, actual_payload)
+        # remove pages permission for the object
+        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.NULL)
+        actual_payload = access_tkn1.payload()
+
+        self.assertEqual(expected_payload_on_del, actual_payload)
+
+
 class TestGithubAppApi(TestCase):
     app = GithubAppApi(app_id=environ.get('APP_ID'))
 
-    def test_et_app_installations(self):
+    def test_get_app_installations(self):
         pass
         # with open('__path__ tpfile ', 'rb') as cert_file:
         #     _pvt = serialization.load_pem_private_key(data=cert_file.read(), password=None, backend=default_backend)
