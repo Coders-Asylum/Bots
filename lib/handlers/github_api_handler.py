@@ -1,5 +1,5 @@
 from lib.handlers.response_handler import ResponseHandlers, Response
-from lib.handlers.authHandler import generate_jwt_token
+from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
 from datetime import datetime
 from requests.structures import CaseInsensitiveDict
 from json import loads, dumps
@@ -357,7 +357,7 @@ class GithubAppApi:
             _li.append(GithubAppInstallations(id=d['id'], org=d['account']['login'], tkn=d['access_tokens_url']))
         return _li
 
-    def create_access_token(self, repos: list[str], permissions: AccessTokenPermission, org: str):
+    def create_access_token(self, repos: list[str], permissions: AccessTokenPermission, org: str) -> GithubAccessToken:
         """
         Creates access tokens for the app installations to authenticate as an app in a repo
 
@@ -385,7 +385,7 @@ class GithubAppApi:
         res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
         if res.status_code != 201:
             print(f'[E] Token was not created: {res.status_code} {res.status}: {res.data}')
-        print(res.status)
+        return GithubAccessToken(data=res.data)
 
 
 if __name__ == '__main__':
