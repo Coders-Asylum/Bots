@@ -364,7 +364,7 @@ class GithubAppApi:
         Args:
             org (str): Organization for which the repos are present, this organization must have the App installed.
             repos (list[str]): List of repos for which the access token needs to be generated. *These repos must be from single organization*
-            permissions (AccessTokenPermission): Permissions against which the access token needs to be generated.
+            permissions (AccessTokenPermission): Permissions against which the access token needs to be generated. If nothing is passed then the default permissions assigned to the app will be assigned to the repos.
         """
         app_installations = self.get_app_installations()
         _index: int = 10000001
@@ -376,7 +376,12 @@ class GithubAppApi:
                 raise Exception(f'App not installed for the Org:{org}')
 
         url = app_installations[_index].acc_tkn_url
-        payload: dict = {"repositories": repos}
+
+        if permissions is None:
+            payload: dict = {"repositories": repos}
+        else:
+            payload: dict = {"repositories": repos, "permissions": permissions.payload()}
+
         res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
         if res.status_code != 201:
             print(f'[E] Token was not created: {res.status_code} {res.status}: {res.data}')
