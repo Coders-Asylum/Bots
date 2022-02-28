@@ -131,7 +131,7 @@ class Permission:
 
 class GithubPermissions(Enum):
     """
-    These are the _permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
+    These are the permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
        To know about the permission look in to this part of the `Github api <https://docs.github.com/en/rest/reference/permissions-required-for-github-apps>`
 
        Note: Add the permission to the following class if not found in the class but is available in the Github APP api docs.
@@ -147,7 +147,7 @@ class GithubPermissions(Enum):
 class AccessTokenPermission:
     """
        Permissions that the access token will be assigned for
-       These are the _permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
+       These are the permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
        To know about the permission look in to this part of the `Github api <https://docs.github.com/en/rest/reference/permissions-required-for-github-apps>`
     """
     _permissions: dict = {}
@@ -187,12 +187,6 @@ class AccessTokenPermission:
                 raise Exception(f'A Null type permission present for permission key:{permission}')
 
         return self._permissions
-
-
-class GithubAccessToken:
-
-    def payload(self):
-        pass
 
 
 class GithubAPIHandler:
@@ -330,16 +324,17 @@ class GithubAPIHandler:
 
 class GithubAppApi:
     """
-    Methods to access Github App api endpints.
+    Methods to access Github App api endpoints.
     """
     _appId: str = None
     _time = int(round(datetime.now().timestamp()))
     payload: dict
     headers = CaseInsensitiveDict()
+    exp_in_min: int = 5
 
     def __init__(self, app_id: str):
         self._appId = app_id
-        self.payload = {"iat": self._time, "exp": self._time + (60 * 10), "iss": app_id}
+        self.payload = {"iat": self._time, "exp": self._time + (60 * self.exp_in_min), "iss": app_id}
         self.headers["Accept"] = "application/vnd.github.v3+json"
         self.headers["Authorization"] = "Bearer " + generate_jwt_token(payload=self.payload)
 
@@ -355,23 +350,43 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_get_response(url, self.headers)
         if res.status_code != 200:
-            print(f'App installation was not received: {res.status_code} {res.status}')
+            print(f'App installation was not received: {res.status_code} {res.status} {res.data}')
 
         _data: list = loads(res.data)
         for d in _data:
             _li.append(GithubAppInstallations(id=d['id'], org=d['account']['login'], tkn=d['access_tokens_url']))
         return _li
 
-    def create_access_token(self, repos: list[str]):
+    def create_access_token(self, repos: list[str], permissions: AccessTokenPermission, org: str):
         """
         Creates access tokens for the app installations to authenticate as an app in a repo
 
-        :param repos: List is repos names to get access for the repos
-        :param
+        Args:
+            org (str): Organization for which the repos are present, this organization must have the App installed.
+            repos (list[str]): List of repos for which the access token needs to be generated. *These repos must be from single organization*
+            permissions (AccessTokenPermission): Permissions against which the access token needs to be generated.
         """
+        app_installations = self.get_app_installations()
+        _index: int = 10000001
+        for i in range(len(app_installations)):
+            if app_installations[i].org == org:
+                _index = i
+                break
+            elif i == len(app_installations) - 1 and app_installations[i].org != org:
+                raise Exception(f'App not installed for the Org:{org}')
+
+        url = app_installations[_index].acc_tkn_url
+        payload: dict = {"repositories": repos}
+        res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
+        if res.status_code != 201:
+            print(f'[E] Token was not created: {res.status_code} {res.status}: {res.data}')
+        print(res.status)
 
 
 if __name__ == '__main__':
     app = GithubAppApi(app_id='173901')
+    access_tkn1: AccessTokenPermission = AccessTokenPermission()
 
-    li = app.get_app_installations()
+    access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+
+    app.create_access_token(repos=['fuzzy-train'], permissions=access_tkn1, org='Coders-Asylum')
