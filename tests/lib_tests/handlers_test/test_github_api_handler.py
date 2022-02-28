@@ -1,8 +1,8 @@
 from unittest import TestCase, main
-from requests import get
-from json import loads
-from requests.structures import CaseInsensitiveDict
-from os import environ
+# from requests import get
+# from json import loads
+# from requests.structures import CaseInsensitiveDict
+# from os import environ
 from lib.handlers import *
 
 
