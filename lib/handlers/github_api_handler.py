@@ -222,10 +222,11 @@ class GithubAPIHandler:
         return GithubRefObject(data=_r.data)
 
     @staticmethod
-    def post_blob(owner: str, repo: str, data: str):
-        url: str = f'https://api.github.com/repos/{owner}/{repo}/git/blobs/'
+    def post_blob(owner: str, repo: str, data: str, access_token: GithubAccessToken):
+        url: str = f'https://api.github.com/repos/{owner}/{repo}/git/blobs'
         _header: CaseInsensitiveDict = CaseInsensitiveDict()
         _header['Accept'] = 'application/vnd.github.v3+json'
+        _header['Authorization'] = access_token.access_tkn
         _data: str = dumps({"content": data})
         print(url)
         _r: Response = ResponseHandlers.curl_post_response(url=url, headers=_header, data=_data)
@@ -261,59 +262,45 @@ class GithubAPIHandler:
         return GithubTreeObject(data=_r.data)
 
     @staticmethod
-    def update_and_post_tree(owner: str, repo: str, branch: str, files: list[GitTree]):
+    def update_and_post_tree(owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken):
         """
         Updates the tree according to files provided
         :param owner:
         :param repo:
         :param branch:
         :param files:
+        :access_token:
         :return:
+
+        Args:
+            access_token:
+
         """
         _header: CaseInsensitiveDict = CaseInsensitiveDict()
         _header['Accept'] = 'application/vnd.github.v3+json'
+        _header['Authorization'] = f'token {access_token.access_tkn}'
+        tree: list[dict] = []
 
+        _git_tree: GithubTreeObject = GithubAPIHandler.get_tree(owner=owner, repo=repo, branch=branch)
+        print(_git_tree.url)
         # api url
         url = f'https://api.github.com/repos/{owner}/{repo}/git/trees'
 
-        _git_tree: GithubTreeObject = GithubAPIHandler.get_tree(owner=owner, repo=repo, branch=branch)
+        base_tree = _git_tree.sha
 
-        #  checking for updated files.
-        c: int = 0
         for file in files:
-            for tree in _git_tree.tree:
-                if file.path is tree['path']:
-                    tree['mode'] = file.mode
-                    tree['type'] = file.type
-                    if file.content is None:
-                        tree['sha'] = file.sha
-                    else:
-                        tree.pop('sha')
-                        tree['content'] = file.content
-                    files.pop(c)
-                else:
-                    pass
-            c = +1
-
-            # if still files are remaining this will add them as a new files.
-            if len(files) != 0:
-                for f in files:
-                    tree: dict
-                    if f.content and f.sha == 'delete':
-                        tree = {"path": f.path, "mode": f.mode, "type": f.type}
-                    elif f.content is None:
-                        tree = {"path": f.path, "mode": f.mode, "type": f.type, "sha": f.sha}
-                    else:
-                        tree = {"path": f.path, "mode": f.mode, "type": f.type, "content": f.content}
-                    _git_tree.tree.append(tree)
+            if file.content and file.sha == 'delete':
+                tree.append({"path": file.path, "mode": file.mode, "type": file.type})
+            elif file.content is None:
+                tree.append({"path": file.path, "mode": file.mode, "type": file.type, "sha": file.sha})
             else:
-                pass
+                tree.append({"path": file.path, "mode": file.mode, "type": file.type, "content": file.content})
 
-        _res = ResponseHandlers.curl_post_response(url=url, headers=_header, data=dumps(_git_tree.tree))
+        _posting_tree: dict = {"owner": owner, "repo": repo, "tree": tree, "base_tree": base_tree}
+
+        _res = ResponseHandlers.curl_post_response(url=url, headers=_header, data=dumps(_posting_tree))
         if _res.status_code != 201:
-            print(f'Tree was not able to be updated because: {_res.status_code} {_res.status}')
-
-        print(_res.data)
+            print(f'Tree was not able to be updated because: {_res.status_code} {_res.status} {_res.data}')
 
         return GithubTreeObject(data=_res.data)
 
@@ -390,8 +377,21 @@ class GithubAppApi:
 
 if __name__ == '__main__':
     app = GithubAppApi(app_id='173901')
+    api = GithubAPIHandler()
     access_tkn1: AccessTokenPermission = AccessTokenPermission()
 
     access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
 
-    app.create_access_token(repos=['fuzzy-train'], permissions=access_tkn1, org='Coders-Asylum')
+    _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
+
+    _owner = 'Coders-Asylum'
+    _repo = 'fuzzy-train'
+    _branch = 'test_branch'
+    _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
+                         'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
+                         'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+                         'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+
+    _tree = [GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=_expected_contents)]
+    _trees = api.update_and_post_tree(owner=_owner, repo=_repo, branch=_branch, files=_tree, access_token=_access_tkn)
+    print(_trees.url, _trees.tree)
