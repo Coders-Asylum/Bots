@@ -1,5 +1,5 @@
 from subprocess import run
-from requests import get, structures, post
+from requests import get, structures, post, patch
 from azure import functions as func
 
 
@@ -40,6 +40,21 @@ class ResponseHandlers:
         :return:
         """
         _r = post(url=url, headers=headers, data=data)
+        return Response(status_code=_r.status_code, data=_r.text, status=_r.reason)
+
+    @staticmethod
+    def http_patch(url: str, headers: structures.CaseInsensitiveDict, data: str) -> Response:
+        """ Patch request to the given url with the headers and data specified.
+
+        Args:
+            url (str): url to which the request has to be made
+            headers (str): Header data that needs to be sent with the request.
+            data (str): data in str format that has to be patched to the server.
+
+        Returns:
+            A Response object with the response after the attempt to do a Http patch.
+        """
+        _r = patch(url=url, headers=headers, data=data)
         return Response(status_code=_r.status_code, data=_r.text, status=_r.reason)
 
     @staticmethod
