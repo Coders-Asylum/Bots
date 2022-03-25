@@ -4,19 +4,19 @@ from azure import functions as func
 
 
 class Response:
-    status_code = None
-    status = None
+    status_code: int = None
+    status: str = None
 
-    data = None
+    data: str = None
     _response = None
 
-    def __init__(self, status_code, status, data):
+    def __init__(self, status_code: int, status: str, data: str):
         self.status_code = status_code
         self.data = data
         self.status = status
 
 
-#         todo: create function to extract data and status from response
+# todo: create function to extract data and for_status from response
 
 
 class ResponseHandlers:

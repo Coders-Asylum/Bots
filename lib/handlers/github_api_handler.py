@@ -190,6 +190,12 @@ class AccessTokenPermission:
 
 
 class GithubAPIHandler:
+    _header: CaseInsensitiveDict = CaseInsensitiveDict()
+    _latest_commit_sha: str = ''
+
+    def __init__(self):
+        self._header['Accept'] = 'application/vnd.github.v3+json'
+
     @staticmethod
     def download_repo_file(repo_name: str, owner: str, file_path: str, branch: str = 'master'):
         """ Downloads file from GitHub repository
@@ -203,8 +209,7 @@ class GithubAPIHandler:
         _r: Response = ResponseHandlers.http_get_response(url)
         return _r
 
-    @staticmethod
-    def get_git_ref(owner: str, repo_name: str, branch_name: str):
+    def _get_git_ref(self, owner: str, repo_name: str, branch_name: str):
         """
         Gets the Git head reference of the branch specified
         :param owner:
@@ -213,76 +218,80 @@ class GithubAPIHandler:
         :return: --> GithubRefObject
         """
         _url: str = f'https://api.github.com/repos/{owner}/{repo_name}/git/ref/heads/{branch_name}'
-        _header: CaseInsensitiveDict = CaseInsensitiveDict()
-        _header['Accept'] = 'application/vnd.github.v3+json'
 
-        _r: Response = ResponseHandlers.curl_get_response(url=_url, headers=_header)
+        _r: Response = ResponseHandlers.curl_get_response(url=_url, headers=self._header)
         if _r.status_code != 200:
             print(f'Error in fetching data: {_r.status_code} {_r.status}')
         return GithubRefObject(data=_r.data)
 
-    @staticmethod
-    def post_blob(owner: str, repo: str, data: str, access_token: GithubAccessToken):
+    def post_blob(self, owner: str, repo: str, data: str, access_token: GithubAccessToken):
+        """
+
+        Args:
+            owner:
+            repo:
+            data:
+            access_token:
+
+        Returns:
+
+        """
         url: str = f'https://api.github.com/repos/{owner}/{repo}/git/blobs'
-        _header: CaseInsensitiveDict = CaseInsensitiveDict()
-        _header['Accept'] = 'application/vnd.github.v3+json'
-        _header['Authorization'] = access_token.access_tkn
+        self._header['Authorization'] = f'token {access_token.access_tkn}'
         _data: str = dumps({"content": data})
-        print(url)
-        _r: Response = ResponseHandlers.curl_post_response(url=url, headers=_header, data=_data)
+
+        _r: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=_data)
         if _r.status_code != 201:
-            print(f'Blog not posted: {_r.status_code} {_r.status}')
+            print(f'Blob not posted: {_r.status_code} {_r.status}')
 
         return GithubBlob(data=_r.data)
 
-    @staticmethod
-    def get_latest_commit(owner: str, repo: str, branch: str):
-        _ref: GithubRefObject = GithubAPIHandler.get_git_ref(owner=owner, repo_name=repo, branch_name=branch)
-        _header: CaseInsensitiveDict = CaseInsensitiveDict()
-        _header['Accept'] = 'application/vnd.github.v3+json'
-
+    def _get_latest_commit(self, owner: str, repo: str, branch: str):
+        _ref: GithubRefObject = self._get_git_ref(owner=owner, repo_name=repo, branch_name=branch)
         # get and store the commit object
-        _r: Response = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=_header)
+        _r: Response = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=self._header)
         if _r.status_code != 200:
             print('Error: was not able to get commit object')
         return GithubCommitObject(data=_r.data)
 
-    @staticmethod
-    def get_tree(owner: str, repo: str, branch: str):
-        _header: CaseInsensitiveDict = CaseInsensitiveDict()
-        _header['Accept'] = 'application/vnd.github.v3+json'
+    def _get_tree(self, owner: str, repo: str, branch: str):
+        """
 
-        _commit: GithubCommitObject = GithubAPIHandler.get_latest_commit(owner=owner, repo=repo, branch=branch)
+        Args:
+            owner:
+            repo:
+            branch:
+
+        Returns:
+
+        """
+        _commit: GithubCommitObject = self._get_latest_commit(owner=owner, repo=repo, branch=branch)
+        self._latest_commit_sha = _commit.sha
 
         # get the tree and return the tree
         # recursive=1 at the end of the tree url helps to get tree objects for all the files with any depth in the repo.
-        _r = ResponseHandlers.curl_get_response(url=_commit.tree['url'] + '?recursive=1', headers=_header)
+        _r = ResponseHandlers.curl_get_response(url=_commit.tree['url'] + '?recursive=1', headers=self._header)
         if _r.status_code != 200:
             print('Error: was not able to get tree object')
         return GithubTreeObject(data=_r.data)
 
-    @staticmethod
-    def update_and_post_tree(owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken):
+    def _update_and_post_tree(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken):
         """
-        Updates the tree according to files provided
-        :param owner:
-        :param repo:
-        :param branch:
-        :param files:
-        :access_token:
-        :return:
 
         Args:
+            owner:
+            repo:
+            branch:
+            files:
             access_token:
 
+        Returns:
+
         """
-        _header: CaseInsensitiveDict = CaseInsensitiveDict()
-        _header['Accept'] = 'application/vnd.github.v3+json'
-        _header['Authorization'] = f'token {access_token.access_tkn}'
+        self._header['Authorization'] = f'token {access_token.access_tkn}'
         tree: list[dict] = []
 
-        _git_tree: GithubTreeObject = GithubAPIHandler.get_tree(owner=owner, repo=repo, branch=branch)
-        print(_git_tree.url)
+        _git_tree: GithubTreeObject = self._get_tree(owner=owner, repo=repo, branch=branch)
         # api url
         url = f'https://api.github.com/repos/{owner}/{repo}/git/trees'
 
@@ -298,15 +307,61 @@ class GithubAPIHandler:
 
         _posting_tree: dict = {"owner": owner, "repo": repo, "tree": tree, "base_tree": base_tree}
 
-        _res = ResponseHandlers.curl_post_response(url=url, headers=_header, data=dumps(_posting_tree))
+        _res = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(_posting_tree))
         if _res.status_code != 201:
-            print(f'Tree was not able to be updated because: {_res.status_code} {_res.status} {_res.data}')
+            print(f'Tree was not able to be updated because: {_res.status_code} {_res.for_status} {_res.data}')
 
         return GithubTreeObject(data=_res.data)
 
-    @staticmethod
-    def commit_files(owner: str, repo: str, branch: str, files: list[GitTree]):
-        pass
+    def _commit_files(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken, message: str = 'New commit'):
+        """
+
+        Args:
+            owner:
+            repo:
+            branch:
+            files:
+            access_token:
+            message:
+
+        Returns:
+
+        """
+        self._header['Authorization'] = f'token {access_token.access_tkn}'
+
+        _post_tree = self._update_and_post_tree(owner=owner, repo=repo, branch=branch, files=files, access_token=access_token)
+        url = f'https://api.github.com/repos/{owner}/{repo}/git/commits'
+        commit_data = {"owner": owner, "repo": repo, "message": message, "tree": _post_tree.sha, "parents": [self._latest_commit_sha]}
+
+        _resp = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(commit_data))
+        if _resp.status_code != 201:
+            print(f'Files were not able to be committed due to:{_resp.status_code} {_resp.for_status} {_resp.data}')
+        print(_resp.data)
+        return GithubCommitObject(data=_resp.data)
+
+    def commit(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken, message: str = 'New commit') -> GithubRefObject:
+        """
+
+        Args:
+            owner: User/Org where the repo is hosted
+            repo: Name of the repository
+            branch: branch name of the repository.
+            files: Files that needs to be committed
+            access_token:
+            message:
+
+        Returns:
+
+        """
+
+        _commit: GithubCommitObject = self._commit_files(owner=owner, repo=repo, branch=branch, files=files, access_token=access_token, message=message)
+        url: str = f'https://api.github.com/repos/{owner}/{repo}/git/refs/heads/{branch}'
+
+        self._header['Authorization'] = f'token {access_token.access_tkn}'
+        _ref: dict = {"sha": _commit.sha}
+        print(_commit.sha)
+        _r: Response = ResponseHandlers.http_patch(url=url, headers=self._header, data=dumps(_ref))
+        return GithubRefObject(data=_r.data)
 
 
 class GithubAppApi:
@@ -337,7 +392,7 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_get_response(url, self.headers)
         if res.status_code != 200:
-            print(f'App installation was not received: {res.status_code} {res.status} {res.data}')
+            print(f'App installation was not received: {res.status_code} {res.for_status} {res.data}')
 
         _data: list = loads(res.data)
         for d in _data:
@@ -354,7 +409,7 @@ class GithubAppApi:
             permissions (AccessTokenPermission): Permissions against which the access token needs to be generated. If nothing is passed then the default permissions assigned to the app will be assigned to the repos.
         """
         app_installations = self.get_app_installations()
-        _index: int = 10000001
+        _index: int = -1
         for i in range(len(app_installations)):
             if app_installations[i].org == org:
                 _index = i
@@ -371,7 +426,8 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
         if res.status_code != 201:
-            print(f'[E] Token was not created: {res.status_code} {res.status}: {res.data}')
+            print(f'[E] Token was not created: {res.status_code} {res.for_status}: {res.data}')
+        print(res.data)
         return GithubAccessToken(data=res.data)
 
 
@@ -384,6 +440,8 @@ if __name__ == '__main__':
 
     _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
 
+    print(_access_tkn.access_tkn)
+
     _owner = 'Coders-Asylum'
     _repo = 'fuzzy-train'
     _branch = 'test_branch'
@@ -391,7 +449,3 @@ if __name__ == '__main__':
                          'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
                          'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
                          'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
-
-    _tree = [GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=_expected_contents)]
-    _trees = api.update_and_post_tree(owner=_owner, repo=_repo, branch=_branch, files=_tree, access_token=_access_tkn)
-    print(_trees.url, _trees.tree)

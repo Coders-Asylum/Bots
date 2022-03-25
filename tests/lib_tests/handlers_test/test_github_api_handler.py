@@ -1,145 +1,86 @@
-from unittest import TestCase, main
+from unittest import TestCase, main, mock
+
 # from requests import get
 # from json import loads
 # from requests.structures import CaseInsensitiveDict
 # from os import environ
 from lib.handlers import *
 
-
 # from datetime import datetime
 # from cryptography.hazmat.primitives import serialization
 # from cryptography.hazmat.backends import default_backend
 # from jwt import encode
+from tests.mocks.mocked_classes import MockedResponseHandlers
+from tests.mocks.github_api_mocks import GithubAPIMock, Status
 
 
 class TestGithubAPIHandler(TestCase):
-    g = GithubAPIHandler()
+    mockedResponse: MockedResponseHandlers = MockedResponseHandlers()
+    g: GithubAPIHandler = GithubAPIHandler()
+    g_mock_success: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
     owner = 'Coders-Asylum'
     repo = 'fuzzy-train'
     branch = 'test_branch'
+    test_token: str = 'ghs_LVJPfMEvqaAbp5lTppxMgmlpUyBhsN3KifKH'
 
     header: CaseInsensitiveDict = CaseInsensitiveDict()
     header['Accept'] = 'application/vnd.github.v3+json'
 
-    def test_download_repo_file(self):
-        expected_file_contents: str = '// This is a basic Flutter widget test.\n//\n' \
-                                      '// To perform an interaction with a widget in your test, use the WidgetTester\n' \
-                                      '// utility that Flutter provides. For example, you can send tap and scroll\n' \
-                                      '// gestures. You can also use WidgetTester to find child widgets in the widget\n' \
-                                      '// tree, read text, and verify that the values of widget properties are ' \
-                                      'correct.\n\n' \
-                                      "import 'package:flutter/material.dart';\n" \
-                                      "import 'package:flutter_test/flutter_test.dart';\n\n" \
-                                      "import 'package:custom_card_design/main.dart';\n\n" \
-                                      'void main() {\n' \
-                                      '  testWidgets(\'Counter increments smoke test\', (WidgetTester tester) async {\n' \
-                                      '    // Build our app and trigger a frame.\n' \
-                                      '    await tester.pumpWidget(MyApp());\n\n' \
-                                      '    // Verify that our counter starts at 0.\n' \
-                                      '    expect(find.text(\'0\'), findsOneWidget);\n' \
-                                      '    expect(find.text(\'1\'), findsNothing);\n\n' \
-                                      '    // Tap the \'+\' icon and trigger a frame.\n' \
-                                      '    await tester.tap(find.byIcon(Icons.add));\n' \
-                                      '    await tester.pump();\n\n' \
-                                      '    // Verify that our counter has incremented.\n' \
-                                      '    expect(find.text(\'0\'), findsNothing);\n' \
-                                      '    expect(find.text(\'1\'), findsOneWidget);\n' \
-                                      '  });\n}\n'
+    expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
+                        'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
+                        'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+                        'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
 
+    @mock.patch('lib.handlers.ResponseHandlers.http_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    def test_download_repo_file(self, mock_func):
+        expected_file = self.g_mock_success.download_repo_file()
         file_path: str = 'custom_card_design/test/widget_test.dart'
         _r = self.g.download_repo_file(repo_name=self.repo, owner=self.owner, file_path=file_path,
                                        branch=self.branch)
 
-        self.assertEqual(expected_file_contents, _r.data)
+        self.assertEqual(expected_file.data, _r.data)
 
-    def test_get_git_ref(self):
-        r: GithubRefObject = self.g.get_git_ref(self.owner, self.repo, self.branch)
-        expected_res = get(url=f'https://api.github.com/repos/{self.owner}/{self.repo}/git/ref/heads/{self.branch}',
-                           headers=self.header)
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    def test_get_git_ref(self, mock_func):
+        r: GithubRefObject = self.g._get_git_ref(self.owner, self.repo, self.branch)
+        expected_res = self.g_mock_success.getref()
 
-        if expected_res.status_code != 200:
-            self.fail(
-                f'Failed test due to following error while running get: {expected_res.status_code} {expected_res.reason}')
-        else:
-            j = loads(expected_res.text)
-            self.assertEqual(r.url, j['url'])
-            self.assertEqual(r.nodeId, j['node_id'])
-            self.assertEqual(r.ref, j['ref'])
-            self.assertEqual(r.obj, j['object'])
+        expected_res_j = loads(expected_res.data)
+        self.assertEqual(r.url, expected_res_j['url'])
+        self.assertEqual(r.nodeId, expected_res_j['node_id'])
+        self.assertEqual(r.ref, expected_res_j['ref'])
+        self.assertEqual(r.obj, expected_res_j['object'])
 
-    # ## todo:some documentation is causing  404 not found return response for http post. So commenting this test
-    #  will #  run after the issue is resolved. refrain for using the function module in original code till then.
-    #  def test_post_blob(self): # Data that will be posted to the Github server to create a blob. expected_data =
-    #  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sapien nisi, ' \ 'luctus finibus hendrerit
-    #  at, dapibus eget lectus. Curabitur suscipit ex lacus, ut tristique ' \ 'mi egestas quis. Sed id tellus
-    #  volutpat, porta velit sit amet, dapibus dolor. Nulla a ' \ 'vestibulum massa, eget finibus felis. Fusce at
-    #  volutpat est, vel accumsan mauris. Donec ut ' \ 'aliquam nisl. Class aptent taciti sociosqu ad litora torquent
-    #  per conubia nostra, ' \ 'per inceptos himenaeos. Suspendisse gravida, nisl at semper ultricies,
-    #  risus ex suscipit ' \ 'orci, porta egestas justo libero in libero. Phasellus ornare nibh nunc,
-    #  sit amet convallis ' \ 'nisi ullamcorper sed. Pellentesque iaculis enim augue. Etiam lacus lectus, sodales sit
-    #  amet ' \ 'purus nec, semper aliquam turpis. Pellentesque habitant morbi tristique senectus et netus et ' \
-    #  'malesuada fames ac turpis egestas. Sed a dapibus neque, vel congue tortor. Mauris at ' \ 'ultrices tellus.
-    #  \nDonec dictum at felis et vehicula. Interdum et malesuada fames ac ante ' \ 'ipsum primis in faucibus.
-    #  Suspendisse mattis laoreet dolor, vitae laoreet nisi consequat ' \ 'non. Sed quis mauris magna. Fusce varius
-    #  ante quis justo suscipit, bibendum rhoncus urna ' \ 'gravida. Pellentesque habitant morbi tristique senectus
-    #  et netus et malesuada fames ac ' \ 'turpis egestas. In vel nisl tellus. Duis vitae neque vel eros pellentesque
-    #  facilisis. Aenean ' \ 'eget suscipit turpis. ' blob = self.g.post_blob(data=expected_data, owner=self.owner,
-    #  repo=self.repo) res = get(url=blob.url, headers=self.header) print(blob.url) if res.status_code != 200:
-    #  self.fail( f'Failed test due to following error while running get: {res.status_code} {res.reason}') else: j =
-    #  loads(res.text) self.assertEqual(expected_data, j['content'])
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response', side_effect=mockedResponse.mocked_http_post_response)
+    def test_post_blob(self, mock_func):  # Data that will be posted to the Github server to create a blob.
+        expected_blob: Response = self.g_mock_success.post_blob()
+        actual_blob = self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=self.g_mock_success.create_access_token())
+        self.assertEqual(loads(expected_blob.data)['url'], actual_blob.url)
+        self.assertEqual(loads(expected_blob.data)['sha'], actual_blob.sha)
 
-    def test_get_latest_commit(self):
-        commit = self.g.get_latest_commit(owner=self.owner, repo=self.repo, branch=self.branch)
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    def test_get_latest_commit(self, mock_func):
+        commit = self.g._get_latest_commit(owner=self.owner, repo=self.repo, branch=self.branch)
+        expected_commit = self.g_mock_success.get_commit()
 
-        # getting the latest reference from the branch.
-        ref = get(url=f'https://api.github.com/repos/{self.owner}/{self.repo}/git/ref/heads/{self.branch}',
-                  headers=self.header)
-        if ref.status_code != 200:
-            self.fail(
-                f'Failed test due to following error while running get on latest reference: {ref.status_code} {ref.reason}')
-        else:
-            ref_j = loads(ref.text)
+        self.assertEqual(loads(expected_commit.data)['sha'], commit.sha)
+        self.assertEqual(loads(expected_commit.data)['author'], commit.author)
+        self.assertEqual(loads(expected_commit.data)['committer'], commit.committer)
+        self.assertEqual(loads(expected_commit.data)['message'], commit.message)
+        self.assertEqual(loads(expected_commit.data)['tree'], commit.tree)
 
-            commit_res = get(url=ref_j['object']['url'], headers=self.header)
-            commit_j = loads(commit_res.text)
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    def test_get_tree(self, mock_func):
+        tree = self.g._get_tree(owner=self.owner, repo=self.repo, branch=self.branch)
+        expected_tree = self.g_mock_success.get_tree()
+        self.assertEqual(loads(expected_tree.data)['sha'], tree.sha)
+        self.assertEqual(loads(expected_tree.data)['url'], tree.url)
+        self.assertEqual(loads(expected_tree.data)['tree'], tree.tree)
 
-            self.assertEqual(commit_j['sha'], commit.sha)
-            self.assertEqual(commit_j['author'], commit.author)
-            self.assertEqual(commit_j['committer'], commit.committer)
-            self.assertEqual(commit_j['message'], commit.message)
-            self.assertEqual(commit_j['tree'], commit.tree)
-
-    def test_get_tree(self):
-        tree = self.g.get_tree(owner=self.owner, repo=self.repo, branch=self.branch)
-
-        # getting the latest reference from the branch.
-        ref = get(url=f'https://api.github.com/repos/{self.owner}/{self.repo}/git/ref/heads/{self.branch}',
-                  headers=self.header)
-        if ref.status_code != 200:
-            self.fail(
-                f'Failed test due to following error while running get on latest reference: {ref.status_code} {ref.reason}')
-        else:
-            ref_j = loads(ref.text)
-
-            commit_res = get(url=ref_j['object']['url'], headers=self.header)
-            commit_j = loads(commit_res.text)
-
-            actual_tree = get(url=f"{commit_j['tree']['url']}?recursive=1", headers=self.header)
-            if actual_tree.status_code != 200:
-                self.fail(
-                    f'Failed test due to following error while running get on latest ree: {actual_tree.status_code} {actual_tree.reason}')
-            else:
-                actual_tree_j = loads(actual_tree.text)
-
-                self.assertEqual(actual_tree_j['sha'], tree.sha)
-                self.assertEqual(actual_tree_j['url'], tree.url)
-                self.assertEqual(actual_tree_j['tree'], tree.tree)
-
-    # def test_update_and_post_tree(self):
-    #     expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
-    #                         'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
-    #                         'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
-    #                         'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+    # def test_update_and_post_tree(self): expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non.
+    # Vestibulum lectus mauris ultrices ' \ 'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus
+    # at. Mi in nulla ' \ 'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+    # 9'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
     #
     #     tree = [GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=expected_contents)]
     #     posted_tree = self.g.update_and_post_tree(owner=self.owner, repo=self.repo, branch=self.branch, files=tree)
@@ -159,69 +100,69 @@ class TestAccessTokenPermission(TestCase):
 
     def test_AccessTokenPermission_all_read(self):
         expected_payload = {'contents': 'read', 'issues': 'read', 'pages': 'read', 'pull_requests': 'read', 'members': 'read'}
-        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+        access_tkn_permission: AccessTokenPermission = AccessTokenPermission()
 
-        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.ISSUES, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.MEMBERS, access=AccessType.READ)
 
-        actual_payload = access_tkn1.payload()
+        actual_payload = access_tkn_permission.payload()
 
         self.assertEqual(expected_payload, actual_payload)
 
     def test_AccessTokenPermission_all_write(self):
         expected_payload = {'contents': 'write', 'issues': 'write', 'pages': 'write', 'pull_requests': 'write', 'members': 'write'}
-        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+        access_tkn_permission: AccessTokenPermission = AccessTokenPermission()
 
-        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.CONTENTS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.PAGES, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
 
-        actual_payload = access_tkn1.payload()
+        actual_payload = access_tkn_permission.payload()
 
         self.assertEqual(expected_payload, actual_payload)
 
     def test_AccessTokenPermission_on_change(self):
         expected_payload = {'contents': 'read', 'issues': 'write', 'pages': 'read', 'pull_requests': 'write', 'members': 'write'}
         expected_payload_on_change = {'contents': 'read', 'issues': 'write', 'pull_requests': 'read', 'pages': 'read', 'members': 'write'}
-        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+        access_tkn_permission: AccessTokenPermission = AccessTokenPermission()
 
-        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
 
-        actual_payload = access_tkn1.payload()
+        actual_payload = access_tkn_permission.payload()
 
         self.assertEqual(expected_payload, actual_payload)
         # remove pages permission for the object
-        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.READ)
-        actual_payload = access_tkn1.payload()
+        access_tkn_permission.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.READ)
+        actual_payload = access_tkn_permission.payload()
 
         self.assertEqual(expected_payload_on_change, actual_payload)
 
     def test_AccessTokenPermission_all_del(self):
         expected_payload = {'contents': 'read', 'issues': 'write', 'pages': 'read', 'pull_requests': 'write', 'members': 'write'}
         expected_payload_on_del = {'contents': 'read', 'issues': 'write', 'pull_requests': 'write', 'members': 'write'}
-        access_tkn1: AccessTokenPermission = AccessTokenPermission()
+        access_tkn_permission: AccessTokenPermission = AccessTokenPermission()
 
-        access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
-        access_tkn1.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
-        access_tkn1.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.ISSUES, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.PAGES, access=AccessType.READ)
+        access_tkn_permission.set(permission=GithubPermissions.PULL_REQUESTS, access=AccessType.WRITE)
+        access_tkn_permission.set(permission=GithubPermissions.MEMBERS, access=AccessType.WRITE)
 
-        actual_payload = access_tkn1.payload()
+        actual_payload = access_tkn_permission.payload()
 
         self.assertEqual(expected_payload, actual_payload)
         # remove pages permission for the object
-        access_tkn1.set(permission=GithubPermissions.PAGES, access=AccessType.NULL)
-        actual_payload = access_tkn1.payload()
+        access_tkn_permission.set(permission=GithubPermissions.PAGES, access=AccessType.NULL)
+        actual_payload = access_tkn_permission.payload()
 
         self.assertEqual(expected_payload_on_del, actual_payload)
 
