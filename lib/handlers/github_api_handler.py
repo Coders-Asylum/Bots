@@ -189,6 +189,18 @@ class AccessTokenPermission:
         return self._permissions
 
 
+class GithubRelease:
+    tag: str
+    pre_release: bool
+    node_id: str
+
+    def __init__(self, data: str):
+        j = loads(data)
+        self.tag = j['tag_name']
+        self.pre_release = j['prerelease']
+        self.node_id = j['node_id']
+
+
 class GithubAPIHandler:
     _header: CaseInsensitiveDict = CaseInsensitiveDict()
     _latest_commit_sha: str = ''
@@ -362,6 +374,24 @@ class GithubAPIHandler:
         print(_commit.sha)
         _r: Response = ResponseHandlers.http_patch(url=url, headers=self._header, data=dumps(_ref))
         return GithubRefObject(data=_r.data)
+
+    def get_release(self, owner: str, repo: str, latest: bool = True) -> list[GithubRelease]:
+        if latest:
+            url: str = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
+        else:
+            url = f'https://api.github.com/repos/{owner}/{repo}/releases'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            print(f'[E] Error caused while getting release: {res.status_code} {res.status}')
+
+        if latest:
+            return [GithubRelease(data=res.data)]
+        else:
+            _l: list = []
+            for i in loads(res.data):
+                _l.append(GithubRelease(data=dumps(i)))
+            return _l
 
 
 class GithubAppApi:
