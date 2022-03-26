@@ -486,3 +486,102 @@ class GithubAPIMock:
 
         if self.for_status is Status.SUCCESS:
             return GithubAccessToken(data=dumps(mock_reponse))
+
+    def get_latest_release(self, latest: bool = True) -> Response:
+        if self.for_status is Status.SUCCESS and latest is True:
+            self.response.data = dumps(
+                {
+                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233",
+                    "assets_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233/assets",
+                    "upload_url": "https://uploads.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233/assets{?name,label}",
+                    "html_url": "https://github.com/Coders-Asylum/fuzzy-train/releases/tag/V0.0.1a",
+                    "id": 62842233,
+                    "author": {
+                        "login": "Maverick099",
+                        "id": 32545664,
+                        "node_id": "MDQ6VXNlcjMyNTQ1NjY0",
+                        "avatar_url": "https://avatars.githubusercontent.com/u/32545664?v=4",
+                        "gravatar_id": "",
+                        "url": "https://api.github.com/users/Maverick099",
+                        "html_url": "https://github.com/Maverick099",
+                        "followers_url": "https://api.github.com/users/Maverick099/followers",
+                        "following_url": "https://api.github.com/users/Maverick099/following{/other_user}",
+                        "gists_url": "https://api.github.com/users/Maverick099/gists{/gist_id}",
+                        "starred_url": "https://api.github.com/users/Maverick099/starred{/owner}{/repo}",
+                        "subscriptions_url": "https://api.github.com/users/Maverick099/subscriptions",
+                        "organizations_url": "https://api.github.com/users/Maverick099/orgs",
+                        "repos_url": "https://api.github.com/users/Maverick099/repos",
+                        "events_url": "https://api.github.com/users/Maverick099/events{/privacy}",
+                        "received_events_url": "https://api.github.com/users/Maverick099/received_events",
+                        "type": "User",
+                        "site_admin": False
+                    },
+                    "node_id": "RE_kwDOG0SbL84DvuV5",
+                    "tag_name": "V0.0.1a",
+                    "target_commitish": "main",
+                    "name": "V0.0.1a",
+                    "draft": False,
+                    "prerelease": False,
+                    "created_at": "2022-02-13T09:55:05Z",
+                    "published_at": "2022-03-26T14:44:33Z",
+                    "assets": [],
+                    "tarball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/tarball/V0.0.1a",
+                    "zipball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/zipball/V0.0.1a",
+                    "body": "## What's Changed\r\n* Delete .idea directory (#1) by @Maverick099 in https://github.com/Coders-Asylum/fuzzy-train/pull/2\r\n* Added caution statements by @Maverick099 in https://github.com/Coders-Asylum/fuzzy-train/pull/3\r\n* Forward merge by @Maverick099 in "
+                            "https://github.com/Coders-Asylum/fuzzy-train/pull/5\r\n\r\n\r\n**Full Changelog**: https://github.com/Coders-Asylum/fuzzy-train/commits/V0.0.1a",
+                    "mentions_count": 1
+                })
+        elif self.for_status is Status.SUCCESS and latest is False:
+            self.response.data = dumps(
+                [
+                    {
+                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233",
+                        "assets_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233/assets",
+                        "upload_url": "https://uploads.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233/assets{?name,label}",
+                        "html_url": "https://github.com/Coders-Asylum/fuzzy-train/releases/tag/V0.0.1a",
+                        "id": 62842233,
+                        "author": {
+                            "login": "Maverick099",
+                            "id": 32545664,
+                            "node_id": "MDQ6VXNlcjMyNTQ1NjY0",
+                            "avatar_url": "https://avatars.githubusercontent.com/u/32545664?v=4",
+                            "gravatar_id": "",
+                            "url": "https://api.github.com/users/Maverick099",
+                            "html_url": "https://github.com/Maverick099",
+                            "followers_url": "https://api.github.com/users/Maverick099/followers",
+                            "following_url": "https://api.github.com/users/Maverick099/following{/other_user}",
+                            "gists_url": "https://api.github.com/users/Maverick099/gists{/gist_id}",
+                            "starred_url": "https://api.github.com/users/Maverick099/starred{/owner}{/repo}",
+                            "subscriptions_url": "https://api.github.com/users/Maverick099/subscriptions",
+                            "organizations_url": "https://api.github.com/users/Maverick099/orgs",
+                            "repos_url": "https://api.github.com/users/Maverick099/repos",
+                            "events_url": "https://api.github.com/users/Maverick099/events{/privacy}",
+                            "received_events_url": "https://api.github.com/users/Maverick099/received_events",
+                            "type": "User",
+                            "site_admin": False
+                        },
+                        "node_id": "RE_kwDOG0SbL84DvuV5",
+                        "tag_name": "V0.0.1a",
+                        "target_commitish": "main",
+                        "name": "V0.0.1a",
+                        "draft": False,
+                        "prerelease": False,
+                        "created_at": "2022-02-13T09:55:05Z",
+                        "published_at": "2022-03-26T14:44:33Z",
+                        "assets": [],
+                        "tarball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/tarball/V0.0.1a",
+                        "zipball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/zipball/V0.0.1a",
+                        "body": "## What's Changed\r\n* Delete .idea directory (#1) by @Maverick099 in https://github.com/Coders-Asylum/fuzzy-train/pull/2\r\n* Added caution statements by @Maverick099 in https://github.com/Coders-Asylum/fuzzy-train/pull/3\r\n* Forward merge by @Maverick099 in "
+                                "https://github.com/Coders-Asylum/fuzzy-train/pull/5\r\n\r\n\r\n**Full Changelog**: https://github.com/Coders-Asylum/fuzzy-train/commits/V0.0.1a",
+                        "mentions_count": 1
+                    }
+                ])
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/repos#list-releases"
+                }
+            )
+
+        return self.response

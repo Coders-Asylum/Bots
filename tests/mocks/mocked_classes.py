@@ -9,6 +9,8 @@ class MockedResponseHandlers:
     ref_url = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/ref\/heads\/\w+'
     file_url = r'https:\/\/raw.githubusercontent.com\/Coders-Asylum\/fuzzy-train\/test_branch\/\w+\/\w+\/\w+.\w+'
     blob_post_url = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/blobs'
+    latest_release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases\/latest'
+    release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases'
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
 
     def mocked_http_get_response(self, *args, **kwargs) -> Response:
@@ -25,6 +27,10 @@ class MockedResponseHandlers:
             return self.gapi_success.getref()
         elif bool(match(self.file_url, url)):
             return self.gapi_success.download_repo_file()
+        elif bool(match(self.latest_release_url, url)):
+            return self.gapi_success.get_latest_release()
+        elif bool(match(self.release_url, url)):
+            return self.gapi_success.get_latest_release(latest=False)
         else:
             return self.gapi_success.response
 

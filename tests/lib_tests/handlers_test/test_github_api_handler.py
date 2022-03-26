@@ -95,6 +95,24 @@ class TestGithubAPIHandler(TestCase):
     def test_commit_files(self):
         pass
 
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    def test_get_latest_release(self, mock_func):
+        expected_data = loads(self.g_mock_success.get_latest_release().data)
+        actual_release: list[GithubRelease] = self.g.get_release(repo=self.repo, owner=self.owner)
+        self.assertEqual(actual_release[0].pre_release, expected_data['prerelease'])
+        self.assertEqual(actual_release[0].tag, expected_data['tag_name'])
+        self.assertEqual(actual_release[0].node_id, expected_data['node_id'])
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    def test_get_all_release(self, mock_func):
+        expected_data = loads(self.g_mock_success.get_latest_release(latest=False).data)
+        actual_release: list[GithubRelease] = self.g.get_release(repo=self.repo, owner=self.owner, latest=False)
+        self.assertEqual(len(actual_release), len(expected_data))
+        for i in range(len(expected_data)):
+            self.assertEqual(actual_release[i].pre_release, expected_data[i]['prerelease'])
+            self.assertEqual(actual_release[i].tag, expected_data[i]['tag_name'])
+            self.assertEqual(actual_release[i].node_id, expected_data[i]['node_id'])
+
 
 class TestAccessTokenPermission(TestCase):
 
@@ -193,6 +211,17 @@ class TestGithubAppApi(TestCase):
         #     self.assertEqual(actual_list[i].org, expected_list[i]['account']['login'])
         #     self.assertEqual(actual_list[i].install_id, expected_list[i]['id'])
         #     self.assertEqual(actual_list[i].acc_tkn_url, expected_list[i]['access_tokens_url'])
+
+
+class TestGithubRelease(TestCase):
+    mock_api_data = GithubAPIMock(for_status=Status.SUCCESS)
+    expected_data = loads(mock_api_data.get_latest_release().data)
+
+    def test_data_extraction(self):
+        release = GithubRelease(data=dumps(self.expected_data))
+        self.assertEqual(release.pre_release, self.expected_data['prerelease'])
+        self.assertEqual(release.tag, self.expected_data['tag_name'])
+        self.assertEqual(release.node_id, self.expected_data['node_id'])
 
 
 if __name__ == '__main__':
