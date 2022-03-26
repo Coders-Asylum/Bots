@@ -37,7 +37,6 @@ class TestFileHandler(TestCase):
     test_file_path: str = './res/test_text.txt'
 
     def test_create_file(self):
-        print('Testing file creation...')
         self.fileHandler.create_file(self.test_file_path, self.test_content)
         self.assertEqual(path.exists(self.test_file_path), True)
 
@@ -58,7 +57,7 @@ class TestFileHandler(TestCase):
         self.fileHandler.update_file(self.test_file_path, self.test_append_content)
         actual_file = open(self.test_file_path, 'r')
         actual_content = actual_file.read()
-
+        actual_file.close()
         self.assertEqual(self.test_content + self.test_append_content, actual_content)
 
     def test_delete_file(self):
