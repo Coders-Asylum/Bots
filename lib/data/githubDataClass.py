@@ -149,4 +149,3 @@ class GithubRelease:
         self.tag = j['tag_name']
         self.pre_release = j['prerelease']
         self.node_id = j['node_id']
-
