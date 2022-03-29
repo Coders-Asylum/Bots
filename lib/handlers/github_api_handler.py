@@ -54,9 +54,19 @@ class AccessTokenPermission:
 class GithubAPIHandler:
     _header: CaseInsensitiveDict = CaseInsensitiveDict()
     _latest_commit_sha: str = ''
+    owner: str
+    branch: str
+    repo: str
+    access_token: GithubAccessToken
 
-    def __init__(self):
+    def __init__(self, owner: str, repo: str, branch: str):
         self._header['Accept'] = 'application/vnd.github.v3+json'
+        self.branch = branch
+        self.owner = owner
+        self.repo = repo
+
+    def set_token(self, access_tkn: GithubAccessToken):
+        self.access_token = access_tkn
 
     @staticmethod
     def download_repo_file(repo_name: str, owner: str, file_path: str, branch: str = 'master'):
@@ -243,6 +253,32 @@ class GithubAPIHandler:
                 _l.append(GithubRelease(data=dumps(i)))
             return _l
 
+    def trigger_workflow(self, name: str, ref: str = 'master', inputs: dict = None):
+        """ Triggers the specified workflow using an HTTP call.
+
+        Args:
+            name (str): file name with extension of the workflow to be triggered.
+            ref (str): The branch/ref on which the action should run is defaulted to master branch.
+            inputs (dict): inputs to be given to the action as per specified in the action file.
+
+        Returns (Response): Response object
+
+        """
+        if self.access_token is None:
+            raise Exception('[E] Access token not found, use set_token to set the token and then proceed')
+        self._header['Authorization'] = f'token {self.access_token.access_tkn}'
+        data: dict = {"ref": ref}
+        if inputs is None:
+            data["inputs"] = inputs
+
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows/{name}/dispatches'
+
+        res: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(data))
+        if res.status_code != 204:
+            print(f'[E] Error caused while running workflow: {res.status_code} {res.status}')
+
+        return res
+
 
 class GithubAppApi:
     """
@@ -313,7 +349,6 @@ class GithubAppApi:
 
 if __name__ == '__main__':
     app = GithubAppApi(app_id='173901')
-    api = GithubAPIHandler()
     access_tkn1: AccessTokenPermission = AccessTokenPermission()
 
     access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
@@ -325,6 +360,7 @@ if __name__ == '__main__':
     _owner = 'Coders-Asylum'
     _repo = 'fuzzy-train'
     _branch = 'test_branch'
+    api = GithubAPIHandler(owner=_owner,branch=_branch,repo=_repo)
     _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
                          'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
                          'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
