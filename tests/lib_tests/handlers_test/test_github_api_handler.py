@@ -10,18 +10,20 @@ from lib.handlers import *
 # from cryptography.hazmat.primitives import serialization
 # from cryptography.hazmat.backends import default_backend
 # from jwt import encode
-from tests.mocks.mocked_classes import MockedResponseHandlers
+from tests.mocks.mocked_classes import MockedResponseHandlers, mocked_token
 from tests.mocks.github_api_mocks import GithubAPIMock, Status
 
 
 class TestGithubAPIHandler(TestCase):
     mockedResponse: MockedResponseHandlers = MockedResponseHandlers()
-    g: GithubAPIHandler = GithubAPIHandler()
-    g_mock_success: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+
     owner = 'Coders-Asylum'
     repo = 'fuzzy-train'
     branch = 'test_branch'
-    test_token: str = 'ghs_LVJPfMEvqaAbp5lTppxMgmlpUyBhsN3KifKH'
+    test_token: str = 'ghs_BWpGokQJ7kJe4vWWir7xLgN6ciyA7e0fDka8'
+
+    g: GithubAPIHandler = GithubAPIHandler(owner=owner, repo=repo, branch=branch)
+    g_mock_success: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
 
     header: CaseInsensitiveDict = CaseInsensitiveDict()
     header['Accept'] = 'application/vnd.github.v3+json'
@@ -103,8 +105,10 @@ class TestGithubAPIHandler(TestCase):
         self.assertEqual(actual_release[0].tag, expected_data['tag_name'])
         self.assertEqual(actual_release[0].node_id, expected_data['node_id'])
 
-    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     def test_get_all_release(self, mock_func):
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+
         expected_data = loads(self.g_mock_success.get_latest_release(latest=False).data)
         actual_release: list[GithubRelease] = self.g.get_release(repo=self.repo, owner=self.owner, latest=False)
         self.assertEqual(len(actual_release), len(expected_data))
@@ -112,6 +116,22 @@ class TestGithubAPIHandler(TestCase):
             self.assertEqual(actual_release[i].pre_release, expected_data[i]['prerelease'])
             self.assertEqual(actual_release[i].tag, expected_data[i]['tag_name'])
             self.assertEqual(actual_release[i].node_id, expected_data[i]['node_id'])
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    def test_trigger_workflow(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_post_response
+
+        # setting a mock token
+        self.g.set_token(access_tkn=mocked_token())
+        expected_data = self.g_mock_success.trigger_workflow().data
+
+        inputs: dict = {"name": "test"}
+        actual_res = self.g.trigger_workflow(name='manual.yml', ref="main", inputs=inputs)
+
+        self.assertEqual(expected_data, actual_res.data)
+        self.assertEqual(204, actual_res.status_code)
+        self.assertEqual('No Content', actual_res.status)
 
 
 class TestAccessTokenPermission(TestCase):

@@ -585,3 +585,23 @@ class GithubAPIMock:
             )
 
         return self.response
+
+    def trigger_workflow(self) -> Response:
+        if self.for_status is Status.SUCCESS:
+            self.response.status_code = 204
+            self.response.status = 'No Content'
+            self.response.data = ''
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps({
+                "message": "Not Found",
+                "documentation_url": "https://docs.github.com/rest/reference/actions#create-a-workflow-dispatch-event"
+            })
+            return self.response
+        elif self.for_status is Status.UNAUTHORIZED:
+            self.response.data = dumps(
+                {
+                    "message": "Bad credentials",
+                    "documentation_url": "https://docs.github.com/rest"
+                })
+
+        return self.response
