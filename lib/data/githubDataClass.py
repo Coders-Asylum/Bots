@@ -2,6 +2,22 @@ from enum import Enum
 from json import loads
 
 
+class Repository:
+    owner: str
+    name: str
+    branch: str
+    map: dict
+
+    def __init__(self, owner: str, repo: str, branch: str):
+        self.owner = owner
+        self.name = repo
+        self.branch = branch
+        self.map = {"owner": owner, "name": repo, "branch": branch}
+
+    def __getitem__(self, item: str):
+        return self.map[item]
+
+
 class GithubBlob:
     url: str
     sha: str
@@ -138,6 +154,7 @@ class GithubPermissions(Enum):
     PAGES = 'pages'
     PULL_REQUESTS = 'pull_requests'
     MEMBERS = 'members'
+
 
 class GithubRelease:
     tag: str
