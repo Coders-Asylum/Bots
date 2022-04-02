@@ -28,7 +28,7 @@ jobs:
           name: "Install local Modules"
           command: |
               pip install .
-              pip install ./secretaryBot
+              pip install ./bot
       
       - run:
           name: "Run Unit tests in tests/ folder"
