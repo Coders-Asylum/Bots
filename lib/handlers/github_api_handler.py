@@ -235,11 +235,11 @@ class GithubAPIHandler:
         _r: Response = ResponseHandlers.http_patch(url=url, headers=self._header, data=dumps(_ref))
         return GithubRefObject(data=_r.data)
 
-    def get_release(self, owner: str, repo: str, latest: bool = True) -> list[GithubRelease]:
+    def get_release(self, latest: bool = True) -> list[GithubRelease]:
         if latest:
-            url: str = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
+            url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/releases/latest'
         else:
-            url = f'https://api.github.com/repos/{owner}/{repo}/releases'
+            url = f'https://api.github.com/repos/{self.owner}/{self.repo}/releases'
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
@@ -278,6 +278,21 @@ class GithubAPIHandler:
             print(f'[E] Error caused while running workflow: {res.status_code} {res.status}')
 
         return res
+
+    def get_tag(self, tag_name: str) -> GithubTag:
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/tags'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            print(f'[E] Error causeg while fetching tags: {res.status_code} {res.status}')
+
+        tags: list = loads(res.data)
+        for tag in tags:
+            if tag['name'] == tag_name:
+                return GithubTag(tag)
+
+        print(f'[E] specified tag `{tag_name}` not found, returning the latest tag instead')
+        return GithubTag(tags[0])
 
 
 class GithubAppApi:
@@ -360,7 +375,7 @@ if __name__ == '__main__':
     _owner = 'Coders-Asylum'
     _repo = 'fuzzy-train'
     _branch = 'test_branch'
-    api = GithubAPIHandler(owner=_owner,branch=_branch,repo=_repo)
+    api = GithubAPIHandler(owner=_owner, branch=_branch, repo=_repo)
     _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
                          'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
                          'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
