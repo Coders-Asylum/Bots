@@ -48,6 +48,7 @@ class MockedResponseHandlers:
     latest_release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases\/latest'
     release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases'
     workflow_trigger_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/actions\/workflows\/\w+.yml\/dispatches'
+    tag_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/tags'
 
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
     gapi_unauthorized = GithubAPIMock(for_status=Status.UNAUTHORIZED)
@@ -70,6 +71,8 @@ class MockedResponseHandlers:
             return self.gapi_success.get_latest_release()
         elif bool(match(self.release_url, url)):
             return self.gapi_success.get_latest_release(latest=False)
+        elif bool(match(self.tag_url,url)):
+            return self.gapi_success.get_tag()
         else:
             return self.gapi_success.response
 

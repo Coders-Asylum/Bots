@@ -605,3 +605,27 @@ class GithubAPIMock:
                 })
 
         return self.response
+
+    def get_tag(self):
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                [
+                    {
+                        "name": "V0.0.1a",
+                        "zipball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/zipball/refs/tags/V0.0.1a",
+                        "tarball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/tarball/refs/tags/V0.0.1a",
+                        "commit": {
+                            "sha": "1f079f4effdde3b001991d6707b92d846f0d398a",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/commits/1f079f4effdde3b001991d6707b92d846f0d398a"
+                        },
+                        "node_id": "REF_kwDOG0SbL7FyZWZzL3RhZ3MvVjAuMC4xYQ"
+                    }
+                ])
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/repos#list-repository-tags"
+                })
+
+        return self.response
