@@ -3,10 +3,10 @@
 This is the Aatmaram Bhide Secretary Bot.
 """
 from .app import App
-
-# # ./src files
-# from .src.jobs import *
-# from .src.webhook import *
-# from .src.initalise import *
+from azure.functions import HttpRequest, HttpResponse
 
 
+def main(req: HttpRequest) -> HttpResponse:
+    _app: App = App()
+    return _app.execute(req=req)
+ 
