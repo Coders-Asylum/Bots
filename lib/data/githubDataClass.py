@@ -166,3 +166,12 @@ class GithubRelease:
         self.tag = j['tag_name']
         self.pre_release = j['prerelease']
         self.node_id = j['node_id']
+
+
+class Webhook:
+    type: str
+    data: dict
+
+    def __init__(self, data: dict):
+        self.data = data
+        self.type = data['action']
