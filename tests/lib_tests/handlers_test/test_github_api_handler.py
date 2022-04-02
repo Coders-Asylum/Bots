@@ -100,7 +100,7 @@ class TestGithubAPIHandler(TestCase):
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
     def test_get_latest_release(self, mock_func):
         expected_data = loads(self.g_mock_success.get_latest_release().data)
-        actual_release: list[GithubRelease] = self.g.get_release(repo=self.repo, owner=self.owner)
+        actual_release: list[GithubRelease] = self.g.get_release()
         self.assertEqual(actual_release[0].pre_release, expected_data['prerelease'])
         self.assertEqual(actual_release[0].tag, expected_data['tag_name'])
         self.assertEqual(actual_release[0].node_id, expected_data['node_id'])
@@ -110,7 +110,7 @@ class TestGithubAPIHandler(TestCase):
         mock_func.side_effect = self.mockedResponse.mocked_http_get_response
 
         expected_data = loads(self.g_mock_success.get_latest_release(latest=False).data)
-        actual_release: list[GithubRelease] = self.g.get_release(repo=self.repo, owner=self.owner, latest=False)
+        actual_release: list[GithubRelease] = self.g.get_release(latest=False)
         self.assertEqual(len(actual_release), len(expected_data))
         for i in range(len(expected_data)):
             self.assertEqual(actual_release[i].pre_release, expected_data[i]['prerelease'])
@@ -132,6 +132,38 @@ class TestGithubAPIHandler(TestCase):
         self.assertEqual(expected_data, actual_res.data)
         self.assertEqual(204, actual_res.status_code)
         self.assertEqual('No Content', actual_res.status)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_tags(self, mock_func):
+        expected_tag: dict = {}
+        tag: str = 'V0.0.1a'
+        # mock
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+
+        expected_tags: list[dict] = loads(self.g_mock_success.get_tag().data)
+
+        for _tag in expected_tags:
+            if _tag['name'] == tag:
+                expected_tag = _tag
+                break
+
+        actual_tag: GithubTag = self.g.get_tag(tag_name=tag)
+
+        self.assertEqual(expected_tag['name'], actual_tag.name)
+        self.assertEqual(expected_tag['commit'], actual_tag.commit)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_tags_non_existing(self, mock_func):
+        tag: str = 'not_the_tag'
+        # mock
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+
+        expected_tag: dict = loads(self.g_mock_success.get_tag().data)[0]
+
+        actual_tag: GithubTag = self.g.get_tag(tag_name=tag)
+
+        self.assertEqual(expected_tag['name'], actual_tag.name)
+        self.assertEqual(expected_tag['commit'], actual_tag.commit)
 
 
 class TestAccessTokenPermission(TestCase):
