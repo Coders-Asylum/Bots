@@ -2,6 +2,5 @@
 """
 Source files for Secretary Bot.
 """
-from .jobs import *
-from .webhook import *
-from .initalise import *
+from .jobs import Jobs
+from .initalise import install_package, initialise
