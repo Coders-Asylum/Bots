@@ -2,9 +2,11 @@
 """
 This is the Aatmaram Bhide Secretary Bot.
 """
-from .app import *
+from .app import App
 
 # # ./src files
 # from .src.jobs import *
 # from .src.webhook import *
 # from .src.initalise import *
+
+
