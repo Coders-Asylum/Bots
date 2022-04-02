@@ -175,3 +175,12 @@ class Webhook:
     def __init__(self, data: dict):
         self.data = data
         self.type = data['action']
+
+
+class GithubTag:
+    name: str
+    commit: dict
+
+    def __init__(self, data: dict):
+        self.name = data['name']
+        self.commit = data['commit']
