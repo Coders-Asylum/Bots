@@ -1,5 +1,3 @@
-from azure import functions as func
-
 from lib.data import Repository, GithubRelease, Webhook
 from lib.handlers import GithubAPIHandler
 
