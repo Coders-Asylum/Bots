@@ -42,7 +42,7 @@ class GithubRefObject:
         self.obj = _j['object']
 
 
-class GithubCommitObject:
+class GitCommit:
     sha: str
     author: dict
     committer: dict
@@ -184,3 +184,15 @@ class GithubTag:
     def __init__(self, data: dict):
         self.name = data['name']
         self.commit = data['commit']
+
+
+class GithubCommit:
+    sha: str
+    parents: list[dict]
+    files: list[dict]
+
+    def __init__(self, data: str):
+        _j = loads(data)
+        self.sha = _j['sha']
+        self.parents = _j['parents']
+        self.files = _j['files']
