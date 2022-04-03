@@ -62,8 +62,8 @@ class TestGithubAPIHandler(TestCase):
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
     def test_get_latest_commit(self, mock_func):
-        commit = self.g._get_latest_commit(owner=self.owner, repo=self.repo, branch=self.branch)
-        expected_commit = self.g_mock_success.get_commit()
+        commit = self.g._get_latest_git_commit(owner=self.owner, repo=self.repo, branch=self.branch)
+        expected_commit = self.g_mock_success.get_git_commit()
 
         self.assertEqual(loads(expected_commit.data)['sha'], commit.sha)
         self.assertEqual(loads(expected_commit.data)['author'], commit.author)
@@ -164,6 +164,21 @@ class TestGithubAPIHandler(TestCase):
 
         self.assertEqual(expected_tag['name'], actual_tag.name)
         self.assertEqual(expected_tag['commit'], actual_tag.commit)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_commit(self, mock_func):
+        sha: str = '10f68682850d598a90ed6f5ea237f5b140a5f4f3'
+
+        # mock
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+
+        expected_commit = loads(self.g_mock_success.get_commit().data)
+
+        actual_commit: GithubCommit = self.g.get_commit(sha=sha)
+
+        self.assertEqual(expected_commit['sha'], actual_commit.sha)
+        self.assertEqual(expected_commit['parents'], actual_commit.parents)
+        self.assertEqual(expected_commit['files'], actual_commit.files)
 
 
 class TestAccessTokenPermission(TestCase):
