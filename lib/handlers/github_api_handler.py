@@ -118,13 +118,13 @@ class GithubAPIHandler:
 
         return GithubBlob(data=_r.data)
 
-    def _get_latest_commit(self, owner: str, repo: str, branch: str):
+    def _get_latest_git_commit(self, owner: str, repo: str, branch: str):
         _ref: GithubRefObject = self._get_git_ref(owner=owner, repo_name=repo, branch_name=branch)
         # get and store the commit object
         _r: Response = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=self._header)
         if _r.status_code != 200:
             print('Error: was not able to get commit object')
-        return GithubCommitObject(data=_r.data)
+        return GitCommit(data=_r.data)
 
     def _get_tree(self, owner: str, repo: str, branch: str):
         """
@@ -137,7 +137,7 @@ class GithubAPIHandler:
         Returns:
 
         """
-        _commit: GithubCommitObject = self._get_latest_commit(owner=owner, repo=repo, branch=branch)
+        _commit: GitCommit = self._get_latest_git_commit(owner=owner, repo=repo, branch=branch)
         self._latest_commit_sha = _commit.sha
 
         # get the tree and return the tree
@@ -209,7 +209,7 @@ class GithubAPIHandler:
         if _resp.status_code != 201:
             print(f'Files were not able to be committed due to:{_resp.status_code} {_resp.for_status} {_resp.data}')
         print(_resp.data)
-        return GithubCommitObject(data=_resp.data)
+        return GitCommit(data=_resp.data)
 
     def commit(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken, message: str = 'New commit') -> GithubRefObject:
         """
@@ -226,7 +226,7 @@ class GithubAPIHandler:
 
         """
 
-        _commit: GithubCommitObject = self._commit_files(owner=owner, repo=repo, branch=branch, files=files, access_token=access_token, message=message)
+        _commit: GitCommit = self._commit_files(owner=owner, repo=repo, branch=branch, files=files, access_token=access_token, message=message)
         url: str = f'https://api.github.com/repos/{owner}/{repo}/git/refs/heads/{branch}'
 
         self._header['Authorization'] = f'token {access_token.access_tkn}'
@@ -293,6 +293,25 @@ class GithubAPIHandler:
 
         print(f'[E] specified tag `{tag_name}` not found, returning the latest tag instead')
         return GithubTag(tags[0])
+
+    def get_commit(self, sha: str) -> GithubCommit:
+        """Gets Github Commit data using API.
+
+        **Note: this gets the Github Commit object and not Git Commit object**
+
+        Args:
+            sha (str): sha string of the commit that is to be fetched.
+
+        Returns: GithubCommit object.
+
+        """
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/commits/{sha}'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            print(f'[E] Error caused in getting commit: {res.status_code} {res.status} ')
+
+        return GithubCommit(data=res.data)
 
 
 class GithubAppApi:
