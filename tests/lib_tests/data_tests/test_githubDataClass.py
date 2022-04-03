@@ -35,5 +35,17 @@ class GithubTag_tests(TestCase):
         self.assertEqual(actual.commit, self.expected_tag['commit'])
 
 
+class GithubCommit_tests(TestCase):
+    g_api_mock: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+    expected_commit = loads(g_api_mock.get_commit().data)
+
+    def test_data_class(self):
+        actual: GithubCommit = GithubCommit(data=self.g_api_mock.get_commit().data)
+
+        self.assertEqual(actual.sha, self.expected_commit['sha'])
+        self.assertEqual(actual.parents, self.expected_commit['parents'])
+        self.assertEqual(actual.files, self.expected_commit['files'])
+
+
 if __name__ == "__main__":
     main()
