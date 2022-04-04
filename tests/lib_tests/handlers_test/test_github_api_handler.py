@@ -42,16 +42,16 @@ class TestGithubAPIHandler(TestCase):
 
         self.assertEqual(expected_file.data, _r.data)
 
-    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    def test_get_git_ref(self, mock_func):
-        r: GithubRefObject = self.g._get_git_ref(self.owner, self.repo, self.branch)
-        expected_res = self.g_mock_success.getref()
-
-        expected_res_j = loads(expected_res.data)
-        self.assertEqual(r.url, expected_res_j['url'])
-        self.assertEqual(r.nodeId, expected_res_j['node_id'])
-        self.assertEqual(r.ref, expected_res_j['ref'])
-        self.assertEqual(r.obj, expected_res_j['object'])
+    # @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    # def test_get_git_ref(self, mock_func):
+    #     r: GithubRefObject = self.g._get_git_ref(self.owner, self.repo, self.branch)
+    #     expected_res = self.g_mock_success.getref()
+    #
+    #     expected_res_j = loads(expected_res.data)
+    #     self.assertEqual(r.url, expected_res_j['url'])
+    #     self.assertEqual(r.nodeId, expected_res_j['node_id'])
+    #     self.assertEqual(r.ref, expected_res_j['ref'])
+    #     self.assertEqual(r.obj, expected_res_j['object'])
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_post_response', side_effect=mockedResponse.mocked_http_post_response)
     def test_post_blob(self, mock_func):  # Data that will be posted to the Github server to create a blob.
@@ -60,24 +60,24 @@ class TestGithubAPIHandler(TestCase):
         self.assertEqual(loads(expected_blob.data)['url'], actual_blob.url)
         self.assertEqual(loads(expected_blob.data)['sha'], actual_blob.sha)
 
-    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    def test_get_latest_commit(self, mock_func):
-        commit = self.g._get_latest_git_commit(owner=self.owner, repo=self.repo, branch=self.branch)
-        expected_commit = self.g_mock_success.get_git_commit()
-
-        self.assertEqual(loads(expected_commit.data)['sha'], commit.sha)
-        self.assertEqual(loads(expected_commit.data)['author'], commit.author)
-        self.assertEqual(loads(expected_commit.data)['committer'], commit.committer)
-        self.assertEqual(loads(expected_commit.data)['message'], commit.message)
-        self.assertEqual(loads(expected_commit.data)['tree'], commit.tree)
-
-    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    def test_get_tree(self, mock_func):
-        tree = self.g._get_tree(owner=self.owner, repo=self.repo, branch=self.branch)
-        expected_tree = self.g_mock_success.get_tree()
-        self.assertEqual(loads(expected_tree.data)['sha'], tree.sha)
-        self.assertEqual(loads(expected_tree.data)['url'], tree.url)
-        self.assertEqual(loads(expected_tree.data)['tree'], tree.tree)
+    # @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    # def test_get_latest_commit(self, mock_func):
+    #     commit = self.g._get_latest_git_commit(owner=self.owner, repo=self.repo, branch=self.branch)
+    #     expected_commit = self.g_mock_success.get_git_commit()
+    #
+    #     self.assertEqual(loads(expected_commit.data)['sha'], commit.sha)
+    #     self.assertEqual(loads(expected_commit.data)['author'], commit.author)
+    #     self.assertEqual(loads(expected_commit.data)['committer'], commit.committer)
+    #     self.assertEqual(loads(expected_commit.data)['message'], commit.message)
+    #     self.assertEqual(loads(expected_commit.data)['tree'], commit.tree)
+    #
+    # @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    # def test_get_tree(self, mock_func):
+    #     tree = self.g._get_tree(owner=self.owner, repo=self.repo, branch=self.branch)
+    #     expected_tree = self.g_mock_success.get_tree()
+    #     self.assertEqual(loads(expected_tree.data)['sha'], tree.sha)
+    #     self.assertEqual(loads(expected_tree.data)['url'], tree.url)
+    #     self.assertEqual(loads(expected_tree.data)['tree'], tree.tree)
 
     # def test_update_and_post_tree(self): expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non.
     # Vestibulum lectus mauris ultrices ' \ 'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus
