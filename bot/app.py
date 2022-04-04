@@ -40,7 +40,7 @@ class App:
 
         if webhook.type == 'published':
             if webhook.data['repository']['name'] == 'coders-asylum.github.io':
-                self._job.push_new_blog_page()
+                self._res = self._job.push_new_blog_page()
             else:
                 self._res = Response(status_code=202, status='Accepted', data=Message.no_processing_required)
 
