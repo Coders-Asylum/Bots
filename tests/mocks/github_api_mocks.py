@@ -112,7 +112,7 @@ class GithubAPIMock:
             })
         return self.response
 
-    def get_commit(self) -> Response:
+    def get_git_commit(self) -> Response:
         if self.for_status is Status.SUCCESS:
             self.response.data = dumps({
                 "sha": "4a162230020ca9adb70c809f5a40a8ba3551dce2",
@@ -605,3 +605,158 @@ class GithubAPIMock:
                 })
 
         return self.response
+
+    def get_tag(self):
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                [
+                    {
+                        "name": "V0.0.1a",
+                        "zipball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/zipball/refs/tags/V0.0.1a",
+                        "tarball_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/tarball/refs/tags/V0.0.1a",
+                        "commit": {
+                            "sha": "1f079f4effdde3b001991d6707b92d846f0d398a",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/commits/1f079f4effdde3b001991d6707b92d846f0d398a"
+                        },
+                        "node_id": "REF_kwDOG0SbL7FyZWZzL3RhZ3MvVjAuMC4xYQ"
+                    }
+                ])
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/repos#list-repository-tags"
+                })
+
+        return self.response
+
+    def get_commit(self):
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                {
+                    "sha": "10f68682850d598a90ed6f5ea237f5b140a5f4f3",
+                    "node_id": "C_kwDOG0SbL9oAKDEwZjY4NjgyODUwZDU5OGE5MGVkNmY1ZWEyMzdmNWIxNDBhNWY0ZjM",
+                    "commit": {
+                        "author": {
+                            "name": "Adithya Shetty",
+                            "email": "32545664+Maverick099@users.noreply.github.com",
+                            "date": "2022-02-13T09:53:39Z"
+                        },
+                        "committer": {
+                            "name": "GitHub",
+                            "email": "noreply@github.com",
+                            "date": "2022-02-13T09:53:39Z"
+                        },
+                        "message": "Create sunflower.dart",
+                        "tree": {
+                            "sha": "01136d7e2c770bd3fed8006c0d79fd694c7a9065",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/01136d7e2c770bd3fed8006c0d79fd694c7a9065"
+                        },
+                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/10f68682850d598a90ed6f5ea237f5b140a5f4f3",
+                        "comment_count": 0,
+                        "verification": {
+                            "verified": True,
+                            "reason": "valid",
+                            "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJiCNUjCRBK7hj4Ov3rIwAAh6kIAGysqYujn3oEvP9g1DzkP5gg\nyfZiQemnGqhNgrn/roq3J7+dLp0wcf0YBWuWP1ivg7FOrPrzNSFrOj2yPLHgsUSa\n29gTpYUmwMfaEXBwNUdi82p8f80DkVWWzHrbUCziaGa2VxMzfntf1YQgB1W9SXHR\n6WZlDmf4g5R7Ik"
+                                         "/Wm1rU3t3cLjEtGevSuum/UMPvR7ZRxxjIs7Cd4wzPCPJhSIr6\nl9nTnrWXGWTzK5mRae62Xz/QGYRw6hudNFU7oJxCPZjL+X8ZEkYUM/I9b8+Z0qIg\nE011PNJyKGiamOP6OH8lvKEZmnHAuM2F9zlrEyI6K1mWD0ycCr8K/7luUaBmt9Q=\n=stsj\n-----END PGP SIGNATURE-----\n",
+                            "payload": "tree 01136d7e2c770bd3fed8006c0d79fd694c7a9065\nparent 9a4cb2a834ef6fb04e37b370eee075411c26c304\nauthor Adithya Shetty <32545664+Maverick099@users.noreply.github.com> 1644746019 +0530\ncommitter GitHub <noreply@github.com> 1644746019 +0530\n\nCreate "
+                                       "sunflower.dart "
+                        }
+                    },
+                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/commits/10f68682850d598a90ed6f5ea237f5b140a5f4f3",
+                    "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/10f68682850d598a90ed6f5ea237f5b140a5f4f3",
+                    "comments_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/commits/10f68682850d598a90ed6f5ea237f5b140a5f4f3/comments",
+                    "author": {
+                        "login": "Maverick099",
+                        "id": 32545664,
+                        "node_id": "MDQ6VXNlcjMyNTQ1NjY0",
+                        "avatar_url": "https://avatars.githubusercontent.com/u/32545664?v=4",
+                        "gravatar_id": "",
+                        "url": "https://api.github.com/users/Maverick099",
+                        "html_url": "https://github.com/Maverick099",
+                        "followers_url": "https://api.github.com/users/Maverick099/followers",
+                        "following_url": "https://api.github.com/users/Maverick099/following{/other_user}",
+                        "gists_url": "https://api.github.com/users/Maverick099/gists{/gist_id}",
+                        "starred_url": "https://api.github.com/users/Maverick099/starred{/owner}{/repo}",
+                        "subscriptions_url": "https://api.github.com/users/Maverick099/subscriptions",
+                        "organizations_url": "https://api.github.com/users/Maverick099/orgs",
+                        "repos_url": "https://api.github.com/users/Maverick099/repos",
+                        "events_url": "https://api.github.com/users/Maverick099/events{/privacy}",
+                        "received_events_url": "https://api.github.com/users/Maverick099/received_events",
+                        "type": "User",
+                        "site_admin": False
+                    },
+                    "committer": {
+                        "login": "web-flow",
+                        "id": 19864447,
+                        "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+                        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+                        "gravatar_id": "",
+                        "url": "https://api.github.com/users/web-flow",
+                        "html_url": "https://github.com/web-flow",
+                        "followers_url": "https://api.github.com/users/web-flow/followers",
+                        "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+                        "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+                        "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+                        "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+                        "organizations_url": "https://api.github.com/users/web-flow/orgs",
+                        "repos_url": "https://api.github.com/users/web-flow/repos",
+                        "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+                        "received_events_url": "https://api.github.com/users/web-flow/received_events",
+                        "type": "User",
+                        "site_admin": False
+                    },
+                    "parents": [
+                        {
+                            "sha": "9a4cb2a834ef6fb04e37b370eee075411c26c304",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/commits/9a4cb2a834ef6fb04e37b370eee075411c26c304",
+                            "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/9a4cb2a834ef6fb04e37b370eee075411c26c304"
+                        }
+                    ],
+                    "stats": {
+                        "total": 147,
+                        "additions": 147,
+                        "deletions": 0
+                    },
+                    "files": [
+                        {
+                            "sha": "7616871141cc1b313bfd92271df48e505d29eb31",
+                            "filename": "custom_card_design/lib/sunflower.dart",
+                            "status": "added",
+                            "additions": 147,
+                            "deletions": 0,
+                            "changes": 147,
+                            "blob_url": "https://github.com/Coders-Asylum/fuzzy-train/blob/10f68682850d598a90ed6f5ea237f5b140a5f4f3/custom_card_design%2Flib%2Fsunflower.dart",
+                            "raw_url": "https://github.com/Coders-Asylum/fuzzy-train/raw/10f68682850d598a90ed6f5ea237f5b140a5f4f3/custom_card_design%2Flib%2Fsunflower.dart",
+                            "contents_url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/contents/custom_card_design%2Flib%2Fsunflower.dart?ref=10f68682850d598a90ed6f5ea237f5b140a5f4f3",
+                            "patch": "@@ -0,0 +1,147 @@\n+// Copyright 2019 the Dart project authors. All rights reserved.\n+// Use of this source code is governed by a BSD-style license\n+// that can be found in the LICENSE file.\n+\n+import 'dart:math' as math;\n+import "
+                                     "'package:flutter/material.dart';\n+\n+const Color primaryColor = Colors.orange;\n+const TargetPlatform platform = TargetPlatform.android;\n+\n+void main() {\n+  runApp(Sunflower());\n+}\n+\n+class SunflowerPainter extends CustomPainter {\n+  static const "
+                                     "seedRadius = 2.0;\n+  static const scaleFactor = 4;\n+  static const tau = math.pi * 2;\n+\n+  static final phi = (math.sqrt(5) + 1) / 2;\n+\n+  final int seeds;\n+\n+  SunflowerPainter(this.seeds);\n+\n+  @override\n+  void paint(Canvas canvas, "
+                                     "Size size) {\n+    final center = size.width / 2;\n+\n+    for (var i = 0; i < seeds; i++) {\n+      final theta = i * tau / phi;\n+      final r = math.sqrt(i) * scaleFactor;\n+      final x = center + r * math.cos(theta);\n+      final y = center - r * "
+                                     "math.sin(theta);\n+      final offset = Offset(x, y);\n+      if (!size.contains(offset)) {\n+        continue;\n+      }\n+      drawSeed(canvas, x, y);\n+    }\n+  }\n+\n+  @override\n+  bool shouldRepaint(SunflowerPainter oldDelegate) {\n+    return "
+                                     "oldDelegate.seeds != seeds;\n+  }\n+\n+  // Draw a small circle representing a seed centered at (x,y).\n+  void drawSeed(Canvas canvas, double x, double y) {\n+    final paint = Paint()\n+      ..strokeWidth = 2\n+      ..style = PaintingStyle.fill\n+      "
+                                     "..color = primaryColor;\n+    canvas.drawCircle(Offset(x, y), seedRadius, paint);\n+  }\n+}\n+\n+class Sunflower extends StatefulWidget {\n+  @override\n+  State<StatefulWidget> createState() {\n+    return _SunflowerState();\n+  }\n+}\n+\n+class "
+                                     "_SunflowerState extends State<Sunflower> {\n+  double seeds = 100.0;\n+\n+  int get seedCount => seeds.floor();\n+\n+  @override\n+  Widget build(BuildContext context) {\n+    return MaterialApp(\n+      debugShowCheckedModeBanner: false,"
+                                     "\n+      theme: ThemeData().copyWith(\n+        platform: platform,\n+        brightness: Brightness.dark,\n+        sliderTheme: SliderThemeData.fromPrimaryColors(\n+          primaryColor: primaryColor,\n+          primaryColorLight: primaryColor,"
+                                     "\n+          primaryColorDark: primaryColor,\n+          valueIndicatorTextStyle: const DefaultTextStyle.fallback().style,\n+        ),\n+      ),\n+      home: Scaffold(\n+        appBar: AppBar(\n+          title: const Text(\"Sunflower\"),\n+        ),"
+                                     "\n+        drawer: Drawer(\n+          child: ListView(\n+            children: const [\n+              DrawerHeader(\n+                child: Center(\n+                  child: Text(\n+                    \"Sunflower 🌻\",\n+                    style: "
+                                     "TextStyle(fontSize: 32),\n+                  ),\n+                ),\n+              ),\n+            ],\n+          ),\n+        ),\n+        body: Container(\n+          constraints: const BoxConstraints.expand(),\n+          decoration: BoxDecoration(\n+   "
+                                     "         border: Border.all(\n+              color: Colors.transparent,\n+            ),\n+          ),\n+          child: Column(\n+            crossAxisAlignment: CrossAxisAlignment.center,\n+            mainAxisAlignment: MainAxisAlignment.start,"
+                                     "\n+            children: [\n+              Container(\n+                decoration: BoxDecoration(\n+                  border: Border.all(\n+                    color: Colors.transparent,\n+                  ),\n+                ),"
+                                     "\n+                child: SizedBox(\n+                  width: 400,\n+                  height: 400,\n+                  child: CustomPaint(\n+                    painter: SunflowerPainter(seedCount),\n+                  ),\n+                ),"
+                                     "\n+              ),\n+              Text(\"Showing $seedCount seeds\"),\n+              ConstrainedBox(\n+                constraints: const BoxConstraints.tightFor(width: 300),\n+                child: Slider.adaptive(\n+                  min: 20,"
+                                     "\n+                  max: 2000,\n+                  value: seeds,\n+                  onChanged: (newValue) {\n+                    setState(() {\n+                      seeds = newValue;\n+                    });\n+                  },\n+                ),"
+                                     "\n+              ),\n+            ],\n+          ),\n+        ),\n+      ),\n+    );\n+  }\n+} "
+                        }
+                    ]
+                }
+            )
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "No commit found for SHA: {sha}",
+                    "documentation_url": "https://docs.github.com/rest/reference/repos#get-a-commit"
+                }
+            )
+        return self.response
+

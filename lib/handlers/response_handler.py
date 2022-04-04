@@ -1,6 +1,6 @@
 from subprocess import run
 from requests import get, structures, post, patch
-from azure import functions as func
+from azure.functions import HttpResponse
 
 
 class Response:
@@ -8,12 +8,21 @@ class Response:
     status: str = None
 
     data: str = None
-    _response = None
+    _response: HttpResponse = None
 
     def __init__(self, status_code: int, status: str, data: str):
         self.status_code = status_code
         self.data = data
         self.status = status
+        self._response = HttpResponse(status_code=status_code, body=data)
+
+    def disintegrated(self) -> HttpResponse:
+        """HttpResponse made by striping data from current object
+
+        Returns: HttpResponse object
+
+        """
+        return self._response
 
 
 # todo: create function to extract data and for_status from response
@@ -87,11 +96,11 @@ class ResponseHandlers:
             else:
                 return Response(_c.returncode, 'error', str(_c))
 
-    @staticmethod
-    def function_response(response: Response) -> func.HttpResponse:
-        """
-        Returns a process response in Azure Function Http Response type
-        :param Response response: the response object that needs to be converted
-        :return --> func.HttpResponse
-        """
-        return func.HttpResponse(status_code=response.status_code, body=response.data)
+    # @staticmethod
+    # def function_response(response: Response) -> func.HttpResponse:
+    #     """
+    #     Returns a process response in Azure Function Http Response type
+    #     :param Response response: the response object that needs to be converted
+    #     :return --> func.HttpResponse
+    #     """
+    #     return func.HttpResponse(status_code=response.status_code, body=response.data)

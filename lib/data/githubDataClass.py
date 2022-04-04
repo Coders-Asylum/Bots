@@ -42,7 +42,7 @@ class GithubRefObject:
         self.obj = _j['object']
 
 
-class GithubCommitObject:
+class GitCommit:
     sha: str
     author: dict
     committer: dict
@@ -166,3 +166,33 @@ class GithubRelease:
         self.tag = j['tag_name']
         self.pre_release = j['prerelease']
         self.node_id = j['node_id']
+
+
+class Webhook:
+    type: str
+    data: dict
+
+    def __init__(self, data: dict):
+        self.data = data
+        self.type = data['action']
+
+
+class GithubTag:
+    name: str
+    commit: dict
+
+    def __init__(self, data: dict):
+        self.name = data['name']
+        self.commit = data['commit']
+
+
+class GithubCommit:
+    sha: str
+    parents: list[dict]
+    files: list[dict]
+
+    def __init__(self, data: str):
+        _j = loads(data)
+        self.sha = _j['sha']
+        self.parents = _j['parents']
+        self.files = _j['files']

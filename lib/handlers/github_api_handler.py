@@ -1,3 +1,5 @@
+import os
+
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
 from lib.data.githubDataClass import *
@@ -57,7 +59,7 @@ class GithubAPIHandler:
     owner: str
     branch: str
     repo: str
-    access_token: GithubAccessToken
+    __access_token: GithubAccessToken
 
     def __init__(self, owner: str, repo: str, branch: str):
         self._header['Accept'] = 'application/vnd.github.v3+json'
@@ -65,8 +67,31 @@ class GithubAPIHandler:
         self.owner = owner
         self.repo = repo
 
-    def set_token(self, access_tkn: GithubAccessToken):
-        self.access_token = access_tkn
+    def set_token(self, access_tkn: GithubAccessToken) -> None:
+        """Sets new token
+
+        Args:
+            access_tkn: New GithubAccessToken
+
+        Returns: None
+
+        """
+        self.__access_token = access_tkn
+
+    def get_raw_data(self, path: str) -> str:
+        """Returns raw contents of the file specified in the path from the branch specified.
+
+        Args:
+            path: path to file on the branch with filename and extension
+
+        Returns: file contents as string
+
+        """
+        url: str = f'https://raw.githubusercontent.com/{self.owner}/{self.repo}/{self.branch}/{path}'
+        _r: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if _r.status_code != 200:
+            print(f'[E] Error while getting file contents: {_r.status_code} {_r.status} {_r.data}')
+        return _r.data
 
     @staticmethod
     def download_repo_file(repo_name: str, owner: str, file_path: str, branch: str = 'master'):
@@ -80,21 +105,6 @@ class GithubAPIHandler:
         url: str = f'https://raw.githubusercontent.com/{owner}/{repo_name}/{branch}/{file_path}'
         _r: Response = ResponseHandlers.http_get_response(url)
         return _r
-
-    def _get_git_ref(self, owner: str, repo_name: str, branch_name: str):
-        """
-        Gets the Git head reference of the branch specified
-        :param owner:
-        :param repo_name:
-        :param branch_name:
-        :return: --> GithubRefObject
-        """
-        _url: str = f'https://api.github.com/repos/{owner}/{repo_name}/git/ref/heads/{branch_name}'
-
-        _r: Response = ResponseHandlers.curl_get_response(url=_url, headers=self._header)
-        if _r.status_code != 200:
-            print(f'Error in fetching data: {_r.status_code} {_r.status}')
-        return GithubRefObject(data=_r.data)
 
     def post_blob(self, owner: str, repo: str, data: str, access_token: GithubAccessToken):
         """
@@ -118,128 +128,92 @@ class GithubAPIHandler:
 
         return GithubBlob(data=_r.data)
 
-    def _get_latest_commit(self, owner: str, repo: str, branch: str):
-        _ref: GithubRefObject = self._get_git_ref(owner=owner, repo_name=repo, branch_name=branch)
-        # get and store the commit object
-        _r: Response = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=self._header)
-        if _r.status_code != 200:
-            print('Error: was not able to get commit object')
-        return GithubCommitObject(data=_r.data)
-
-    def _get_tree(self, owner: str, repo: str, branch: str):
-        """
+    def commit_files(self, files: list[GitTree], message: str = 'New commit') -> GithubRefObject:
+        """To commit files into the repository.
 
         Args:
-            owner:
-            repo:
-            branch:
+            files (list[GitTree]: Files that needs to be committed
+            message (str): Commit message
 
-        Returns:
+        Returns: GitHub Ref object after new committed files.
 
         """
-        _commit: GithubCommitObject = self._get_latest_commit(owner=owner, repo=repo, branch=branch)
+        tree: list[dict] = []
+        ref_url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/git/refs/heads/{self.branch}'
+        post_tree_url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/git/trees'
+        commit_url = f'https://api.github.com/repos/{self.owner}/{self.repo}/git/commits'
+
+        # exception raised if access token not set.
+        if self.__access_token is None:
+            raise Exception('[E] Access token not found, use set_token to set the token and then proceed')
+        self._header['Authorization'] = f'token {self.__access_token.access_tkn}'
+
+        # get branch ref
+        _r: Response = ResponseHandlers.curl_get_response(url=ref_url, headers=self._header)
+        if _r.status_code != 200:
+            print(f'Error in fetching data: {_r.status_code} {_r.status}')
+        _ref: GithubRefObject = GithubRefObject(data=_r.data)
+
+        # get and store the latest git commit object from ref
+        _r = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=self._header)
+        if _r.status_code != 200:
+            print('Error: was not able to get commit object')
+        _commit: GitCommit = GitCommit(data=_r.data)
         self._latest_commit_sha = _commit.sha
 
-        # get the tree and return the tree
+        # get the git tree
         # recursive=1 at the end of the tree url helps to get tree objects for all the files with any depth in the repo.
         _r = ResponseHandlers.curl_get_response(url=_commit.tree['url'] + '?recursive=1', headers=self._header)
         if _r.status_code != 200:
             print('Error: was not able to get tree object')
-        return GithubTreeObject(data=_r.data)
+        _git_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
-    def _update_and_post_tree(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken):
-        """
-
-        Args:
-            owner:
-            repo:
-            branch:
-            files:
-            access_token:
-
-        Returns:
-
-        """
-        self._header['Authorization'] = f'token {access_token.access_tkn}'
-        tree: list[dict] = []
-
-        _git_tree: GithubTreeObject = self._get_tree(owner=owner, repo=repo, branch=branch)
-        # api url
-        url = f'https://api.github.com/repos/{owner}/{repo}/git/trees'
-
+        # update and post tree
         base_tree = _git_tree.sha
-
+        # adding/updating new files
         for file in files:
-            if file.content and file.sha == 'delete':
+            if file.content is None and file.sha == 'delete':
                 tree.append({"path": file.path, "mode": file.mode, "type": file.type})
             elif file.content is None:
                 tree.append({"path": file.path, "mode": file.mode, "type": file.type, "sha": file.sha})
             else:
                 tree.append({"path": file.path, "mode": file.mode, "type": file.type, "content": file.content})
 
-        _posting_tree: dict = {"owner": owner, "repo": repo, "tree": tree, "base_tree": base_tree}
+        _posting_tree: dict = {"owner": self.owner, "repo": self.repo, "tree": tree, "base_tree": base_tree}
+        _r = ResponseHandlers.curl_post_response(url=post_tree_url, headers=self._header, data=dumps(_posting_tree))
+        if _r.status_code != 201:
+            print(f'Tree was not able to be updated because: {_r.status_code} {_r.status} {_r.data}')
+        _posted_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
-        _res = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(_posting_tree))
-        if _res.status_code != 201:
-            print(f'Tree was not able to be updated because: {_res.status_code} {_res.for_status} {_res.data}')
+        # commit new tree
+        commit_data = {"owner": self.owner, "repo": self.repo, "message": message, "tree": _posted_tree.sha, "parents": [self._latest_commit_sha]}
+        _r = ResponseHandlers.curl_post_response(url=commit_url, headers=self._header, data=dumps(commit_data))
+        if _r.status_code != 201:
+            print(f'Files were not able to be committed due to:{_r.status_code} {_r.status} {_r.data}')
+        _commit: GitCommit = GitCommit(data=_r.data)
 
-        return GithubTreeObject(data=_res.data)
-
-    def _commit_files(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken, message: str = 'New commit'):
-        """
-
-        Args:
-            owner:
-            repo:
-            branch:
-            files:
-            access_token:
-            message:
-
-        Returns:
-
-        """
-        self._header['Authorization'] = f'token {access_token.access_tkn}'
-
-        _post_tree = self._update_and_post_tree(owner=owner, repo=repo, branch=branch, files=files, access_token=access_token)
-        url = f'https://api.github.com/repos/{owner}/{repo}/git/commits'
-        commit_data = {"owner": owner, "repo": repo, "message": message, "tree": _post_tree.sha, "parents": [self._latest_commit_sha]}
-
-        _resp = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(commit_data))
-        if _resp.status_code != 201:
-            print(f'Files were not able to be committed due to:{_resp.status_code} {_resp.for_status} {_resp.data}')
-        print(_resp.data)
-        return GithubCommitObject(data=_resp.data)
-
-    def commit(self, owner: str, repo: str, branch: str, files: list[GitTree], access_token: GithubAccessToken, message: str = 'New commit') -> GithubRefObject:
-        """
-
-        Args:
-            owner: User/Org where the repo is hosted
-            repo: Name of the repository
-            branch: branch name of the repository.
-            files: Files that needs to be committed
-            access_token:
-            message:
-
-        Returns:
-
-        """
-
-        _commit: GithubCommitObject = self._commit_files(owner=owner, repo=repo, branch=branch, files=files, access_token=access_token, message=message)
-        url: str = f'https://api.github.com/repos/{owner}/{repo}/git/refs/heads/{branch}'
-
-        self._header['Authorization'] = f'token {access_token.access_tkn}'
+        # update branch ref
         _ref: dict = {"sha": _commit.sha}
         print(_commit.sha)
-        _r: Response = ResponseHandlers.http_patch(url=url, headers=self._header, data=dumps(_ref))
+        _r: Response = ResponseHandlers.http_patch(url=ref_url, headers=self._header, data=dumps(_ref))
+        if _r.status_code != 200:
+            print(f'[E] Error while updating ref: {_r.status_code} {_r.status} ')
+        print(_r.data)
         return GithubRefObject(data=_r.data)
 
-    def get_release(self, owner: str, repo: str, latest: bool = True) -> list[GithubRelease]:
+    def get_release(self, latest: bool = True) -> list[GithubRelease]:
+        """Gets the repository releases
+
+        Args:
+            latest (bool): To get the only latest release from the repository. Defaults to True
+
+        Returns: list of GitHub Releases
+
+        """
         if latest:
-            url: str = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
+            url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/releases/latest'
         else:
-            url = f'https://api.github.com/repos/{owner}/{repo}/releases'
+            url = f'https://api.github.com/repos/{self.owner}/{self.repo}/releases'
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
@@ -264,9 +238,9 @@ class GithubAPIHandler:
         Returns (Response): Response object
 
         """
-        if self.access_token is None:
+        if self.__access_token is None:
             raise Exception('[E] Access token not found, use set_token to set the token and then proceed')
-        self._header['Authorization'] = f'token {self.access_token.access_tkn}'
+        self._header['Authorization'] = f'token {self.__access_token.access_tkn}'
         data: dict = {"ref": ref}
         if inputs is None:
             data["inputs"] = inputs
@@ -278,6 +252,40 @@ class GithubAPIHandler:
             print(f'[E] Error caused while running workflow: {res.status_code} {res.status}')
 
         return res
+
+    def get_tag(self, tag_name: str) -> GithubTag:
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/tags'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            print(f'[E] Error causeg while fetching tags: {res.status_code} {res.status}')
+
+        tags: list = loads(res.data)
+        for tag in tags:
+            if tag['name'] == tag_name:
+                return GithubTag(tag)
+
+        print(f'[E] specified tag `{tag_name}` not found, returning the latest tag instead')
+        return GithubTag(tags[0])
+
+    def get_commit(self, sha: str) -> GithubCommit:
+        """Gets Github Commit data using API.
+
+        **Note: this gets the Github Commit object and not Git Commit object**
+
+        Args:
+            sha (str): sha string of the commit that is to be fetched.
+
+        Returns: GithubCommit object.
+
+        """
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/commits/{sha}'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            print(f'[E] Error caused in getting commit: {res.status_code} {res.status} ')
+
+        return GithubCommit(data=res.data)
 
 
 class GithubAppApi:
@@ -343,25 +351,27 @@ class GithubAppApi:
         res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
         if res.status_code != 201:
             print(f'[E] Token was not created: {res.status_code} {res.for_status}: {res.data}')
-        print(res.data)
         return GithubAccessToken(data=res.data)
 
 
 if __name__ == '__main__':
-    app = GithubAppApi(app_id='173901')
-    access_tkn1: AccessTokenPermission = AccessTokenPermission()
-
-    access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
-
-    _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
-
-    print(_access_tkn.access_tkn)
-
-    _owner = 'Coders-Asylum'
-    _repo = 'fuzzy-train'
-    _branch = 'test_branch'
-    api = GithubAPIHandler(owner=_owner,branch=_branch,repo=_repo)
-    _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
-                         'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
-                         'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
-                         'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+    pass
+    # app = GithubAppApi(app_id=os.environ.get('APP_ID'))
+    # access_tkn1: AccessTokenPermission = AccessTokenPermission()
+    #
+    # access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+    #
+    # _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
+    #
+    # _owner = 'Coders-Asylum'
+    # _repo = 'fuzzy-train'
+    # _branch = 'test_branch'
+    # api = GithubAPIHandler(owner=_owner, branch=_branch, repo=_repo)
+    # _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
+    #                      'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
+    #                      'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+    #                      'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+    #
+    # new_file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=_expected_contents)
+    # api.set_token(access_tkn=_access_tkn)
+    # api.commit_files(files=[new_file], message='New test file')

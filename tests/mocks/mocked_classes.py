@@ -40,7 +40,7 @@ def mocked_token() -> GithubAccessToken:
 
 
 class MockedResponseHandlers:
-    commit_url: str = r'^https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/\w+'
+    git_commit_url: str = r'^https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/\w+'
     tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees\/\w+'
     ref_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/ref\/heads\/\w+'
     file_url: str = r'https:\/\/raw.githubusercontent.com\/Coders-Asylum\/fuzzy-train\/test_branch\/\w+\/\w+\/\w+.\w+'
@@ -48,6 +48,8 @@ class MockedResponseHandlers:
     latest_release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases\/latest'
     release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases'
     workflow_trigger_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/actions\/workflows\/\w+.yml\/dispatches'
+    tag_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/tags'
+    commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/commits\/10f68682850d598a90ed6f5ea237f5b140a5f4f3'
 
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
     gapi_unauthorized = GithubAPIMock(for_status=Status.UNAUTHORIZED)
@@ -58,8 +60,8 @@ class MockedResponseHandlers:
         else:
             url = args[0]
 
-        if bool(match(self.commit_url, url)):
-            return self.gapi_success.get_commit()
+        if bool(match(self.git_commit_url, url)):
+            return self.gapi_success.get_git_commit()
         elif bool(match(self.tree_url, url)):
             return self.gapi_success.get_tree()
         elif bool(match(self.ref_url, url)):
@@ -70,6 +72,10 @@ class MockedResponseHandlers:
             return self.gapi_success.get_latest_release()
         elif bool(match(self.release_url, url)):
             return self.gapi_success.get_latest_release(latest=False)
+        elif bool(match(self.tag_url, url)):
+            return self.gapi_success.get_tag()
+        elif bool(match(self.commit_url, url)):
+            return self.gapi_success.get_commit()
         else:
             return self.gapi_success.response
 
