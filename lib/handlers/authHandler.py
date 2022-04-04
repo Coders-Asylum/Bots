@@ -6,6 +6,7 @@ from cryptography.hazmat.backends import default_backend
 from jwt import encode
 from json import loads
 from datetime import datetime
+from os import environ
 
 
 def get_hash_key(key: str, req: func.HttpRequest) -> str:
@@ -14,10 +15,9 @@ def get_hash_key(key: str, req: func.HttpRequest) -> str:
 
 
 def generate_jwt_token(payload: dict) -> str:
-    file_path: str = 'D:/work_src/Medium Coders Asylum/bots/cert2.pem'
-    pwd: bytes = None
-    with open(file_path, 'rb') as file:
-        _pvt_key = serialization.load_pem_private_key(data=file.read(), password=pwd, backend=default_backend)
+    key: str = environ.get('AUTH_KEY')
+    key_bytes: bytes = bytes(key, 'UTF-8')
+    _pvt_key = serialization.load_pem_private_key(data=key_bytes, password=None, backend=default_backend)
     return encode(payload=payload, key=_pvt_key, algorithm='RS256')
 
 
