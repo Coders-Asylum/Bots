@@ -1,0 +1,21 @@
+[run]
+branch = True
+source =
+    .
+    bin/
+    secretaryBot/
+
+[report]
+exclude_lines =
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+ignore_errors = True
+skip_empty = True
+omit =
+    tests/*
+    */setup.py
+
+[xml]
+output = coverage.xml

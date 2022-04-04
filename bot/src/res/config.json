@@ -1,0 +1,10 @@
+{
+  "blog_page": {
+    "name": "BlogPage.dart",
+    "path": "lib/pages/BlogPage.dart"
+  },
+  "blog_post_page": {
+    "name": "BlogPostPage.dart",
+    "path": "lib/pages/BlogPostPage.dart"
+  }
+}
