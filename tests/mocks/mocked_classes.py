@@ -40,9 +40,13 @@ def mocked_token() -> GithubAccessToken:
 
 
 class MockedResponseHandlers:
-    git_commit_url: str = r'^https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/\w+'
-    tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees\/\w+'
-    ref_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/ref\/heads\/\w+'
+    # commit files urls
+    git_commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/c30dbe34699b8e7e522885bc9d2a4d9d141c9382'
+    git_post_tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees'
+    git_ref_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/refs\/heads\/test_branch'
+    git_post_commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits'
+    git_tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees\/47b01c17a28529cd72f150f403022fc46d061452'
+
     file_url: str = r'https:\/\/raw.githubusercontent.com\/Coders-Asylum\/fuzzy-train\/test_branch\/\w+\/\w+\/\w+.\w+'
     blob_post_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/blobs'
     latest_release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases\/latest'
@@ -62,10 +66,10 @@ class MockedResponseHandlers:
 
         if bool(match(self.git_commit_url, url)):
             return self.gapi_success.get_git_commit()
-        elif bool(match(self.tree_url, url)):
-            return self.gapi_success.get_tree()
-        elif bool(match(self.ref_url, url)):
-            return self.gapi_success.getref()
+        elif bool(match(self.git_tree_url, url)):
+            return self.gapi_success.get_git_tree()
+        elif bool(match(self.git_ref_url, url)):
+            return self.gapi_success.get_latest_ref()
         elif bool(match(self.file_url, url)):
             return self.gapi_success.download_repo_file()
         elif bool(match(self.latest_release_url, url)):
@@ -97,5 +101,27 @@ class MockedResponseHandlers:
             return self.gapi_success.post_blob()
         elif bool(match(self.workflow_trigger_url, url)):
             return self.gapi_success.trigger_workflow()
+        elif bool(match(self.git_post_tree_url, url)):
+            return self.gapi_success.post_git_tree()
+        elif bool(match(self.git_post_commit_url, url)):
+            return self.gapi_success.post_git_commit()
+        else:
+            return self.gapi_success.response
+
+    def mocked_http_patch_response(self, *args, **kwargs):
+        url: str
+        data: str
+        headers: CaseInsensitiveDict
+
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+            data = kwargs['data']
+            headers = kwargs['headers']
+        else:
+            url = args[0]
+            headers = args[1]
+            data = args[2]
+        if bool(match(self.git_ref_url, url)):
+            return self.gapi_success.patch_git_ref()
         else:
             return self.gapi_success.response

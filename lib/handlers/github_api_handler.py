@@ -194,11 +194,9 @@ class GithubAPIHandler:
 
         # update branch ref
         _ref: dict = {"sha": _commit.sha}
-        print(_commit.sha)
         _r: Response = ResponseHandlers.http_patch(url=ref_url, headers=self._header, data=dumps(_ref))
         if _r.status_code != 200:
             print(f'[E] Error while updating ref: {_r.status_code} {_r.status} ')
-        print(_r.data)
         return GithubRefObject(data=_r.data)
 
     def get_release(self, latest: bool = True) -> list[GithubRelease]:
@@ -316,7 +314,7 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_get_response(url, self.headers)
         if res.status_code != 200:
-            print(f'App installation was not received: {res.status_code} {res.for_status} {res.data}')
+            print(f'App installation was not received: {res.status_code} {res.status} {res.data}')
 
         _data: list = loads(res.data)
         for d in _data:
@@ -355,23 +353,23 @@ class GithubAppApi:
 
 
 if __name__ == '__main__':
-    pass
-    # app = GithubAppApi(app_id=os.environ.get('APP_ID'))
-    # access_tkn1: AccessTokenPermission = AccessTokenPermission()
-    #
-    # access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
-    #
-    # _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
-    #
-    # _owner = 'Coders-Asylum'
-    # _repo = 'fuzzy-train'
-    # _branch = 'test_branch'
-    # api = GithubAPIHandler(owner=_owner, branch=_branch, repo=_repo)
-    # _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
-    #                      'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
-    #                      'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
-    #                      'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
-    #
-    # new_file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=_expected_contents)
-    # api.set_token(access_tkn=_access_tkn)
-    # api.commit_files(files=[new_file], message='New test file')
+    # pass
+    app = GithubAppApi(app_id='173901')
+    access_tkn1: AccessTokenPermission = AccessTokenPermission()
+
+    access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
+
+    _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
+
+    _owner = 'Coders-Asylum'
+    _repo = 'fuzzy-train'
+    _branch = 'test_branch'
+    api = GithubAPIHandler(owner=_owner, branch=_branch, repo=_repo)
+    _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
+                         'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
+                         'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+                         'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+
+    new_file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=_expected_contents)
+    api.set_token(access_tkn=_access_tkn)
+    api.commit_files(files=[new_file], message='New test file')

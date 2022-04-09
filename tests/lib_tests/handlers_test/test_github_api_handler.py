@@ -94,8 +94,31 @@ class TestGithubAPIHandler(TestCase):
     #         expected_tree_data = loads(posted_tree.tree)
     #         self.assertEqual(actual_tree_data, expected_tree_data)
 
-    def test_commit_files(self):
-        pass
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    @mock.patch('lib.handlers.ResponseHandlers.http_patch')
+    def test_commit_files(self,mock_patch, mock_post,mock_get ):
+        # mocks
+        mock_get.side_effect = self.mockedResponse.mocked_http_get_response
+        mock_post.side_effect = self.mockedResponse.mocked_http_post_response
+        mock_patch.side_effect = self.mockedResponse.mocked_http_patch_response
+
+        expected_ref = loads(self.g_mock_success.patch_git_ref().data)
+
+        posting_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
+                           'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
+                           'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+                           'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+
+        file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=posting_contents)
+        # setting a mock token
+        self.g.set_token(access_tkn=mocked_token())
+        actual: GithubRefObject = self.g.commit_files(files=[file], message='New test file')
+
+        self.assertEqual(actual.url, expected_ref['url'])
+        self.assertEqual(actual.ref, expected_ref['ref'])
+        self.assertEqual(actual.obj, expected_ref['object'])
+        self.assertEqual(actual.nodeId, expected_ref['node_id'])
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
     def test_get_latest_release(self, mock_func):

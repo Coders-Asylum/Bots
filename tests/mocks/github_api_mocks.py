@@ -53,6 +53,73 @@ class GithubAPIMock:
         else:
             return self.notFound
 
+    def get_latest_ref(self) -> Response:
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                {
+                    "ref": "refs/heads/test_branch",
+                    "node_id": "REF_kwDOG0SbL7ZyZWZzL2hlYWRzL3Rlc3RfYnJhbmNo",
+                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/refs/heads/test_branch",
+                    "object": {
+                        "sha": "c30dbe34699b8e7e522885bc9d2a4d9d141c9382",
+                        "type": "commit",
+                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/c30dbe34699b8e7e522885bc9d2a4d9d141c9382"
+                    }
+                })
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps({
+                "message": "Not Found",
+                "documentation_url": "https://docs.github.com/rest/reference/git#get-a-reference"
+            })
+        return self.response
+
+    def get_git_commit(self):
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                {
+                    "sha": "c30dbe34699b8e7e522885bc9d2a4d9d141c9382",
+                    "node_id": "C_kwDOG0SbL9oAKGMzMGRiZTM0Njk5YjhlN2U1MjI4ODViYzlkMmE0ZDlkMTQxYzkzODI",
+                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/c30dbe34699b8e7e522885bc9d2a4d9d141c9382",
+                    "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/c30dbe34699b8e7e522885bc9d2a4d9d141c9382",
+                    "author": {
+                        "name": "aatmaram-bhide-bot[bot]",
+                        "email": "100037318+aatmaram-bhide-bot[bot]@users.noreply.github.com",
+                        "date": "2022-04-05T17:10:44Z"
+                    },
+                    "committer": {
+                        "name": "GitHub",
+                        "email": "noreply@github.com",
+                        "date": "2022-04-05T17:10:44Z"
+                    },
+                    "tree": {
+                        "sha": "47b01c17a28529cd72f150f403022fc46d061452",
+                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452"
+                    },
+                    "message": "New test file",
+                    "parents": [
+                        {
+                            "sha": "aa8052742b140c8403925dd574dbc045bafcd028",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/aa8052742b140c8403925dd574dbc045bafcd028",
+                            "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/aa8052742b140c8403925dd574dbc045bafcd028"
+                        }
+                    ],
+                    "verification": {
+                        "verified": True,
+                        "reason": "valid",
+                        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJiTHgUCRBK7hj4Ov3rIwAAPAQIADoblAf29cBFjFG2wdCnYKLD\nQK5zI7UWSqVXRJaGop15w1Wioh/EMZm0TT1b82socKd17akeCRxeaZI1Yr1IQ5r6\n7zqq6vHvlTTt+QJpw93WADglvK73js7bzJoU4giIGbKpXIVAfBixYtSi1k84g0Dc"
+                                     "\nTRPgIRsEF7HUQqhVv3UjpQ9krSc1iqOWlz4Hm6tu7Wzf8q/Z+myrYdZxtZkchmQg\nPAL5EzVWzWVc4BSrR9In8PByCN+kFYrUmeYYnKHal5IMbVtSvUFKT0c5jWQ6vMNZ\n1gwF9M3q0sOPHoa/UI+spwj317VKZGzNFnjhRn7B3ritk4DRk+0hvJkM3qAnbl0=\n=4aBk\n-----END PGP SIGNATURE-----\n",
+                        "payload": "tree 47b01c17a28529cd72f150f403022fc46d061452\nparent aa8052742b140c8403925dd574dbc045bafcd028\nauthor aatmaram-bhide-bot[bot] <100037318+aatmaram-bhide-bot[bot]@users.noreply.github.com> 1649178644 +0000\ncommitter GitHub <noreply@github.com> 1649178644 "
+                                   "+0000\n\nNew test file "
+                    }
+                }
+            )
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps({
+                "message": "Not Found",
+                "documentation_url": "https://docs.github.com/rest/reference/git#get-a-reference"
+            })
+        return self.response
+
     def post_blob(self) -> Response:
         if self.for_status is Status.SUCCESS:
             self.response.status_code = self.created['status']
@@ -88,280 +155,248 @@ class GithubAPIMock:
 
         return self.response
 
-    def getref(self) -> Response:
-        """ Get Reference api response
-
-        Returns (Response): A Response object
-
-        """
-        if self.for_status is Status.SUCCESS:
-            self.response.data = dumps({
-                "ref": "refs/heads/test_branch",
-                "node_id": "REF_kwDOG0SbL7ZyZWZzL2hlYWRzL3Rlc3RfYnJhbmNo",
-                "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/refs/heads/test_branch",
-                "object": {
-                    "sha": "4a162230020ca9adb70c809f5a40a8ba3551dce2",
-                    "type": "commit",
-                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/4a162230020ca9adb70c809f5a40a8ba3551dce2"
-                }
-            })
-        elif self.for_status is Status.RES_NOT_FOUND:
-            self.response.data = dumps({
-                "message": "Not Found",
-                "documentation_url": "https://docs.github.com/rest/reference/git#get-a-reference"
-            })
-        return self.response
-
-    def get_git_commit(self) -> Response:
-        if self.for_status is Status.SUCCESS:
-            self.response.data = dumps({
-                "sha": "4a162230020ca9adb70c809f5a40a8ba3551dce2",
-                "node_id": "C_kwDOG0SbL9oAKDRhMTYyMjMwMDIwY2E5YWRiNzBjODA5ZjVhNDBhOGJhMzU1MWRjZTI",
-                "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/4a162230020ca9adb70c809f5a40a8ba3551dce2",
-                "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/4a162230020ca9adb70c809f5a40a8ba3551dce2",
-                "author": {
-                    "name": "aatmaram-bhide-bot[bot]",
-                    "email": "100037318+aatmaram-bhide-bot[bot]@users.noreply.github.com",
-                    "date": "2022-03-02T17:07:32Z"
-                },
-                "committer": {
-                    "name": "GitHub",
-                    "email": "noreply@github.com",
-                    "date": "2022-03-02T17:07:32Z"
-                },
-                "tree": {
-                    "sha": "47b01c17a28529cd72f150f403022fc46d061452",
-                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452"
-                },
-                "message": "New commit",
-                "parents": [
-                    {
-                        "sha": "c2675d3104aeacc81a155f4cbfe54b0615e70f32",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/c2675d3104aeacc81a155f4cbfe54b0615e70f32",
-                        "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/c2675d3104aeacc81a155f4cbfe54b0615e70f32"
-                    }
-                ],
-                "verification": {
-                    "verified": True,
-                    "reason": "valid",
-                    "signature": "-----BEGIN PGP SIGNATURE-----\n\n{signature}\n\n-----END PGP SIGNATURE-----\n",
-                    "payload": "tree 47b01c17a28529cd72f150f403022fc46d061452\nparent c2675d3104aeacc81a155f4cbfe54b0615e70f32\nauthor aatmaram-bhide-bot[bot] <100037318+aatmaram-bhide-bot[bot]@users.noreply.github.com> 1646240852 +0000\ncommitter GitHub <noreply@github.com> 1646240852 "
-                               "+0000\n\nNew commit "
-                }
-            })
-        elif self.for_status is Status.RES_NOT_FOUND:
-            self.response.data = dumps({
-                "message": "Not Found",
-                "documentation_url": "https://docs.github.com/rest/reference/git#get-a-reference"
-            })
-        return self.response
-
-    def get_tree(self, recursive: bool = True):
+    def get_git_tree(self, recursive: bool = True):
         if self.for_status is Status.SUCCESS and recursive is True:
-            self.response.data = dumps({
-                "sha": "47b01c17a28529cd72f150f403022fc46d061452",
-                "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452",
-                "tree": [
-                    {
-                        "path": ".circleci",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "4aa50b2cb143654823f1f81c68a0d0deb06e8c80",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4aa50b2cb143654823f1f81c68a0d0deb06e8c80"
-                    },
-                    {
-                        "path": ".circleci/config.yml",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "6f98693addd5cba9a40f6ab9335054951a78b2ee",
-                        "size": 449,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/6f98693addd5cba9a40f6ab9335054951a78b2ee"
-                    },
-                    {
-                        "path": ".github",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "5df41bac369a0132c47d81af980366628c40d15f",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/5df41bac369a0132c47d81af980366628c40d15f"
-                    },
-                    {
-                        "path": ".github/labeler.yml",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "e8c1cc94aa60d90fe331a285605c12ace07f58fc",
-                        "size": 493,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e8c1cc94aa60d90fe331a285605c12ace07f58fc"
-                    },
-                    {
-                        "path": ".github/workflows",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "b6fa3f4354e24c2cfec37a4b5d929744f84bb0c0",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/b6fa3f4354e24c2cfec37a4b5d929744f84bb0c0"
-                    },
-                    {
-                        "path": ".github/workflows/label.yml",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "a3cad4323df1362e1c5caf1ca192fd36d1ba64aa",
-                        "size": 498,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/a3cad4323df1362e1c5caf1ca192fd36d1ba64aa"
-                    },
-                    {
-                        "path": ".gitignore",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "dbef116d224d8f796abe72ecfef9271f9d79f069",
-                        "size": 618,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/dbef116d224d8f796abe72ecfef9271f9d79f069"
-                    },
-                    {
-                        "path": "LICENSE",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff",
-                        "size": 1521,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff"
-                    },
-                    {
-                        "path": "README.md",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "e36ecc3cb45958b71efbd968723a4d346d5241f0",
-                        "size": 305,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e36ecc3cb45958b71efbd968723a4d346d5241f0"
-                    },
-                    {
-                        "path": "custom_card_design",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "4e01a14f50c83d758c107d4a4d752bbdd073552b",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4e01a14f50c83d758c107d4a4d752bbdd073552b"
-                    },
-                    {
-                        "path": "custom_card_design/.gitignore",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "f3c205341e7dbb11f1dfecee67a1cd1f84660a22",
-                        "size": 722,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/f3c205341e7dbb11f1dfecee67a1cd1f84660a22"
-                    },
-                    {
-                        "path": "custom_card_design/README.md",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "373ad06e12baffe6261944e80a8e79178117a015",
-                        "size": 507,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/373ad06e12baffe6261944e80a8e79178117a015"
-                    },
-                    {
-                        "path": "custom_card_design/lib",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "ccc0316b0f7da00a02eeb4c696119b1e8eeb3c88",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/ccc0316b0f7da00a02eeb4c696119b1e8eeb3c88"
-                    },
-                    {
-                        "path": "custom_card_design/lib/main.dart",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "60f4891b28608fe03cdd544fd7fdb77c00e34675",
-                        "size": 3883,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/60f4891b28608fe03cdd544fd7fdb77c00e34675"
-                    },
-                    {
-                        "path": "custom_card_design/lib/sunflower.dart",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "7616871141cc1b313bfd92271df48e505d29eb31",
-                        "size": 4011,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/7616871141cc1b313bfd92271df48e505d29eb31"
-                    },
-                    {
-                        "path": "custom_card_design/test",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "ab36ed17e98f0262b2bdad181c2f6168293168b6",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/ab36ed17e98f0262b2bdad181c2f6168293168b6"
-                    },
-                    {
-                        "path": "custom_card_design/test/change_file_test.txt",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "e42afe058b5f88127000a4406a059b06694a3c4f",
-                        "size": 1051,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e42afe058b5f88127000a4406a059b06694a3c4f"
-                    },
-                    {
-                        "path": "custom_card_design/test/widget_test.dart",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "e7a083314c93505805d26f97851a6ceedf902524",
-                        "size": 1057,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e7a083314c93505805d26f97851a6ceedf902524"
-                    }
-                ],
-                "truncated": False
-            })
-        elif self.for_status == Status.SUCCESS:
-            self.response.data = dumps({
-                "sha": "47b01c17a28529cd72f150f403022fc46d061452",
-                "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452",
-                "tree": [
-                    {
-                        "path": ".circleci",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "4aa50b2cb143654823f1f81c68a0d0deb06e8c80",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4aa50b2cb143654823f1f81c68a0d0deb06e8c80"
-                    },
-                    {
-                        "path": ".github",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "5df41bac369a0132c47d81af980366628c40d15f",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/5df41bac369a0132c47d81af980366628c40d15f"
-                    },
-                    {
-                        "path": ".gitignore",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "dbef116d224d8f796abe72ecfef9271f9d79f069",
-                        "size": 618,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/dbef116d224d8f796abe72ecfef9271f9d79f069"
-                    },
-                    {
-                        "path": "LICENSE",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff",
-                        "size": 1521,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff"
-                    },
-                    {
-                        "path": "README.md",
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": "e36ecc3cb45958b71efbd968723a4d346d5241f0",
-                        "size": 305,
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e36ecc3cb45958b71efbd968723a4d346d5241f0"
-                    },
-                    {
-                        "path": "custom_card_design",
-                        "mode": "040000",
-                        "type": "tree",
-                        "sha": "4e01a14f50c83d758c107d4a4d752bbdd073552b",
-                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4e01a14f50c83d758c107d4a4d752bbdd073552b"
-                    }
-                ],
-                "truncated": False
-            })
+            self.response.data = dumps(
+                {
+                    "sha": "47b01c17a28529cd72f150f403022fc46d061452",
+                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452",
+                    "tree": [
+                        {
+                            "path": ".circleci",
+                            "mode": "040000",
+                            "type": "tree",
+                            "sha": "4aa50b2cb143654823f1f81c68a0d0deb06e8c80",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4aa50b2cb143654823f1f81c68a0d0deb06e8c80"
+                        },
+                        {
+                            "path": ".circleci/config.yml",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "6f98693addd5cba9a40f6ab9335054951a78b2ee",
+                            "size": 449,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/6f98693addd5cba9a40f6ab9335054951a78b2ee"
+                        },
+                        {
+                            "path": ".github",
+                            "mode": "040000",
+                            "type": "tree",
+                            "sha": "5df41bac369a0132c47d81af980366628c40d15f",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/5df41bac369a0132c47d81af980366628c40d15f"
+                        },
+                        {
+                            "path": ".github/labeler.yml",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "e8c1cc94aa60d90fe331a285605c12ace07f58fc",
+                            "size": 493,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e8c1cc94aa60d90fe331a285605c12ace07f58fc"
+                        },
+                        {
+                            "path": ".github/workflows",
+                            "mode": "040000",
+                            "type": "tree",
+                            "sha": "b6fa3f4354e24c2cfec37a4b5d929744f84bb0c0",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/b6fa3f4354e24c2cfec37a4b5d929744f84bb0c0"
+                        },
+                        {
+                            "path": ".github/workflows/label.yml",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "a3cad4323df1362e1c5caf1ca192fd36d1ba64aa",
+                            "size": 498,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/a3cad4323df1362e1c5caf1ca192fd36d1ba64aa"
+                        },
+                        {
+                            "path": ".gitignore",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "dbef116d224d8f796abe72ecfef9271f9d79f069",
+                            "size": 618,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/dbef116d224d8f796abe72ecfef9271f9d79f069"
+                        },
+                        {
+                            "path": "LICENSE",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff",
+                            "size": 1521,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff"
+                        },
+                        {
+                            "path": "README.md",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "e36ecc3cb45958b71efbd968723a4d346d5241f0",
+                            "size": 305,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e36ecc3cb45958b71efbd968723a4d346d5241f0"
+                        },
+                        {
+                            "path": "custom_card_design",
+                            "mode": "040000",
+                            "type": "tree",
+                            "sha": "4e01a14f50c83d758c107d4a4d752bbdd073552b",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4e01a14f50c83d758c107d4a4d752bbdd073552b"
+                        },
+                        {
+                            "path": "custom_card_design/.gitignore",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "f3c205341e7dbb11f1dfecee67a1cd1f84660a22",
+                            "size": 722,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/f3c205341e7dbb11f1dfecee67a1cd1f84660a22"
+                        },
+                        {
+                            "path": "custom_card_design/README.md",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "373ad06e12baffe6261944e80a8e79178117a015",
+                            "size": 507,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/373ad06e12baffe6261944e80a8e79178117a015"
+                        },
+                        {
+                            "path": "custom_card_design/lib",
+                            "mode": "040000",
+                            "type": "tree",
+                            "sha": "ccc0316b0f7da00a02eeb4c696119b1e8eeb3c88",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/ccc0316b0f7da00a02eeb4c696119b1e8eeb3c88"
+                        },
+                        {
+                            "path": "custom_card_design/lib/main.dart",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "60f4891b28608fe03cdd544fd7fdb77c00e34675",
+                            "size": 3883,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/60f4891b28608fe03cdd544fd7fdb77c00e34675"
+                        },
+                        {
+                            "path": "custom_card_design/lib/sunflower.dart",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "7616871141cc1b313bfd92271df48e505d29eb31",
+                            "size": 4011,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/7616871141cc1b313bfd92271df48e505d29eb31"
+                        },
+                        {
+                            "path": "custom_card_design/test",
+                            "mode": "040000",
+                            "type": "tree",
+                            "sha": "ab36ed17e98f0262b2bdad181c2f6168293168b6",
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/ab36ed17e98f0262b2bdad181c2f6168293168b6"
+                        },
+                        {
+                            "path": "custom_card_design/test/change_file_test.txt",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "e42afe058b5f88127000a4406a059b06694a3c4f",
+                            "size": 1051,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e42afe058b5f88127000a4406a059b06694a3c4f"
+                        },
+                        {
+                            "path": "custom_card_design/test/widget_test.dart",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": "e7a083314c93505805d26f97851a6ceedf902524",
+                            "size": 1057,
+                            "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e7a083314c93505805d26f97851a6ceedf902524"
+                        }
+                    ],
+                    "truncated": False
+                }
+            )
         elif self.for_status is Status.RES_NOT_FOUND:
             self.response.data = dumps({
                 "message": "Not Found",
                 "documentation_url": "https://docs.github.com/rest/reference/git#get-a-tree"
             })
+        return self.response
 
+    def post_git_tree(self):
+        self.response.status_code = self.created['status']
+        self.response.status = self.created['msg']
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                {"sha": "47b01c17a28529cd72f150f403022fc46d061452", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452",
+                 "tree": [{"path": ".circleci", "mode": "040000", "type": "tree", "sha": "4aa50b2cb143654823f1f81c68a0d0deb06e8c80", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4aa50b2cb143654823f1f81c68a0d0deb06e8c80"},
+                          {"path": ".github", "mode": "040000", "type": "tree", "sha": "5df41bac369a0132c47d81af980366628c40d15f", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/5df41bac369a0132c47d81af980366628c40d15f"},
+                          {"path": ".gitignore", "mode": "100644", "type": "blob", "sha": "dbef116d224d8f796abe72ecfef9271f9d79f069", "size": 618, "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/dbef116d224d8f796abe72ecfef9271f9d79f069"},
+                          {"path": "LICENSE", "mode": "100644", "type": "blob", "sha": "82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff", "size": 1521, "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/82eba2f8c0d4a00bf67deb72a68ecfcff29f68ff"},
+                          {"path": "README.md", "mode": "100644", "type": "blob", "sha": "e36ecc3cb45958b71efbd968723a4d346d5241f0", "size": 305, "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/blobs/e36ecc3cb45958b71efbd968723a4d346d5241f0"},
+                          {"path": "custom_card_design", "mode": "040000", "type": "tree", "sha": "4e01a14f50c83d758c107d4a4d752bbdd073552b", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4e01a14f50c83d758c107d4a4d752bbdd073552b"}], "truncated": False
+                 }
+            )
+        elif self.for_status is Status.UNAUTHORIZED:
+            self.response.data = dumps({
+                "message": "Bad credentials",
+                "documentation_url": "https://docs.github.com/rest"
+            })
+        else:
+            self.response.data = '404: Not Found'
+        return self.response
+
+    def post_git_commit(self):
+        self.response.status_code = self.created['status']
+        self.response.status = self.created['msg']
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                {
+                    "sha": "7f0624ce1d9407aecae6e38dd007dea0265b12c2", "node_id": "C_kwDOG0SbL9oAKDdmMDYyNGNlMWQ5NDA3YWVjYWU2ZTM4ZGQwMDdkZWEwMjY1YjEyYzI", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/7f0624ce1d9407aecae6e38dd007dea0265b12c2",
+                    "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/7f0624ce1d9407aecae6e38dd007dea0265b12c2", "author": {"name": "aatmaram-bhide-bot[bot]", "email": "100037318+aatmaram-bhide-bot[bot]@users.noreply.github.com", "date": "2022-04-06T18:21:33Z"},
+                    "committer": {
+                        "name": "GitHub",
+                        "email": "noreply@github.com",
+                        "date": "2022-04-06T18:21:33Z"
+                    },
+                    "tree": {"sha": "47b01c17a28529cd72f150f403022fc46d061452", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452"},
+                    "message": "New test file",
+                    "parents": [
+                        {
+                            "sha": "c30dbe34699b8e7e522885bc9d2a4d9d141c9382", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/c30dbe34699b8e7e522885bc9d2a4d9d141c9382",
+                            "html_url": "https://github.com/Coders-Asylum/fuzzy-train/commit/c30dbe34699b8e7e522885bc9d2a4d9d141c9382"
+                        }
+                    ],
+                    "verification": {
+                        "verified": True, "reason": "valid",
+                        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJiTdotCRBK7hj4Ov3rIwAAql4IAGJgFLtu6r9oogox/kV6ujV3\npl02HM3osNan6kgvjt/bC7nYUeycoapAKNMB91s2/7J7ZjETy8L9sV+Em7WNvobk\njdAEytQK8WdLDtg//p3PUWUh/csRY5QPc3zC7rl7RwS+6tCvppWqyUrx1B3Bvzh"
+                                     "+\n56By2IwH34EO1oJo2xkXex4dQHc3/Sy6ImMPIA4Sg9BuAEEncSj5hvG+nRr9UMR4\nbIZ1bWDrJ+owH62v/QmP0eptdOrfhruHOlGRayDy/aqGiqPu9zhlM+wzMiSukff8\n0+PszRU+5SWGk11wc2wx8fFq6FQ7MHteLiSWS1Tp3cbLcp48A8t6yqkWvS8tT5I=\n=RULJ\n-----END PGP SIGNATURE-----\n",
+                        "payload": "tree 47b01c17a28529cd72f150f403022fc46d061452\nparent c30dbe34699b8e7e522885bc9d2a4d9d141c9382\nauthor aatmaram-bhide-bot[bot] <100037318+aatmaram-bhide-bot[bot]@users.noreply.github.com> 1649269293 +0000\ncommitter GitHub <noreply@github.com> "
+                                   "1649269293 +0000\n\nNew test file"
+                    }
+                }
+            )
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/git#create-a-commit"
+                }
+            )
+        return self.response
+
+    def patch_git_ref(self):
+        self.response.status = self.success['msg']
+        self.response.status_code = self.success['status']
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                {
+                    "ref": "refs/heads/test_branch",
+                    "node_id": "REF_kwDOG0SbL7ZyZWZzL2hlYWRzL3Rlc3RfYnJhbmNo",
+                    "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/refs/heads/test_branch",
+                    "object": {
+                        "sha": "7f0624ce1d9407aecae6e38dd007dea0265b12c2",
+                        "type": "commit",
+                        "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/commits/7f0624ce1d9407aecae6e38dd007dea0265b12c2"
+                    }
+                }
+
+            )
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/git#update-a-reference"
+                }
+            )
         return self.response
 
     def create_access_token(self) -> GithubAccessToken:
@@ -531,6 +566,7 @@ class GithubAPIMock:
                             "https://github.com/Coders-Asylum/fuzzy-train/pull/5\r\n\r\n\r\n**Full Changelog**: https://github.com/Coders-Asylum/fuzzy-train/commits/V0.0.1a",
                     "mentions_count": 1
                 })
+
         elif self.for_status is Status.SUCCESS and latest is False:
             self.response.data = dumps(
                 [
@@ -576,6 +612,7 @@ class GithubAPIMock:
                         "mentions_count": 1
                     }
                 ])
+
         elif self.for_status is Status.RES_NOT_FOUND:
             self.response.data = dumps(
                 {
@@ -596,14 +633,13 @@ class GithubAPIMock:
                 "message": "Not Found",
                 "documentation_url": "https://docs.github.com/rest/reference/actions#create-a-workflow-dispatch-event"
             })
-            return self.response
+
         elif self.for_status is Status.UNAUTHORIZED:
             self.response.data = dumps(
                 {
                     "message": "Bad credentials",
                     "documentation_url": "https://docs.github.com/rest"
                 })
-
         return self.response
 
     def get_tag(self):
@@ -759,4 +795,3 @@ class GithubAPIMock:
                 }
             )
         return self.response
-
