@@ -1,3 +1,4 @@
+import os.path
 from json import load
 from logging import info
 from os import environ
@@ -9,15 +10,12 @@ from lib.handlers import GithubAPIHandler, GithubAccessToken, GithubAppApi
 class Jobs:
     _webhook: Webhook
     _response: Response
-    __config_file_path: str = './res/config.json'
+    __config_file_path: str = os.path.join(os.path.dirname(__file__), './res/config.json')
 
     def __init__(self):
         self._response = Response(status_code=202, status='Accepted', data=Message.no_processing_required)
         config_file = open(self.__config_file_path)
         self.config_data: dict = load(config_file)
-
-    def status(self):
-        pass
 
     def push_new_blog_page(self) -> Response:
         """ Pushes the new blog-page code to blog repository src folder and then triggers the build workflow to build the new blog pages out of the new release build.
@@ -62,7 +60,7 @@ class Jobs:
 
             # update blog page file
             elif f['filename'] == self.config_data['blog_post_page']['path']:
-                blog_post_page_file_content:str = github_api_website.get_raw_data(path=self.config_data['blog_post_page']['path'])
+                blog_post_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_post_page']['path'])
                 blog_post_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['path'], content=blog_post_page_file_content)
                 github_api_target.set_token(access_tkn=target_access_tkn)
                 target_ref = github_api_target.commit_files(files=[blog_post_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
