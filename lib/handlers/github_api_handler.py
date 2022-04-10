@@ -353,23 +353,4 @@ class GithubAppApi:
 
 
 if __name__ == '__main__':
-    # pass
-    app = GithubAppApi(app_id='173901')
-    access_tkn1: AccessTokenPermission = AccessTokenPermission()
-
-    access_tkn1.set(permission=GithubPermissions.CONTENTS, access=AccessType.READ)
-
-    _access_tkn = app.create_access_token(repos=['fuzzy-train'], permissions=None, org='Coders-Asylum')
-
-    _owner = 'Coders-Asylum'
-    _repo = 'fuzzy-train'
-    _branch = 'test_branch'
-    api = GithubAPIHandler(owner=_owner, branch=_branch, repo=_repo)
-    _expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
-                         'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
-                         'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
-                         'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
-
-    new_file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=_expected_contents)
-    api.set_token(access_tkn=_access_tkn)
-    api.commit_files(files=[new_file], message='New test file')
+    pass
