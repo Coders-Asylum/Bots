@@ -53,6 +53,7 @@ class Jobs:
                 blog_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_page']['path'])
                 blog_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['path'], content=blog_page_file_content)
                 github_api_target.set_token(access_tkn=target_access_tkn)
+
                 target_ref = github_api_target.commit_files(files=[blog_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
                 info(f'[I] New Blog Page File Committed url:{target_ref.url}')
                 payload['message'] = payload['message'] + f'New Blog Page File Committed url:{target_ref.url}\n'
@@ -63,6 +64,7 @@ class Jobs:
                 blog_post_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_post_page']['path'])
                 blog_post_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['path'], content=blog_post_page_file_content)
                 github_api_target.set_token(access_tkn=target_access_tkn)
+
                 target_ref = github_api_target.commit_files(files=[blog_post_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
                 info(f'[I] New Blog Post Page File Committed url:{target_ref.url}')
                 payload['message'] = payload['message'] + f'New Blog Post Page File Committed url:{target_ref.url}\n'
