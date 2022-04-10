@@ -1,5 +1,3 @@
-import os
-
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
 from lib.data.githubDataClass import *
