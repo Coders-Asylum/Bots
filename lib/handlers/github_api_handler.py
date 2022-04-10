@@ -319,7 +319,7 @@ class GithubAppApi:
             _li.append(GithubAppInstallations(id=d['id'], org=d['account']['login'], tkn=d['access_tokens_url']))
         return _li
 
-    def create_access_token(self, repos: list[str], permissions: AccessTokenPermission, org: str) -> GithubAccessToken:
+    def create_access_token(self, repos: list[str], org: str, permissions: AccessTokenPermission = None) -> GithubAccessToken:
         """
         Creates access tokens for the app installations to authenticate as an app in a repo
 
