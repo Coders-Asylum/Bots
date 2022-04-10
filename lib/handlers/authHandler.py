@@ -1,4 +1,3 @@
-from filecmp import cmp
 from hashlib import sha1
 import hmac as crypto
 import azure.functions as func
