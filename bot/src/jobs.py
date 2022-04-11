@@ -52,7 +52,7 @@ class Jobs:
             # update blog page file
             if f['filename'] == self.config_data['blog_page']['path']:
                 blog_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_page']['path'])
-                blog_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['path'], content=blog_page_file_content)
+                blog_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['target_path'], content=blog_page_file_content)
                 github_api_target.set_token(access_tkn=target_access_tkn)
 
                 target_ref = github_api_target.commit_files(files=[blog_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
@@ -63,7 +63,7 @@ class Jobs:
             # update blog page file
             elif f['filename'] == self.config_data['blog_post_page']['path']:
                 blog_post_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_post_page']['path'])
-                blog_post_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['path'], content=blog_post_page_file_content)
+                blog_post_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['target_path'], content=blog_post_page_file_content)
                 github_api_target.set_token(access_tkn=target_access_tkn)
 
                 target_ref = github_api_target.commit_files(files=[blog_post_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
