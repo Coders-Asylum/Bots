@@ -1,5 +1,5 @@
 import os.path
-from json import load
+from json import load, dumps
 from logging import info
 from os import environ
 from lib import Response
@@ -16,6 +16,7 @@ class Jobs:
         self._response = Response(status_code=202, status='Accepted', data=Message.no_processing_required)
         config_file = open(self.__config_file_path)
         self.config_data: dict = load(config_file)
+        config_file.close()
 
     def push_new_blog_page(self) -> Response:
         """ Pushes the new blog-page code to blog repository src folder and then triggers the build workflow to build the new blog pages out of the new release build.
@@ -23,7 +24,7 @@ class Jobs:
         Returns:
 
         """
-        payload: dict = {"message": ''}
+        payload: list = []
         # repos
         website_repo: Repository = Repository(owner='Coders-Asylum', repo='coders-asylum.github.io', branch='production')
         target_repos: Repository = Repository(owner='Coders-Asylum', repo='blog', branch='master')
@@ -56,7 +57,7 @@ class Jobs:
 
                 target_ref = github_api_target.commit_files(files=[blog_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
                 info(f'[I] New Blog Page File Committed url:{target_ref.url}')
-                payload['message'] = payload['message'] + f'New Blog Page File Committed url:{target_ref.url}\n'
+                payload.append(f'New Blog Page File Committed url:{target_ref.url}')
                 self._response.status_code = 200
 
             # update blog page file
@@ -67,7 +68,10 @@ class Jobs:
 
                 target_ref = github_api_target.commit_files(files=[blog_post_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
                 info(f'[I] New Blog Post Page File Committed url:{target_ref.url}')
-                payload['message'] = payload['message'] + f'New Blog Post Page File Committed url:{target_ref.url}\n'
+                payload.append(f'New Blog Page File Committed url:{target_ref.url}')
                 self._response.status_code = 200
+
+        if payload:
+            self._response.data = dumps({"message": payload})
 
         return self._response
