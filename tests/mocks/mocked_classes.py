@@ -2,10 +2,11 @@ from re import match
 
 from requests.structures import CaseInsensitiveDict
 
+from lib.data import *
 from lib.handlers import GithubAccessToken
 from tests.mocks.github_api_mocks import GithubAPIMock, Status
 from lib import Response
-from json import dumps
+from json import dumps, loads
 
 
 def mocked_token() -> GithubAccessToken:
@@ -125,3 +126,40 @@ class MockedResponseHandlers:
             return self.gapi_success.patch_git_ref()
         else:
             return self.gapi_success.response
+
+
+class MockedGithubAPIHandler:
+    g_api_mock: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+
+    def get_release(self) -> list[GithubRelease]:
+        return [GithubRelease(data=self.g_api_mock.get_latest_release().data)]
+
+    def get_tag(self, *args, **kwargs) -> GithubTag:
+        return GithubTag(data=loads(self.g_api_mock.get_tag().data)[0])
+
+    def get_commit(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit().data)
+
+    def get_commit_blog_page_file(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit(blog_page_file=True).data)
+
+    def get_commit_blog_file(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit(blog_file=True).data)
+
+    def get_commit_all_files(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit(blog_file=True, blog_page_file=True).data)
+
+    def commit_files(self, *args, **kwargs) -> GithubRefObject:
+        return GithubRefObject(data=self.g_api_mock.get_latest_ref().data)
+
+    def get_raw_data(self,*args, **kwargs) -> str:
+        return self.g_api_mock.get_raw_data()
+
+
+class MockedGithubAppApi:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @staticmethod
+    def create_access_token(*args, **kwargs) -> GithubAccessToken:
+        return mocked_token()
