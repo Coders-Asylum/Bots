@@ -566,7 +566,7 @@ class GithubAPIMock:
                             "https://github.com/Coders-Asylum/fuzzy-train/pull/5\r\n\r\n\r\n**Full Changelog**: https://github.com/Coders-Asylum/fuzzy-train/commits/V0.0.1a",
                     "mentions_count": 1
                 })
-
+            
         elif self.for_status is Status.SUCCESS and latest is False:
             self.response.data = dumps(
                 [
