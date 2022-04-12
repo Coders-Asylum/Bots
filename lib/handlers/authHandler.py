@@ -15,7 +15,7 @@ def get_hash_key(key: str, req: func.HttpRequest) -> str:
 
 
 def generate_jwt_token(payload: dict) -> str:
-    key: str = environ.get('AUTH_KEY')
+    key: str = environ.get('AUTH_KEY').replace(r'\n', '\n')
     key_bytes: bytes = bytes(key, 'UTF-8')
     _pvt_key = serialization.load_pem_private_key(data=key_bytes, password=None, backend=default_backend)
     return encode(payload=payload, key=_pvt_key, algorithm='RS256')

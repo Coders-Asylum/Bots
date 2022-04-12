@@ -2,10 +2,11 @@ from re import match
 
 from requests.structures import CaseInsensitiveDict
 
+from lib.data import *
 from lib.handlers import GithubAccessToken
 from tests.mocks.github_api_mocks import GithubAPIMock, Status
 from lib import Response
-from json import dumps
+from json import dumps, loads
 
 
 def mocked_token() -> GithubAccessToken:
@@ -40,9 +41,13 @@ def mocked_token() -> GithubAccessToken:
 
 
 class MockedResponseHandlers:
-    git_commit_url: str = r'^https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/\w+'
-    tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees\/\w+'
-    ref_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/ref\/heads\/\w+'
+    # commit files urls
+    git_commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/c30dbe34699b8e7e522885bc9d2a4d9d141c9382'
+    git_post_tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees'
+    git_ref_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/refs\/heads\/test_branch'
+    git_post_commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits'
+    git_tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees\/47b01c17a28529cd72f150f403022fc46d061452'
+
     file_url: str = r'https:\/\/raw.githubusercontent.com\/Coders-Asylum\/fuzzy-train\/test_branch\/\w+\/\w+\/\w+.\w+'
     blob_post_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/blobs'
     latest_release_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/releases\/latest'
@@ -62,10 +67,10 @@ class MockedResponseHandlers:
 
         if bool(match(self.git_commit_url, url)):
             return self.gapi_success.get_git_commit()
-        elif bool(match(self.tree_url, url)):
-            return self.gapi_success.get_tree()
-        elif bool(match(self.ref_url, url)):
-            return self.gapi_success.getref()
+        elif bool(match(self.git_tree_url, url)):
+            return self.gapi_success.get_git_tree()
+        elif bool(match(self.git_ref_url, url)):
+            return self.gapi_success.get_latest_ref()
         elif bool(match(self.file_url, url)):
             return self.gapi_success.download_repo_file()
         elif bool(match(self.latest_release_url, url)):
@@ -97,5 +102,64 @@ class MockedResponseHandlers:
             return self.gapi_success.post_blob()
         elif bool(match(self.workflow_trigger_url, url)):
             return self.gapi_success.trigger_workflow()
+        elif bool(match(self.git_post_tree_url, url)):
+            return self.gapi_success.post_git_tree()
+        elif bool(match(self.git_post_commit_url, url)):
+            return self.gapi_success.post_git_commit()
         else:
             return self.gapi_success.response
+
+    def mocked_http_patch_response(self, *args, **kwargs):
+        url: str
+        data: str
+        headers: CaseInsensitiveDict
+
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+            data = kwargs['data']
+            headers = kwargs['headers']
+        else:
+            url = args[0]
+            headers = args[1]
+            data = args[2]
+        if bool(match(self.git_ref_url, url)):
+            return self.gapi_success.patch_git_ref()
+        else:
+            return self.gapi_success.response
+
+
+class MockedGithubAPIHandler:
+    g_api_mock: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+
+    def get_release(self) -> list[GithubRelease]:
+        return [GithubRelease(data=self.g_api_mock.get_latest_release().data)]
+
+    def get_tag(self, *args, **kwargs) -> GithubTag:
+        return GithubTag(data=loads(self.g_api_mock.get_tag().data)[0])
+
+    def get_commit(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit().data)
+
+    def get_commit_blog_page_file(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit(blog_page_file=True).data)
+
+    def get_commit_blog_file(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit(blog_file=True).data)
+
+    def get_commit_all_files(self, *args, **kwargs) -> GithubCommit:
+        return GithubCommit(data=self.g_api_mock.get_commit(blog_file=True, blog_page_file=True).data)
+
+    def commit_files(self, *args, **kwargs) -> GithubRefObject:
+        return GithubRefObject(data=self.g_api_mock.get_latest_ref().data)
+
+    def get_raw_data(self,*args, **kwargs) -> str:
+        return self.g_api_mock.get_raw_data()
+
+
+class MockedGithubAppApi:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @staticmethod
+    def create_access_token(*args, **kwargs) -> GithubAccessToken:
+        return mocked_token()

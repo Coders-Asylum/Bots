@@ -1,10 +1,12 @@
 {
   "blog_page": {
     "name": "BlogPage.dart",
-    "path": "lib/pages/BlogPage.dart"
+    "path": "lib/pages/BlogPage.dart",
+    "target_path": "src/pages/BlogPage.dart"
   },
   "blog_post_page": {
     "name": "BlogPostPage.dart",
-    "path": "lib/pages/BlogPostPage.dart"
+    "path": "lib/pages/BlogPostPage.dart",
+    "target_path": "src/pages/BlogPostPage.dart"
   }
 }
