@@ -2,7 +2,7 @@ import os
 
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
-from lib.data.githubDataClass import *
+from lib.data import *
 from datetime import datetime
 from requests.structures import CaseInsensitiveDict
 from json import loads, dumps

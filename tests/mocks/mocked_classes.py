@@ -3,9 +3,8 @@ from re import match
 from requests.structures import CaseInsensitiveDict
 
 from lib.data import *
-from lib.handlers import GithubAccessToken
+from lib.handlers import GithubAccessToken, Response
 from tests.mocks.github_api_mocks import GithubAPIMock, Status
-from lib import Response
 from json import dumps, loads
 
 

@@ -1,9 +1,8 @@
-import os
 from json import dumps
 from unittest import TestCase, main, mock
 
 from bot.src import Jobs
-from lib import Response
+from lib.handlers import Response
 from tests.mocks.mocked_classes import MockedGithubAPIHandler, MockedGithubAppApi
 
 

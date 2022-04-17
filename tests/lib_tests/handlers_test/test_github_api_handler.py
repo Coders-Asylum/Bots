@@ -1,9 +1,7 @@
+from json import loads, dumps
 from unittest import TestCase, main, mock
-
-# from requests import get
-# from json import loads
-# from requests.structures import CaseInsensitiveDict
-# from os import environ
+from requests.structures import CaseInsensitiveDict
+from lib.data import *
 from lib.handlers import *
 
 # from datetime import datetime
@@ -97,7 +95,7 @@ class TestGithubAPIHandler(TestCase):
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
     @mock.patch('lib.handlers.ResponseHandlers.http_patch')
-    def test_commit_files(self,mock_patch, mock_post,mock_get ):
+    def test_commit_files(self, mock_patch, mock_post, mock_get):
         # mocks
         mock_get.side_effect = self.mockedResponse.mocked_http_get_response
         mock_post.side_effect = self.mockedResponse.mocked_http_post_response

@@ -2,9 +2,8 @@ import os.path
 from json import load, dumps
 from logging import info
 from os import environ
-from lib import Response
 from lib.data import Repository, GithubRelease, Webhook, GithubCommit, Message, GitTree, TreeType
-from lib.handlers import GithubAPIHandler, GithubAccessToken, GithubAppApi
+from lib.handlers import GithubAPIHandler, GithubAccessToken, GithubAppApi, Response
 
 
 class Jobs:
