@@ -1,11 +1,8 @@
-from enum import Enum
 import logging as log
 from sys import exit
-from colorama import Fore
+from logging import log
 
-
-class ExceptionType(Enum):
-    CLOSE = Fore.RED + '[!] Program execution stopped due to a fatal error.'
+from lib.data import ExceptionType
 
 
 class Exception_Handler:
@@ -19,13 +16,14 @@ class Exception_Handler:
 
     # todo: add flag to send email, if flag is set to true to group of users, email code should be added to utils.py
     def handle(self, exception_type, message):
-        print(Fore.BLUE + '[I] ' + message)
         if exception_type is ExceptionType.CLOSE:
             log.exception(f'[E] {message}')
             log.info(f'[I] {exception_type.value}')
             self._exit_execution()
+        elif exception_type is ExceptionType.WARNING:
+            print(f'{exception_type.value} {message}')
 
 
 if __name__ == '__main__':
     exe = Exception_Handler()
-    exe.handle(ExceptionType.CLOSE, 'Log')
+    exe.handle(ExceptionType.WARNING, 'Log')
