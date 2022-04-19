@@ -7,11 +7,27 @@ class Message:
     http_body_semantic_error: str = dumps({"message": "Semantic Error in body, hence the request is not processable."})
 
     no_processing_required: str = dumps({'message': 'Current payload does not require any processing'})
+    __dash_seperator: str = '-----------------------------------------------------'
+
+    @property
+    def seperator(self, sep_type: str = 'dash') -> str:
+        """ Returns a seperator string.
+
+        Args:
+            sep_type (str): type of seperator (default=dash)
+
+        Returns: string
+
+        """
+        if sep_type == 'dash':
+            return self.__dash_seperator
+        else:
+            return self.__dash_seperator
 
 
 class Status:
     __program_error: dict = {"status_code": 500, "status": 'Internal server Error'}
 
     @property
-    def program_error(self):
+    def program_error(self) -> dict:
         return self.__program_error
