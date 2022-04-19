@@ -1,5 +1,3 @@
-import os
-
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
 from lib.data import *
@@ -256,7 +254,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error causeg while fetching tags: {res.status_code} {res.status}')
+            print(f'[E] Error causing while fetching tags: {res.status_code} {res.status}')
 
         tags: list = loads(res.data)
         for tag in tags:
