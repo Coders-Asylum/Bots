@@ -31,25 +31,14 @@ class TestGithubAPIHandler(TestCase):
                         'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
                         'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
 
-    @mock.patch('lib.handlers.ResponseHandlers.http_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    def test_download_repo_file(self, mock_func):
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_raw_data(self, mock_func):
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
         expected_file = self.g_mock_success.download_repo_file()
         file_path: str = 'custom_card_design/test/widget_test.dart'
-        _r = self.g.download_repo_file(repo_name=self.repo, owner=self.owner, file_path=file_path,
-                                       branch=self.branch)
+        _r = self.g.get_raw_data(path=file_path)
 
-        self.assertEqual(expected_file.data, _r.data)
-
-    # @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    # def test_get_git_ref(self, mock_func):
-    #     r: GithubRefObject = self.g._get_git_ref(self.owner, self.repo, self.branch)
-    #     expected_res = self.g_mock_success.getref()
-    #
-    #     expected_res_j = loads(expected_res.data)
-    #     self.assertEqual(r.url, expected_res_j['url'])
-    #     self.assertEqual(r.nodeId, expected_res_j['node_id'])
-    #     self.assertEqual(r.ref, expected_res_j['ref'])
-    #     self.assertEqual(r.obj, expected_res_j['object'])
+        self.assertEqual(expected_file.data, _r)
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_post_response', side_effect=mockedResponse.mocked_http_post_response)
     def test_post_blob(self, mock_func):  # Data that will be posted to the Github server to create a blob.
@@ -57,40 +46,6 @@ class TestGithubAPIHandler(TestCase):
         actual_blob = self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=self.g_mock_success.create_access_token())
         self.assertEqual(loads(expected_blob.data)['url'], actual_blob.url)
         self.assertEqual(loads(expected_blob.data)['sha'], actual_blob.sha)
-
-    # @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    # def test_get_latest_commit(self, mock_func):
-    #     commit = self.g._get_latest_git_commit(owner=self.owner, repo=self.repo, branch=self.branch)
-    #     expected_commit = self.g_mock_success.get_git_commit()
-    #
-    #     self.assertEqual(loads(expected_commit.data)['sha'], commit.sha)
-    #     self.assertEqual(loads(expected_commit.data)['author'], commit.author)
-    #     self.assertEqual(loads(expected_commit.data)['committer'], commit.committer)
-    #     self.assertEqual(loads(expected_commit.data)['message'], commit.message)
-    #     self.assertEqual(loads(expected_commit.data)['tree'], commit.tree)
-    #
-    # @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
-    # def test_get_tree(self, mock_func):
-    #     tree = self.g._get_tree(owner=self.owner, repo=self.repo, branch=self.branch)
-    #     expected_tree = self.g_mock_success.get_tree()
-    #     self.assertEqual(loads(expected_tree.data)['sha'], tree.sha)
-    #     self.assertEqual(loads(expected_tree.data)['url'], tree.url)
-    #     self.assertEqual(loads(expected_tree.data)['tree'], tree.tree)
-
-    # def test_update_and_post_tree(self): expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non.
-    # Vestibulum lectus mauris ultrices ' \ 'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus
-    # at. Mi in nulla ' \ 'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
-    # 9'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
-    #
-    #     tree = [GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=expected_contents)]
-    #     posted_tree = self.g.update_and_post_tree(owner=self.owner, repo=self.repo, branch=self.branch, files=tree)
-    #     actual_tree = get(url=f'https://api.github.com/repos/octocat/hello-world/git/trees/{posted_tree.sha}?recursive=1')
-    #     if actual_tree.status_code != 200:
-    #         self.fail(f'Posted tree with sha: {posted_tree.sha} failed to get due to: {actual_tree.status_code} {actual_tree.reason}')
-    #     else:
-    #         actual_tree_data = loads(actual_tree.text)['tree']
-    #         expected_tree_data = loads(posted_tree.tree)
-    #         self.assertEqual(actual_tree_data, expected_tree_data)
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
