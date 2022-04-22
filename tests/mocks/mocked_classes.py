@@ -40,6 +40,8 @@ def mocked_token() -> GithubAccessToken:
 
 
 class MockedResponseHandlers:
+    """ Returns mocked responses for testing Github rest(http) api.
+    """
     # commit files urls
     git_commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/c30dbe34699b8e7e522885bc9d2a4d9d141c9382'
     git_post_tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees'
@@ -57,31 +59,66 @@ class MockedResponseHandlers:
 
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
     gapi_unauthorized = GithubAPIMock(for_status=Status.UNAUTHORIZED)
+    gapi_res_not_found = GithubAPIMock(for_status=Status.RES_NOT_FOUND)
 
     def mocked_http_get_response(self, *args, **kwargs) -> Response:
+        """ Mocked responses for HTTP get request
+
+        - Fist args should be url or kwargs "url" and pass the api url.
+        - Second args should be for_status or kwargs "for_status" and pass Status.xxx
+
+        Args:
+            *args: list arguments
+            **kwargs: keyword arguments
+
+        Returns: HTTP api response as a Response object
+
+        """
         if args is None or len(args) == 0:
             url = kwargs['url']
         else:
             url = args[0]
 
-        if bool(match(self.git_commit_url, url)):
-            return self.gapi_success.get_git_commit()
-        elif bool(match(self.git_tree_url, url)):
-            return self.gapi_success.get_git_tree()
-        elif bool(match(self.git_ref_url, url)):
-            return self.gapi_success.get_latest_ref()
-        elif bool(match(self.file_url, url)):
-            return self.gapi_success.download_repo_file()
-        elif bool(match(self.latest_release_url, url)):
-            return self.gapi_success.get_latest_release()
-        elif bool(match(self.release_url, url)):
-            return self.gapi_success.get_latest_release(latest=False)
-        elif bool(match(self.tag_url, url)):
-            return self.gapi_success.get_tag()
-        elif bool(match(self.commit_url, url)):
-            return self.gapi_success.get_commit()
-        else:
-            return self.gapi_success.response
+        if kwargs['for_status'] is Status.SUCCESS or args[1] is Status.SUCCESS:
+
+            if bool(match(self.git_commit_url, url)):
+                return self.gapi_res_not_found.get_git_commit()
+            elif bool(match(self.git_tree_url, url)):
+                return self.gapi_res_not_found.get_git_tree()
+            elif bool(match(self.git_ref_url, url)):
+                return self.gapi_res_not_found.get_latest_ref()
+            elif bool(match(self.file_url, url)):
+                return self.gapi_res_not_found.download_repo_file()
+            elif bool(match(self.latest_release_url, url)):
+                return self.gapi_res_not_found.get_latest_release()
+            elif bool(match(self.release_url, url)):
+                return self.gapi_res_not_found.get_latest_release(latest=False)
+            elif bool(match(self.tag_url, url)):
+                return self.gapi_res_not_found.get_tag()
+            elif bool(match(self.commit_url, url)):
+                return self.gapi_res_not_found.get_commit()
+            else:
+                return self.gapi_res_not_found.response
+
+        elif kwargs['for_status'] is Status.RES_NOT_FOUND or args[1] is Status.RES_NOT_FOUND:
+            if bool(match(self.git_commit_url, url)):
+                return self.gapi_success.get_git_commit()
+            elif bool(match(self.git_tree_url, url)):
+                return self.gapi_success.get_git_tree()
+            elif bool(match(self.git_ref_url, url)):
+                return self.gapi_success.get_latest_ref()
+            elif bool(match(self.file_url, url)):
+                return self.gapi_success.download_repo_file()
+            elif bool(match(self.latest_release_url, url)):
+                return self.gapi_success.get_latest_release()
+            elif bool(match(self.release_url, url)):
+                return self.gapi_success.get_latest_release(latest=False)
+            elif bool(match(self.tag_url, url)):
+                return self.gapi_success.get_tag()
+            elif bool(match(self.commit_url, url)):
+                return self.gapi_success.get_commit()
+            else:
+                return self.gapi_success.response
 
     def mocked_http_post_response(self, *args, **kwargs):
         url: str
@@ -151,7 +188,7 @@ class MockedGithubAPIHandler:
     def commit_files(self, *args, **kwargs) -> GithubRefObject:
         return GithubRefObject(data=self.g_api_mock.get_latest_ref().data)
 
-    def get_raw_data(self,*args, **kwargs) -> str:
+    def get_raw_data(self, *args, **kwargs) -> str:
         return self.g_api_mock.get_raw_data()
 
 

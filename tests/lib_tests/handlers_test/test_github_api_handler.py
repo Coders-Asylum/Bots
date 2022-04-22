@@ -12,7 +12,40 @@ from tests.mocks.mocked_classes import MockedResponseHandlers, mocked_token
 from tests.mocks.github_api_mocks import GithubAPIMock, Status
 
 
+class TestGithubAPIHandler4xxFailed(TestCase):
+    """ Tests for implemented APIs HTTP responses returning as resource not found or failed (4xx errors)
+    """
+    mockedResponse: MockedResponseHandlers = MockedResponseHandlers()
+
+    owner = 'Coders-Asylum'
+    repo = 'fuzzy-train'
+    branch = 'test_branch'
+    test_token: str = 'ghs_BWpGokQJ7kJe4vWWir7xLgN6ciyA7e0fDka8'
+
+    g: GithubAPIHandler = GithubAPIHandler(owner=owner, repo=repo, branch=branch)
+    g_mock_success: GithubAPIMock = GithubAPIMock(for_status=Status.RES_NOT_FOUND)
+
+    header: CaseInsensitiveDict = CaseInsensitiveDict()
+    header['Accept'] = 'application/vnd.github.v3+json'
+
+    expected_contents = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
+                        'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
+                        'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
+                        'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_raw_data_404_error(self, mock_func):
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+        expected_file = self.g_mock_success.download_repo_file()
+        file_path: str = 'custom_card_design/test/widget_test.dart'
+        _r = self.g.get_raw_data(path=file_path)
+
+        self.assertEqual(expected_file.data, _r)
+
+
 class TestGithubAPIHandler(TestCase):
+    """ Tests for implemented APIs HTTP responses returning as successful
+    """
     mockedResponse: MockedResponseHandlers = MockedResponseHandlers()
 
     owner = 'Coders-Asylum'
