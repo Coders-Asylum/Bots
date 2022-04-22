@@ -88,7 +88,7 @@ class GithubAPIHandler:
         url: str = f'https://raw.githubusercontent.com/{self.owner}/{self.repo}/{self.branch}/{path}'
         _r: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if _r.status_code != 200:
-            print(f'[E] Error while getting file contents: {_r.status_code} {_r.status} {_r.data}')
+            raise GithubApiException(msg='Error while getting file contents', api='get_raw_data', response=_r, error_type=ExceptionType.ERROR)
         return _r.data
 
     @staticmethod
