@@ -122,7 +122,7 @@ class GithubAPIHandler:
 
         _r: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=_data)
         if _r.status_code != 201:
-            print(f'Blob not posted: {_r.status_code} {_r.status}')
+            raise GithubApiException(msg='Blob not posted.', response=_r, error_type=ExceptionType.ERROR, api='post_blob')
 
         return GithubBlob(data=_r.data)
 
