@@ -120,7 +120,7 @@ class MockedResponseHandlers:
         elif bool(match(self.git_ref_url, url)):
             return self.gapi_res_not_found.get_latest_ref()
         elif bool(match(self.file_url, url)):
-            return self.gapi_res_not_found.download_repo_file()
+            return self.gapi_res_not_found.get_raw_data()
         elif bool(match(self.latest_release_url, url)):
             return self.gapi_res_not_found.get_latest_release()
         elif bool(match(self.release_url, url)):
