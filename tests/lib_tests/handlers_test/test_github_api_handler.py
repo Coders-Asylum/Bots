@@ -35,12 +35,10 @@ class TestGithubAPIHandler4xxFailed(TestCase):
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     def test_get_raw_data_404_error(self, mock_func):
-        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
-        expected_file = self.g_mock_success.download_repo_file()
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_res_found_response
         file_path: str = 'custom_card_design/test/widget_test.dart'
-        _r = self.g.get_raw_data(path=file_path)
-
-        self.assertEqual(expected_file.data, _r)
+        with self.assertRaises(expected_exception=GithubApiException) as api_exception:
+            _r = self.g.get_raw_data(path=file_path)
 
 
 class TestGithubAPIHandler(TestCase):

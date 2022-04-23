@@ -79,46 +79,58 @@ class MockedResponseHandlers:
         else:
             url = args[0]
 
-        if kwargs['for_status'] is Status.SUCCESS or args[1] is Status.SUCCESS:
+        if bool(match(self.git_commit_url, url)):
+            return self.gapi_success.get_git_commit()
+        elif bool(match(self.git_tree_url, url)):
+            return self.gapi_success.get_git_tree()
+        elif bool(match(self.git_ref_url, url)):
+            return self.gapi_success.get_latest_ref()
+        elif bool(match(self.file_url, url)):
+            return self.gapi_success.download_repo_file()
+        elif bool(match(self.latest_release_url, url)):
+            return self.gapi_success.get_latest_release()
+        elif bool(match(self.release_url, url)):
+            return self.gapi_success.get_latest_release(latest=False)
+        elif bool(match(self.tag_url, url)):
+            return self.gapi_success.get_tag()
+        elif bool(match(self.commit_url, url)):
+            return self.gapi_success.get_commit()
+        else:
+            return self.gapi_success.response
 
-            if bool(match(self.git_commit_url, url)):
-                return self.gapi_res_not_found.get_git_commit()
-            elif bool(match(self.git_tree_url, url)):
-                return self.gapi_res_not_found.get_git_tree()
-            elif bool(match(self.git_ref_url, url)):
-                return self.gapi_res_not_found.get_latest_ref()
-            elif bool(match(self.file_url, url)):
-                return self.gapi_res_not_found.download_repo_file()
-            elif bool(match(self.latest_release_url, url)):
-                return self.gapi_res_not_found.get_latest_release()
-            elif bool(match(self.release_url, url)):
-                return self.gapi_res_not_found.get_latest_release(latest=False)
-            elif bool(match(self.tag_url, url)):
-                return self.gapi_res_not_found.get_tag()
-            elif bool(match(self.commit_url, url)):
-                return self.gapi_res_not_found.get_commit()
-            else:
-                return self.gapi_res_not_found.response
+    def mocked_http_get_res_found_response(self, *args, **kwargs) -> Response:
+        """ Mocked responses for HTTP get request with 404 error code
 
-        elif kwargs['for_status'] is Status.RES_NOT_FOUND or args[1] is Status.RES_NOT_FOUND:
-            if bool(match(self.git_commit_url, url)):
-                return self.gapi_success.get_git_commit()
-            elif bool(match(self.git_tree_url, url)):
-                return self.gapi_success.get_git_tree()
-            elif bool(match(self.git_ref_url, url)):
-                return self.gapi_success.get_latest_ref()
-            elif bool(match(self.file_url, url)):
-                return self.gapi_success.download_repo_file()
-            elif bool(match(self.latest_release_url, url)):
-                return self.gapi_success.get_latest_release()
-            elif bool(match(self.release_url, url)):
-                return self.gapi_success.get_latest_release(latest=False)
-            elif bool(match(self.tag_url, url)):
-                return self.gapi_success.get_tag()
-            elif bool(match(self.commit_url, url)):
-                return self.gapi_success.get_commit()
-            else:
-                return self.gapi_success.response
+        Args:
+            *args: list arguments
+            **kwargs: keyword arguments
+
+        Returns: HTTP api response as a Response object
+
+        """
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+        else:
+            url = args[0]
+
+        if bool(match(self.git_commit_url, url)):
+            return self.gapi_res_not_found.get_git_commit()
+        elif bool(match(self.git_tree_url, url)):
+            return self.gapi_res_not_found.get_git_tree()
+        elif bool(match(self.git_ref_url, url)):
+            return self.gapi_res_not_found.get_latest_ref()
+        elif bool(match(self.file_url, url)):
+            return self.gapi_res_not_found.download_repo_file()
+        elif bool(match(self.latest_release_url, url)):
+            return self.gapi_res_not_found.get_latest_release()
+        elif bool(match(self.release_url, url)):
+            return self.gapi_res_not_found.get_latest_release(latest=False)
+        elif bool(match(self.tag_url, url)):
+            return self.gapi_res_not_found.get_tag()
+        elif bool(match(self.commit_url, url)):
+            return self.gapi_res_not_found.get_commit()
+        else:
+            return self.gapi_res_not_found.response
 
     def mocked_http_post_response(self, *args, **kwargs):
         url: str
