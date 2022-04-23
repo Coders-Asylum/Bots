@@ -23,7 +23,7 @@ class TestGithubAPIHandler4xxFailed(TestCase):
     test_token: str = 'ghs_BWpGokQJ7kJe4vWWir7xLgN6ciyA7e0fDka8'
 
     g: GithubAPIHandler = GithubAPIHandler(owner=owner, repo=repo, branch=branch)
-    g_mock_success: GithubAPIMock = GithubAPIMock(for_status=Status.RES_NOT_FOUND)
+    g_mock_res_not_found: GithubAPIMock = GithubAPIMock(for_status=Status.RES_NOT_FOUND)
 
     header: CaseInsensitiveDict = CaseInsensitiveDict()
     header['Accept'] = 'application/vnd.github.v3+json'
@@ -35,10 +35,14 @@ class TestGithubAPIHandler4xxFailed(TestCase):
 
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     def test_get_raw_data_404_error(self, mock_func):
+        _expected_msg: str = 'ERROR:root:Error while getting file contents\nResponse data from get_raw_data api: \n\t404 Resource not found\n\tNot found\n-----------------------------------------------------'
         mock_func.side_effect = self.mockedResponse.mocked_http_get_res_found_response
         file_path: str = 'custom_card_design/test/widget_test.dart'
         with self.assertRaises(expected_exception=GithubApiException) as api_exception:
             _r = self.g.get_raw_data(path=file_path)
+        self.assertEqual(api_exception.exception.response.data, self.g_mock_res_not_found.get_raw_data().data)
+        self.assertEqual(api_exception.exception.response.status, self.g_mock_res_not_found.get_raw_data().status)
+        self.assertEqual(api_exception.exception.response.status_code, self.g_mock_res_not_found.get_raw_data().status_code)
 
 
 class TestGithubAPIHandler(TestCase):
