@@ -133,6 +133,15 @@ class MockedResponseHandlers:
             return self.gapi_res_not_found.response
 
     def mocked_http_post_response(self, *args, **kwargs):
+        """ Mocked responses for HTTP post request.
+
+                Args:
+                    *args: list arguments
+                    **kwargs: keyword arguments
+
+                Returns: HTTP api response as a Response object
+
+                """
         url: str
         data: str
         headers: CaseInsensitiveDict
@@ -156,6 +165,39 @@ class MockedResponseHandlers:
             return self.gapi_success.post_git_commit()
         else:
             return self.gapi_success.response
+
+    def mocked_http_post_res_not_response(self, *args, **kwargs):
+        """ Mocked responses for HTTP post request with 404 error code
+
+               Args:
+                   *args: list arguments
+                   **kwargs: keyword arguments
+
+               Returns: HTTP api response as a Response object
+        """
+        url: str
+        data: str
+        headers: CaseInsensitiveDict
+
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+            data = kwargs['data']
+            headers = kwargs['headers']
+        else:
+            url = args[0]
+            headers = args[1]
+            data = args[2]
+
+        if bool(match(self.blob_post_url, url)):
+            return self.gapi_res_not_found.post_blob()
+        elif bool(match(self.workflow_trigger_url, url)):
+            return self.gapi_res_not_found.trigger_workflow()
+        elif bool(match(self.git_post_tree_url, url)):
+            return self.gapi_res_not_found.post_git_tree()
+        elif bool(match(self.git_post_commit_url, url)):
+            return self.gapi_res_not_found.post_git_commit()
+        else:
+            return self.gapi_res_not_found.response
 
     def mocked_http_patch_response(self, *args, **kwargs):
         url: str
