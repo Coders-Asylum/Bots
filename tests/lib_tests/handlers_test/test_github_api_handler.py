@@ -44,6 +44,17 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         self.assertEqual(api_exception.exception.response.status, self.g_mock_res_not_found.get_raw_data().status)
         self.assertEqual(api_exception.exception.response.status_code, self.g_mock_res_not_found.get_raw_data().status_code)
 
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    def test_post_blob(self, mock_func):  # Data that will be posted to the Github server to create a blob.
+        mock_func.side_effect = self.mockedResponse.mocked_http_post_res_not_response
+        expected_blob: Response = self.g_mock_res_not_found.post_blob()
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=mocked_token())
+
+        self.assertEqual(api_exception.exception.response.data, expected_blob.data)
+        self.assertEqual(api_exception.exception.response.status, expected_blob.status)
+        self.assertEqual(api_exception.exception.response.status_code, expected_blob.status_code)
+
 
 class TestGithubAPIHandler(TestCase):
     """ Tests for implemented APIs HTTP responses returning as successful
@@ -75,10 +86,11 @@ class TestGithubAPIHandler(TestCase):
 
         self.assertEqual(expected_file.data, _r)
 
-    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response', side_effect=mockedResponse.mocked_http_post_response)
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
     def test_post_blob(self, mock_func):  # Data that will be posted to the Github server to create a blob.
+        mock_func.side_effect = self.mockedResponse.mocked_http_post_response
         expected_blob: Response = self.g_mock_success.post_blob()
-        actual_blob = self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=self.g_mock_success.create_access_token())
+        actual_blob = self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=mocked_token())
         self.assertEqual(loads(expected_blob.data)['url'], actual_blob.url)
         self.assertEqual(loads(expected_blob.data)['sha'], actual_blob.sha)
 
