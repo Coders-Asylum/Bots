@@ -197,8 +197,10 @@ class TestGithubAPIHandler(TestCase):
         self.assertEqual(actual.obj, expected_ref['object'])
         self.assertEqual(actual.nodeId, expected_ref['node_id'])
 
-    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response', side_effect=mockedResponse.mocked_http_get_response)
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     def test_get_latest_release(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
         expected_data = loads(self.g_mock_success.get_latest_release().data)
         actual_release: list[GithubRelease] = self.g.get_release()
         self.assertEqual(actual_release[0].pre_release, expected_data['prerelease'])
