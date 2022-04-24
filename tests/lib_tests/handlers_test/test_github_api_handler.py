@@ -144,6 +144,23 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         self.assertEqual(api_exception.exception.response.status_code, expected_data.status_code)
         self.assertEqual(api_exception.exception.response.status, expected_data.status)
 
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    def test_trigger_workflow(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_post_res_not_response
+
+        # setting a mock token
+        self.g.set_token(access_tkn=mocked_token())
+        expected_data = self.g_mock_res_not_found.trigger_workflow()
+
+        inputs: dict = {"name": "test"}
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.trigger_workflow(name='manual.yml', ref="main", inputs=inputs)
+
+        self.assertEqual(api_exception.exception.response.data, expected_data.data)
+        self.assertEqual(api_exception.exception.response.status_code, expected_data.status_code)
+        self.assertEqual(api_exception.exception.response.status, expected_data.status)
+
 
 class TestGithubAPIHandler(TestCase):
     """ Tests for implemented APIs HTTP responses returning as successful
