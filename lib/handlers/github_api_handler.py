@@ -93,19 +93,6 @@ class GithubAPIHandler:
             raise GithubApiException(msg='Error while getting file contents', api='get_raw_data', response=_r, error_type=ExceptionType.ERROR)
         return _r.data
 
-    @staticmethod
-    def download_repo_file(repo_name: str, owner: str, file_path: str, branch: str = 'master'):
-        """ Downloads file from GitHub repository
-        :param repo_name: Name of repository where the file is located
-        :param owner: Name of organization or User of the repository
-        :param file_path: path of the file from the home root directory with / and file extension as it is
-        :param branch: Repository branch from which the file must be fetched, is defaulted to 'master'
-        :return: File contents as string
-        """
-        url: str = f'https://raw.githubusercontent.com/{owner}/{repo_name}/{branch}/{file_path}'
-        _r: Response = ResponseHandlers.http_get_response(url)
-        return _r
-
     def post_blob(self, owner: str, repo: str, data: str, access_token: GithubAccessToken):
         """
 
