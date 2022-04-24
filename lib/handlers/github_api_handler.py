@@ -170,7 +170,7 @@ class GithubAPIHandler:
         # recursive=1 at the end of the tree url helps to get tree objects for all the files with any depth in the repo.
         _r = ResponseHandlers.curl_get_response(url=_commit.tree['url'] + '?recursive=1', headers=self._header)
         if _r.status_code != 200:
-            raise GithubApiException(msg=f'Error while getting git tree for: {_commit.tree["url"]}', api='commit_files', response=_r)
+            raise GithubApiException(msg=f'Error while getting git tree for: {_commit.tree["url"]}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         _git_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
         # update and post tree
@@ -187,14 +187,14 @@ class GithubAPIHandler:
         _posting_tree: dict = {"owner": self.owner, "repo": self.repo, "tree": tree, "base_tree": base_tree}
         _r = ResponseHandlers.curl_post_response(url=post_tree_url, headers=self._header, data=dumps(_posting_tree))
         if _r.status_code != 201:
-            print(f'Tree was not able to be updated because: {_r.status_code} {_r.status} {_r.data}')
+            raise GithubApiException(msg=f'Error while posting new git tree. url: {post_tree_url}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         _posted_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
         # commit new tree
         commit_data = {"owner": self.owner, "repo": self.repo, "message": message, "tree": _posted_tree.sha, "parents": [self._latest_commit_sha]}
         _r = ResponseHandlers.curl_post_response(url=commit_url, headers=self._header, data=dumps(commit_data))
         if _r.status_code != 201:
-            print(f'Files were not able to be committed due to:{_r.status_code} {_r.status} {_r.data}')
+            raise GithubApiException(msg=f'Error while committing . url: {commit_url}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         _commit: GitCommit = GitCommit(data=_r.data)
 
         # update branch ref
