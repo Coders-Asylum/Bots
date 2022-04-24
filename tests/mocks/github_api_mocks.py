@@ -312,9 +312,9 @@ class GithubAPIMock:
         return self.response
 
     def post_git_tree(self):
-        self.response.status_code = self.created['status']
-        self.response.status = self.created['msg']
         if self.for_status is Status.SUCCESS:
+            self.response.status_code = self.created['status']
+            self.response.status = self.created['msg']
             self.response.data = dumps(
                 {"sha": "47b01c17a28529cd72f150f403022fc46d061452", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452",
                  "tree": [{"path": ".circleci", "mode": "040000", "type": "tree", "sha": "4aa50b2cb143654823f1f81c68a0d0deb06e8c80", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4aa50b2cb143654823f1f81c68a0d0deb06e8c80"},
@@ -330,6 +330,13 @@ class GithubAPIMock:
                 "message": "Bad credentials",
                 "documentation_url": "https://docs.github.com/rest"
             })
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/git#create-a-tree"
+                }
+            )
         else:
             self.response.data = '404: Not Found'
         return self.response
