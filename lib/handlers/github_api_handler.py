@@ -201,7 +201,7 @@ class GithubAPIHandler:
         _ref: dict = {"sha": _commit.sha}
         _r: Response = ResponseHandlers.http_patch(url=ref_url, headers=self._header, data=dumps(_ref))
         if _r.status_code != 200:
-            print(f'[E] Error while updating ref: {_r.status_code} {_r.status} ')
+            raise GithubApiException(msg=f'Error while updating ref. url: {ref_url}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         return GithubRefObject(data=_r.data)
 
     def get_release(self, latest: bool = True) -> list[GithubRelease]:

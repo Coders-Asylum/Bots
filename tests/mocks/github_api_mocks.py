@@ -381,9 +381,9 @@ class GithubAPIMock:
         return self.response
 
     def patch_git_ref(self):
-        self.response.status = self.success['msg']
-        self.response.status_code = self.success['status']
         if self.for_status is Status.SUCCESS:
+            self.response.status = self.success['msg']
+            self.response.status_code = self.success['status']
             self.response.data = dumps(
                 {
                     "ref": "refs/heads/test_branch",
@@ -398,6 +398,7 @@ class GithubAPIMock:
 
             )
         elif self.for_status is Status.RES_NOT_FOUND:
+            self.status()
             self.response.data = dumps(
                 {
                     "message": "Not Found",
