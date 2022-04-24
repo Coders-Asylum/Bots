@@ -220,7 +220,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error caused while getting release: {res.status_code} {res.status}')
+            raise GithubApiException(msg=f'Error while getting latest release: url = {url}', api='get_release', error_type=ExceptionType.ERROR, response=res)
 
         if latest:
             return [GithubRelease(data=res.data)]
@@ -252,7 +252,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(data))
         if res.status_code != 204:
-            print(f'[E] Error caused while running workflow: {res.status_code} {res.status}')
+            raise GithubApiException(msg=f'Error while triggering workflow: url = {url}', api='trigger_workflow', error_type=ExceptionType.ERROR, response=res)
 
         return res
 
@@ -286,7 +286,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error caused in getting commit: {res.status_code} {res.status} ')
+            raise GithubApiException(msg=f'Error while getting commit: url = {url}', api='get_commit', error_type=ExceptionType.ERROR, response=res)
 
         return GithubCommit(data=res.data)
 
@@ -319,7 +319,7 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_get_response(url, self.headers)
         if res.status_code != 200:
-            print(f'App installation was not received: {res.status_code} {res.status} {res.data}')
+            raise GithubAppApiException(msg='Couldn\'t get app installation', response=res, error_type=ExceptionType.ERROR, api='get_app_installations')
 
         _data: list = loads(res.data)
         for d in _data:
@@ -353,7 +353,7 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
         if res.status_code != 201:
-            print(f'[E] Token was not created: {res.status_code} {res.for_status}: {res.data}')
+            raise GithubAppApiException(msg='Unable to create a access token', response=res, error_type=ExceptionType.ERROR, api='create_access_token')
         return GithubAccessToken(data=res.data)
 
 
