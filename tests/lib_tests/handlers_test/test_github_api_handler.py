@@ -78,13 +78,32 @@ class TestGithubAPIHandler4xxFailed(TestCase):
     @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
     @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
     @mock.patch('lib.handlers.ResponseHandlers.http_patch')
-    def test_commit_files_access_token_not_set(self, mock_patch, mock_post, mock_get):
+    def test_commit_files_get_request_failed(self, mock_patch, mock_post, mock_get):
         # mocks
         mock_get.side_effect = self.mockedResponse.mocked_http_get_res_found_response
         mock_post.side_effect = self.mockedResponse.mocked_http_post_response
         mock_patch.side_effect = self.mockedResponse.mocked_http_patch_response
 
         expected_res = self.g_mock_res_not_found.get_latest_ref()
+
+        file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=self.expected_contents)
+        self.g.set_token(access_tkn=mocked_token())
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.commit_files(files=[file], message='New test file')
+
+        self.assertEqual(api_exception.exception.response.status, expected_res.status)
+        self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    @mock.patch('lib.handlers.ResponseHandlers.http_patch')
+    def test_commit_files_post_request_failed(self, mock_patch, mock_post, mock_get):
+        # mocks
+        mock_get.side_effect = self.mockedResponse.mocked_http_get_response
+        mock_post.side_effect = self.mockedResponse.mocked_http_post_res_not_response
+        mock_patch.side_effect = self.mockedResponse.mocked_http_patch_response
+
+        expected_res = self.g_mock_res_not_found.post_git_tree()
 
         file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=self.expected_contents)
         self.g.set_token(access_tkn=mocked_token())
