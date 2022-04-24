@@ -217,6 +217,24 @@ class MockedResponseHandlers:
         else:
             return self.gapi_success.response
 
+    def mocked_http_patch_res_not_found_response(self, *args, **kwargs):
+        url: str
+        data: str
+        headers: CaseInsensitiveDict
+
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+            data = kwargs['data']
+            headers = kwargs['headers']
+        else:
+            url = args[0]
+            headers = args[1]
+            data = args[2]
+        if bool(match(self.git_ref_url, url)):
+            return self.gapi_res_not_found.patch_git_ref()
+        else:
+            return self.gapi_res_not_found.response
+
 
 class MockedGithubAPIHandler:
     g_api_mock: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
