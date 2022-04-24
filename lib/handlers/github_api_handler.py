@@ -248,7 +248,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error causing while fetching tags: {res.status_code} {res.status}')
+            raise GithubApiException(msg=f'Unable to fetch tags. url: {url}', response=res, api='get_tag', error_type=ExceptionType.ERROR)
 
         tags: list = loads(res.data)
         for tag in tags:
