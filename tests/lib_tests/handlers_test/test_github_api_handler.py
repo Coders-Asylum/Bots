@@ -176,6 +176,21 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
         self.assertEqual(api_exception.exception.response.status, expected_res.status)
 
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_commit(self, mock_func):
+        sha: str = '10f68682850d598a90ed6f5ea237f5b140a5f4f3'
+        # mock
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_res_found_response
+
+        expected_res = self.g_mock_res_not_found.get_commit()
+
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.get_commit(sha=sha)
+
+        self.assertEqual(api_exception.exception.response.data, expected_res.data)
+        self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
+        self.assertEqual(api_exception.exception.response.status, expected_res.status)
+
 
 class TestGithubAPIHandler(TestCase):
     """ Tests for implemented APIs HTTP responses returning as successful
