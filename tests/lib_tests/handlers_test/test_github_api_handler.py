@@ -1,6 +1,7 @@
 from json import loads, dumps
 from unittest import TestCase, main, mock
 from requests.structures import CaseInsensitiveDict
+from lib.data.constants import Status as internal_status
 from lib.data import *
 from lib.handlers import *
 
@@ -24,6 +25,8 @@ class TestGithubAPIHandler4xxFailed(TestCase):
 
     g: GithubAPIHandler = GithubAPIHandler(owner=owner, repo=repo, branch=branch)
     g_mock_res_not_found: GithubAPIMock = GithubAPIMock(for_status=Status.RES_NOT_FOUND)
+    g_mock_success: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+    __internal_status = internal_status()
 
     header: CaseInsensitiveDict = CaseInsensitiveDict()
     header['Accept'] = 'application/vnd.github.v3+json'
@@ -54,6 +57,23 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         self.assertEqual(api_exception.exception.response.data, expected_blob.data)
         self.assertEqual(api_exception.exception.response.status, expected_blob.status)
         self.assertEqual(api_exception.exception.response.status_code, expected_blob.status_code)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    @mock.patch('lib.handlers.ResponseHandlers.http_patch')
+    def test_commit_files_access_token_not_set(self, mock_patch, mock_post, mock_get):
+        # mocks
+        mock_get.side_effect = self.mockedResponse.mocked_http_get_response
+        mock_post.side_effect = self.mockedResponse.mocked_http_post_response
+        mock_patch.side_effect = self.mockedResponse.mocked_http_patch_response
+
+        file: GitTree = GitTree(path='custom_card_design/test/change_file_test.txt', tree_type=TreeType.BLOB, content=self.expected_contents)
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.commit_files(files=[file], message='New test file')
+
+        self.assertEqual(api_exception.exception.response.status, self.__internal_status.program_error['status'])
+        self.assertEqual(api_exception.exception.response.status_code, self.__internal_status.program_error['status_code'])
+        self.assertEqual(api_exception.exception.response.data, '{message: API Token Not Set}')
 
 
 class TestGithubAPIHandler(TestCase):
