@@ -156,13 +156,13 @@ class GithubAPIHandler:
         # get branch ref
         _r: Response = ResponseHandlers.curl_get_response(url=ref_url, headers=self._header)
         if _r.status_code != 200:
-            print(f'Error in fetching data: {_r.status_code} {_r.status}')
+            raise GithubApiException(msg=f'Error while getting latest git ref for {ref_url}', api='commit_files', error_type=ExceptionType.ERROR, response=_r)
         _ref: GithubRefObject = GithubRefObject(data=_r.data)
 
         # get and store the latest git commit object from ref
         _r = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=self._header)
         if _r.status_code != 200:
-            print('Error: was not able to get commit object')
+            raise GithubApiException(msg=f'Error while getting git commit object for {_ref.obj["url"]}', api='commit_files', error_type=ExceptionType.ERROR, response=_r)
         _commit: GitCommit = GitCommit(data=_r.data)
         self._latest_commit_sha = _commit.sha
 
@@ -170,7 +170,7 @@ class GithubAPIHandler:
         # recursive=1 at the end of the tree url helps to get tree objects for all the files with any depth in the repo.
         _r = ResponseHandlers.curl_get_response(url=_commit.tree['url'] + '?recursive=1', headers=self._header)
         if _r.status_code != 200:
-            print('Error: was not able to get tree object')
+            raise GithubApiException(msg=f'Error while getting git tree for: {_commit.tree["url"]}', api='commit_files', response=_r)
         _git_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
         # update and post tree
