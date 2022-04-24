@@ -1,3 +1,4 @@
+from lib.data.constants import Status
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
 from lib.data import *
@@ -57,13 +58,14 @@ class GithubAPIHandler:
     owner: str
     branch: str
     repo: str
-    __access_token: GithubAccessToken
+    __access_token: GithubAccessToken = None
 
     def __init__(self, owner: str, repo: str, branch: str):
         self._header['Accept'] = 'application/vnd.github.v3+json'
         self.branch = branch
         self.owner = owner
         self.repo = repo
+        self.__internal_status = Status()
 
     def set_token(self, access_tkn: GithubAccessToken) -> None:
         """Sets new token
@@ -143,7 +145,12 @@ class GithubAPIHandler:
 
         # exception raised if access token not set.
         if self.__access_token is None:
-            raise Exception('[E] Access token not found, use set_token to set the token and then proceed')
+            raise GithubApiException(
+                msg='Access token not found, use set_token function to set the token and then proceed',
+                error_type=ExceptionType.ERROR,
+                response=Response(status_code=self.__internal_status.program_error['status_code'], status=self.__internal_status.program_error['status'], data='{message: API Token Not Set}'),
+                api='commit_files'
+            )
         self._header['Authorization'] = f'token {self.__access_token.access_tkn}'
 
         # get branch ref
