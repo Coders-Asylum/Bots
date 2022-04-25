@@ -56,6 +56,7 @@ class MockedResponseHandlers:
     workflow_trigger_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/actions\/workflows\/\w+.yml\/dispatches'
     tag_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/tags'
     commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/commits\/10f68682850d598a90ed6f5ea237f5b140a5f4f3'
+    milestone_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/milestones'
 
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
     gapi_unauthorized = GithubAPIMock(for_status=Status.UNAUTHORIZED)
@@ -95,6 +96,8 @@ class MockedResponseHandlers:
             return self.gapi_success.get_tag()
         elif bool(match(self.commit_url, url)):
             return self.gapi_success.get_commit()
+        elif bool(match(self.milestone_url, url)):
+            return self.gapi_success.get_milestone()
         else:
             return self.gapi_success.response
 
@@ -129,6 +132,8 @@ class MockedResponseHandlers:
             return self.gapi_res_not_found.get_tag()
         elif bool(match(self.commit_url, url)):
             return self.gapi_res_not_found.get_commit()
+        elif bool(match(self.milestone_url, url)):
+            return self.gapi_res_not_found.get_milestone()
         else:
             return self.gapi_res_not_found.response
 
