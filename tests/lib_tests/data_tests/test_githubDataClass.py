@@ -47,5 +47,17 @@ class GithubCommit_tests(TestCase):
         self.assertEqual(actual.files, self.expected_commit['files'])
 
 
+class GithubMilestone_tests(TestCase):
+    g_api_mock: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+    expected_milestone = loads(g_api_mock.get_milestone().data)
+
+    def test_data_class(self):
+        actual: GithubMilestone = GithubMilestone(data=self.expected_milestone[0])
+
+        self.assertEqual(actual.name, self.expected_milestone[0]['title'])
+        self.assertEqual(actual.id, self.expected_milestone[0]['id'])
+        self.assertEqual(actual.number, self.expected_milestone[0]['number'])
+
+
 if __name__ == "__main__":
     main()
