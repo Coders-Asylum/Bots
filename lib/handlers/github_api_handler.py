@@ -1,3 +1,6 @@
+import logging
+from typing import Union
+
 from lib.data.constants import Status
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
@@ -276,6 +279,34 @@ class GithubAPIHandler:
             raise GithubApiException(msg=f'Error while getting commit: url = {url}', api='get_commit', error_type=ExceptionType.ERROR, response=res)
 
         return GithubCommit(data=res.data)
+
+    def get_milestone(self, name: str) -> Union[GithubMilestone, None]:
+        """ Gets the milestone details for the given milestone name.
+
+        **Note: implement exception handler because GithubApiException is raised for Error type warning to log this.**
+
+        Args:
+            name (str): Milestone name
+
+        Returns (GithubMilestone): GithubMilestone object or None is returned of milestone is not present for the repo.
+
+        """
+
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/milestones'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            raise GithubApiException(msg=f'Unable to get milestone/s for url={url}', api='get_milestone', response=res, error_type=ExceptionType.ERROR)
+
+        milestones: list[dict] = loads(res.data)
+
+        for milestone in milestones:
+            if milestone['title'] == name:
+                return GithubMilestone(milestone)
+
+        # logs warning message since the passed milestone is not found.
+        logging.warning(f'Milestone {name} was not found in repo {self.owner}/{self.repo}. url: {url}.')
+        return None
 
 
 class GithubAppApi:
