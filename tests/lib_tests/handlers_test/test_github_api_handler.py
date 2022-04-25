@@ -191,6 +191,19 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
         self.assertEqual(api_exception.exception.response.status, expected_res.status)
 
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_milestone_404_error(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_res_found_response
+        expected_res = self.g_mock_res_not_found.get_milestone()
+
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.get_milestone(name='v1.0')
+
+        self.assertEqual(api_exception.exception.response.data, expected_res.data)
+        self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
+        self.assertEqual(api_exception.exception.response.status, expected_res.status)
+
 
 class TestGithubAPIHandler(TestCase):
     """ Tests for implemented APIs HTTP responses returning as successful
@@ -340,6 +353,27 @@ class TestGithubAPIHandler(TestCase):
         self.assertEqual(expected_commit['sha'], actual_commit.sha)
         self.assertEqual(expected_commit['parents'], actual_commit.parents)
         self.assertEqual(expected_commit['files'], actual_commit.files)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_milestone(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+
+        expected_milestone = loads(self.g_mock_success.get_milestone().data)[0]
+
+        actual_milestone: GithubMilestone = self.g.get_milestone(name='v1.0')
+
+        self.assertEqual(actual_milestone.name, expected_milestone['title'])
+        self.assertEqual(actual_milestone.number, expected_milestone['number'])
+        self.assertEqual(actual_milestone.id, expected_milestone['id'])
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_get_response')
+    def test_get_milestone_returns_none(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_get_response
+        actual_milestone: GithubMilestone = self.g.get_milestone(name='non_existing_milestone')
+
+        self.assertIsNone(actual_milestone)
 
 
 class TestAccessTokenPermission(TestCase):
