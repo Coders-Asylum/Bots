@@ -308,6 +308,37 @@ class GithubAPIHandler:
         logging.warning(f'Milestone {name} was not found in repo {self.owner}/{self.repo}. url: {url}.')
         return None
 
+    def create_issue(self, title: str, body: str, milestone: str = None, assignees: list[str] = None, labels: list[str] = None) -> GithubIssue:
+        """ Creates an issue in the given repo.
+
+        Args:
+            title (str): Title of the issue.
+            body (str): Body if the issue.
+            milestone (str): Milestone name to be added to the issue.
+            assignees (list[str]): List of usernames of  users that the issue has to be assigned.
+            labels (list[str]): List of labels that has to be assigned to the issue.
+
+        Returns:
+
+        """
+
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/issues'
+        if milestone is not None:
+            milestone: GithubMilestone = self.get_milestone(name=milestone)
+            payload: dict = {"title": title, "body": body, "milestone": milestone.number, "assignees": assignees, "labels": labels}
+        else:
+            payload = {"title": title, "body": body, "milestone": None, "assignees": assignees, "labels": labels}
+
+        filtered = {k: v for k, v in payload.items() if v is not None}
+        payload.clear()
+        payload.update(filtered)
+
+        res: Response = ResponseHandlers.curl_post_response(url=url, data=dumps(payload), headers=self._header)
+        if res.status_code != 201:
+            raise GithubApiException(msg='Unable to raise issue.', api='create_issue', response=res, error_type=ExceptionType.ERROR)
+
+        return GithubIssue(data=res.data)
+
 
 class GithubAppApi:
     """
