@@ -59,5 +59,19 @@ class GithubMilestone_tests(TestCase):
         self.assertEqual(actual.number, self.expected_milestone[0]['number'])
 
 
+class GithubIssue_tests(TestCase):
+    g_api_mock: GithubAPIMock = GithubAPIMock(for_status=Status.SUCCESS)
+    expected_issue = loads(g_api_mock.create_issue().data)
+
+    def test_data_class(self):
+        actual: GithubIssue = GithubIssue(data=self.g_api_mock.create_issue().data)
+
+        self.assertEqual(actual.id, self.expected_issue['id'])
+        self.assertEqual(actual.url, self.expected_issue['url'])
+        self.assertEqual(actual.number, self.expected_issue['number'])
+        self.assertEqual(actual.state, self.expected_issue['state'])
+        self.assertEqual(actual.title, self.expected_issue['title'])
+
+
 if __name__ == "__main__":
     main()

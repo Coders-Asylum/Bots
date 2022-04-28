@@ -57,6 +57,7 @@ class MockedResponseHandlers:
     tag_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/tags'
     commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/commits\/10f68682850d598a90ed6f5ea237f5b140a5f4f3'
     milestone_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/milestones'
+    create_issue_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/issues'
 
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
     gapi_unauthorized = GithubAPIMock(for_status=Status.UNAUTHORIZED)
@@ -168,6 +169,8 @@ class MockedResponseHandlers:
             return self.gapi_success.post_git_tree()
         elif bool(match(self.git_post_commit_url, url)):
             return self.gapi_success.post_git_commit()
+        elif bool(match(self.create_issue_url, url)):
+            return self.gapi_success.create_issue()
         else:
             return self.gapi_success.response
 
@@ -201,6 +204,8 @@ class MockedResponseHandlers:
             return self.gapi_res_not_found.post_git_tree()
         elif bool(match(self.git_post_commit_url, url)):
             return self.gapi_res_not_found.post_git_commit()
+        elif bool(match(self.create_issue_url, url)):
+            return self.gapi_res_not_found.create_issue()
         else:
             return self.gapi_res_not_found.response
 
