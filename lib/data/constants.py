@@ -31,3 +31,16 @@ class Status:
     @property
     def program_error(self) -> dict:
         return self.__program_error
+
+
+class BotConfig:
+    __repo_name: str = 'Bots'
+    __repo_owner_name: str = 'Coders-Asylum'
+
+    @property
+    def repo_name(self) -> str:
+        return self.__repo_name
+
+    @property
+    def repo_owner(self) -> str:
+        return self.__repo_owner_name

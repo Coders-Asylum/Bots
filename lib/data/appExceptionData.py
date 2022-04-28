@@ -21,6 +21,7 @@ class AppException(Exception):
     def __init__(self, **kwargs):
         self.__response: Response = kwargs['response']
         self.__error_type: ExceptionType = kwargs['error_type']
+        self.__api = kwargs['api']
         self.log(kwargs['msg'])
         super().__init__(self, kwargs['msg'])
 
@@ -46,23 +47,32 @@ class AppException(Exception):
 
     @property
     def response(self):
-        """
+        """ Response data during exception
 
         Returns (Response): Response object for the current exception.
 
         """
         return self.__response
 
+    @property
+    def api(self):
+        """ Api from which exception was raised
+
+        Returns (str): Name of the API.
+
+        """
+        return self.__api
+
 
 class GithubAppApiException(AppException):
 
     def __init__(self, msg: str, api: str, response: Response, error_type: ExceptionType = ExceptionType.WARNING):
         __msg = f'{msg} \n Response data from App {api} api: \n\t {response.status_code} {response.status} \n\t{response.data}'
-        super().__init__(msg=__msg, error_type=error_type, response=response)
+        super().__init__(msg=__msg, error_type=error_type, response=response, api=api)
 
 
 class GithubApiException(AppException):
 
     def __init__(self, msg: str, api: str, response: Response, error_type: ExceptionType = ExceptionType.WARNING):
         __msg = f'{msg} \n Response data from {api} api: \n\t {response.status_code} {response.status} \n\t{response.data}'
-        super().__init__(msg=__msg, error_type=error_type, response=response)
+        super().__init__(msg=__msg, error_type=error_type, response=response, api=api)
