@@ -204,6 +204,18 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
         self.assertEqual(api_exception.exception.response.status, expected_res.status)
 
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    def test_create_issue_res_not_found(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_post_res_not_response
+        expected_res = self.g_mock_res_not_found.create_issue()
+        with self.assertRaises(GithubApiException) as api_exception:
+            self.g.create_issue(title='Test Issue', body='test issue body')
+
+        self.assertEqual(api_exception.exception.response.data, expected_res.data)
+        self.assertEqual(api_exception.exception.response.status_code, expected_res.status_code)
+        self.assertEqual(api_exception.exception.response.status, expected_res.status)
+
 
 class TestGithubAPIHandler(TestCase):
     """ Tests for implemented APIs HTTP responses returning as successful
@@ -374,6 +386,20 @@ class TestGithubAPIHandler(TestCase):
         actual_milestone: GithubMilestone = self.g.get_milestone(name='non_existing_milestone')
 
         self.assertIsNone(actual_milestone)
+
+    @mock.patch('lib.handlers.ResponseHandlers.curl_post_response')
+    def test_create_issue(self, mock_func):
+        # mocks
+        mock_func.side_effect = self.mockedResponse.mocked_http_post_response
+        expected_issue = loads(self.g_mock_success.create_issue().data)
+
+        actual_issue: GithubIssue = self.g.create_issue(title='Test Issue', body='test issue body')
+
+        self.assertEqual(actual_issue.id, expected_issue['id'])
+        self.assertEqual(actual_issue.url, expected_issue['url'])
+        self.assertEqual(actual_issue.number, expected_issue['number'])
+        self.assertEqual(actual_issue.state, expected_issue['state'])
+        self.assertEqual(actual_issue.title, expected_issue['title'])
 
 
 class TestAccessTokenPermission(TestCase):

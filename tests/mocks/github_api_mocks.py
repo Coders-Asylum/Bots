@@ -1259,6 +1259,8 @@ class GithubAPIMock:
 
     def create_issue(self):
         if self.for_status is Status.SUCCESS:
+            self.response.status_code = self.created['status']
+            self.response.status = self.created['msg']
             self.response.data = dumps(
                 {
                     "id": 1,
