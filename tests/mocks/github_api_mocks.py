@@ -312,9 +312,9 @@ class GithubAPIMock:
         return self.response
 
     def post_git_tree(self):
-        self.response.status_code = self.created['status']
-        self.response.status = self.created['msg']
         if self.for_status is Status.SUCCESS:
+            self.response.status_code = self.created['status']
+            self.response.status = self.created['msg']
             self.response.data = dumps(
                 {"sha": "47b01c17a28529cd72f150f403022fc46d061452", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/47b01c17a28529cd72f150f403022fc46d061452",
                  "tree": [{"path": ".circleci", "mode": "040000", "type": "tree", "sha": "4aa50b2cb143654823f1f81c68a0d0deb06e8c80", "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/git/trees/4aa50b2cb143654823f1f81c68a0d0deb06e8c80"},
@@ -330,6 +330,13 @@ class GithubAPIMock:
                 "message": "Bad credentials",
                 "documentation_url": "https://docs.github.com/rest"
             })
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/git#create-a-tree"
+                }
+            )
         else:
             self.response.data = '404: Not Found'
         return self.response
@@ -374,9 +381,9 @@ class GithubAPIMock:
         return self.response
 
     def patch_git_ref(self):
-        self.response.status = self.success['msg']
-        self.response.status_code = self.success['status']
         if self.for_status is Status.SUCCESS:
+            self.response.status = self.success['msg']
+            self.response.status_code = self.success['status']
             self.response.data = dumps(
                 {
                     "ref": "refs/heads/test_branch",
@@ -391,6 +398,7 @@ class GithubAPIMock:
 
             )
         elif self.for_status is Status.RES_NOT_FOUND:
+            self.status()
             self.response.data = dumps(
                 {
                     "message": "Not Found",
@@ -524,6 +532,8 @@ class GithubAPIMock:
 
     def get_latest_release(self, latest: bool = True) -> Response:
         if self.for_status is Status.SUCCESS and latest is True:
+            self.response.status_code = self.success['status']
+            self.response.status = self.success['msg']
             self.response.data = dumps(
                 {
                     "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233",
@@ -568,6 +578,8 @@ class GithubAPIMock:
                 })
             
         elif self.for_status is Status.SUCCESS and latest is False:
+            self.response.status_code = self.success['status']
+            self.response.status = self.success['msg']
             self.response.data = dumps(
                 [
                     {
@@ -1187,9 +1199,236 @@ class GithubAPIMock:
 
     def get_raw_data(self):
         if self.for_status is Status.SUCCESS:
-            return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ultrices ' \
-                   'eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. Mi in nulla ' \
-                   'posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus vitae. Semper ' \
-                   'feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis orci. '
+            self.response.data = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis at tellus at urna condimentum mattis pellentesque id. Lobortis elementum nibh tellus molestie nunc non. Vestibulum lectus mauris ' \
+                                 'ultrices eros in. Odio ut sem nulla pharetra. Aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Nam libero justo laoreet sit amet cursus. Amet nulla facilisi morbi tempus iaculis urna. Massa id neque aliquam vestibulum morbi blandit cursus risus at. ' \
+                                 'Mi in nulla posuere sollicitudin aliquam ultrices sagittis orci. Lobortis feugiat vivamus at augue eget arcu dictum. Sit amet consectetur adipiscing elit pellentesque. Tortor posuere ac ut consequat semper viverra nam libero justo. Eu nisl nunc mi ipsum faucibus ' \
+                                 'vitae. Semper feugiat nibh sed pulvinar proin gravida hendrerit. Habitant morbi tristique senectus et netus et. Tempor orci dapibus ultrices in iaculis nunc. Amet risus nullam eget felis eget nunc lobortis mattis. Posuere sollicitudin aliquam ultrices sagittis ' \
+                                 'orci. '
         elif self.for_status is Status.RES_NOT_FOUND:
-            return "Not found"
+            self.response.data = "Not found"
+
+        return self.response
+
+    def get_milestone(self):
+        if self.for_status is Status.SUCCESS:
+            self.response.data = dumps(
+                [
+                    {
+                        "url": "https://api.github.com/repos/octocat/Hello-World/milestones/1",
+                        "html_url": "https://github.com/octocat/Hello-World/milestones/v1.0",
+                        "labels_url": "https://api.github.com/repos/octocat/Hello-World/milestones/1/labels",
+                        "id": 1002604,
+                        "node_id": "MDk6TWlsZXN0b25lMTAwMjYwNA==",
+                        "number": 1,
+                        "state": "open",
+                        "title": "v1.0",
+                        "description": "Tracking milestone for version 1.0",
+                        "creator": {
+                            "login": "octocat",
+                            "id": 1,
+                            "node_id": "MDQ6VXNlcjE=",
+                            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                            "gravatar_id": "",
+                            "url": "https://api.github.com/users/octocat",
+                            "html_url": "https://github.com/octocat",
+                            "followers_url": "https://api.github.com/users/octocat/followers",
+                            "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                            "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                            "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                            "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                            "organizations_url": "https://api.github.com/users/octocat/orgs",
+                            "repos_url": "https://api.github.com/users/octocat/repos",
+                            "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                            "received_events_url": "https://api.github.com/users/octocat/received_events",
+                            "type": "User",
+                            "site_admin": False
+                        },
+                        "open_issues": 4,
+                        "closed_issues": 8,
+                        "created_at": "2011-04-10T20:09:31Z",
+                        "updated_at": "2014-03-03T18:58:10Z",
+                        "closed_at": "2013-02-12T13:22:01Z",
+                        "due_on": "2012-10-09T23:39:01Z"
+                    }
+                ]
+            )
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/rest/reference/issues#list-milestones"
+                }
+            )
+        return self.response
+
+    def create_issue(self):
+        if self.for_status is Status.SUCCESS:
+            self.response.status_code = self.created['status']
+            self.response.status = self.created['msg']
+            self.response.data = dumps(
+                {
+                    "id": 1,
+                    "node_id": "MDU6SXNzdWUx",
+                    "url": "https://api.github.com/repos/octocat/Hello-World/issues/1347",
+                    "repository_url": "https://api.github.com/repos/octocat/Hello-World",
+                    "labels_url": "https://api.github.com/repos/octocat/Hello-World/issues/1347/labels{/name}",
+                    "comments_url": "https://api.github.com/repos/octocat/Hello-World/issues/1347/comments",
+                    "events_url": "https://api.github.com/repos/octocat/Hello-World/issues/1347/events",
+                    "html_url": "https://github.com/octocat/Hello-World/issues/1347",
+                    "number": 1347,
+                    "state": "open",
+                    "title": "Found a bug",
+                    "body": "I'm having a problem with this.",
+                    "user": {
+                        "login": "octocat",
+                        "id": 1,
+                        "node_id": "MDQ6VXNlcjE=",
+                        "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                        "gravatar_id": "",
+                        "url": "https://api.github.com/users/octocat",
+                        "html_url": "https://github.com/octocat",
+                        "followers_url": "https://api.github.com/users/octocat/followers",
+                        "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                        "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                        "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                        "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                        "organizations_url": "https://api.github.com/users/octocat/orgs",
+                        "repos_url": "https://api.github.com/users/octocat/repos",
+                        "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                        "received_events_url": "https://api.github.com/users/octocat/received_events",
+                        "type": "User",
+                        "site_admin": False
+                    },
+                    "labels": [
+                        {
+                            "id": 208045946,
+                            "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+                            "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+                            "name": "bug",
+                            "description": "Something isn't working",
+                            "color": "f29513",
+                            "default": True
+                        }
+                    ],
+                    "assignee": {
+                        "login": "octocat",
+                        "id": 1,
+                        "node_id": "MDQ6VXNlcjE=",
+                        "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                        "gravatar_id": "",
+                        "url": "https://api.github.com/users/octocat",
+                        "html_url": "https://github.com/octocat",
+                        "followers_url": "https://api.github.com/users/octocat/followers",
+                        "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                        "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                        "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                        "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                        "organizations_url": "https://api.github.com/users/octocat/orgs",
+                        "repos_url": "https://api.github.com/users/octocat/repos",
+                        "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                        "received_events_url": "https://api.github.com/users/octocat/received_events",
+                        "type": "User",
+                        "site_admin": False
+                    },
+                    "assignees": [
+                        {
+                            "login": "octocat",
+                            "id": 1,
+                            "node_id": "MDQ6VXNlcjE=",
+                            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                            "gravatar_id": "",
+                            "url": "https://api.github.com/users/octocat",
+                            "html_url": "https://github.com/octocat",
+                            "followers_url": "https://api.github.com/users/octocat/followers",
+                            "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                            "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                            "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                            "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                            "organizations_url": "https://api.github.com/users/octocat/orgs",
+                            "repos_url": "https://api.github.com/users/octocat/repos",
+                            "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                            "received_events_url": "https://api.github.com/users/octocat/received_events",
+                            "type": "User",
+                            "site_admin": False
+                        }
+                    ],
+                    "milestone": {
+                        "url": "https://api.github.com/repos/octocat/Hello-World/milestones/1",
+                        "html_url": "https://github.com/octocat/Hello-World/milestones/v1.0",
+                        "labels_url": "https://api.github.com/repos/octocat/Hello-World/milestones/1/labels",
+                        "id": 1002604,
+                        "node_id": "MDk6TWlsZXN0b25lMTAwMjYwNA==",
+                        "number": 1,
+                        "state": "open",
+                        "title": "v1.0",
+                        "description": "Tracking milestone for version 1.0",
+                        "creator": {
+                            "login": "octocat",
+                            "id": 1,
+                            "node_id": "MDQ6VXNlcjE=",
+                            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                            "gravatar_id": "",
+                            "url": "https://api.github.com/users/octocat",
+                            "html_url": "https://github.com/octocat",
+                            "followers_url": "https://api.github.com/users/octocat/followers",
+                            "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                            "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                            "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                            "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                            "organizations_url": "https://api.github.com/users/octocat/orgs",
+                            "repos_url": "https://api.github.com/users/octocat/repos",
+                            "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                            "received_events_url": "https://api.github.com/users/octocat/received_events",
+                            "type": "User",
+                            "site_admin": False
+                        },
+                        "open_issues": 4,
+                        "closed_issues": 8,
+                        "created_at": "2011-04-10T20:09:31Z",
+                        "updated_at": "2014-03-03T18:58:10Z",
+                        "closed_at": "2013-02-12T13:22:01Z",
+                        "due_on": "2012-10-09T23:39:01Z"
+                    },
+                    "locked": True,
+                    "active_lock_reason": "too heated",
+                    "comments": 0,
+                    "pull_request": {
+                        "url": "https://api.github.com/repos/octocat/Hello-World/pulls/1347",
+                        "html_url": "https://github.com/octocat/Hello-World/pull/1347",
+                        "diff_url": "https://github.com/octocat/Hello-World/pull/1347.diff",
+                        "patch_url": "https://github.com/octocat/Hello-World/pull/1347.patch"
+                    },
+                    "closed_at": None,
+                    "created_at": "2011-04-22T13:33:48Z",
+                    "updated_at": "2011-04-22T13:33:48Z",
+                    "closed_by": {
+                        "login": "octocat",
+                        "id": 1,
+                        "node_id": "MDQ6VXNlcjE=",
+                        "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                        "gravatar_id": "",
+                        "url": "https://api.github.com/users/octocat",
+                        "html_url": "https://github.com/octocat",
+                        "followers_url": "https://api.github.com/users/octocat/followers",
+                        "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                        "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                        "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                        "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                        "organizations_url": "https://api.github.com/users/octocat/orgs",
+                        "repos_url": "https://api.github.com/users/octocat/repos",
+                        "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                        "received_events_url": "https://api.github.com/users/octocat/received_events",
+                        "type": "User",
+                        "site_admin": False
+                    },
+                    "author_association": "COLLABORATOR"
+                }
+            )
+        elif self.for_status is Status.RES_NOT_FOUND:
+            self.response.data = dumps(
+                {
+                    "message": "Not Found",
+                    "documentation_url": "https://docs.github.com/en/rest/issues/issues#create-an-issue"
+                }
+            )
+        return self.response

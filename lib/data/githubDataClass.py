@@ -196,3 +196,30 @@ class GithubCommit:
         self.sha = _j['sha']
         self.parents = _j['parents']
         self.files = _j['files']
+
+
+class GithubMilestone(object):
+    id: int
+    name: str
+    number: int
+
+    def __init__(self, data: dict):
+        self.id = data['id']
+        self.name = data['title']
+        self.number = data['number']
+
+
+class GithubIssue(object):
+    id: int
+    url: str
+    number: int
+    state: str
+    title: str
+
+    def __init__(self, data: str):
+        _j = loads(data)
+        self.id = _j['id']
+        self.url = _j['url']
+        self.number = _j['number']
+        self.state = _j['state']
+        self.title = _j['title']

@@ -1,8 +1,10 @@
-import os
+import logging
+from typing import Union
 
+from lib.data.constants import Status
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
-from lib.data.githubDataClass import *
+from lib.data import *
 from datetime import datetime
 from requests.structures import CaseInsensitiveDict
 from json import loads, dumps
@@ -59,13 +61,14 @@ class GithubAPIHandler:
     owner: str
     branch: str
     repo: str
-    __access_token: GithubAccessToken
+    __access_token: GithubAccessToken = None
 
     def __init__(self, owner: str, repo: str, branch: str):
         self._header['Accept'] = 'application/vnd.github.v3+json'
         self.branch = branch
         self.owner = owner
         self.repo = repo
+        self.__internal_status = Status()
 
     def set_token(self, access_tkn: GithubAccessToken) -> None:
         """Sets new token
@@ -90,21 +93,8 @@ class GithubAPIHandler:
         url: str = f'https://raw.githubusercontent.com/{self.owner}/{self.repo}/{self.branch}/{path}'
         _r: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if _r.status_code != 200:
-            print(f'[E] Error while getting file contents: {_r.status_code} {_r.status} {_r.data}')
+            raise GithubApiException(msg='Error while getting file contents', api='get_raw_data', response=_r, error_type=ExceptionType.ERROR)
         return _r.data
-
-    @staticmethod
-    def download_repo_file(repo_name: str, owner: str, file_path: str, branch: str = 'master'):
-        """ Downloads file from GitHub repository
-        :param repo_name: Name of repository where the file is located
-        :param owner: Name of organization or User of the repository
-        :param file_path: path of the file from the home root directory with / and file extension as it is
-        :param branch: Repository branch from which the file must be fetched, is defaulted to 'master'
-        :return: File contents as string
-        """
-        url: str = f'https://raw.githubusercontent.com/{owner}/{repo_name}/{branch}/{file_path}'
-        _r: Response = ResponseHandlers.http_get_response(url)
-        return _r
 
     def post_blob(self, owner: str, repo: str, data: str, access_token: GithubAccessToken):
         """
@@ -124,7 +114,7 @@ class GithubAPIHandler:
 
         _r: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=_data)
         if _r.status_code != 201:
-            print(f'Blob not posted: {_r.status_code} {_r.status}')
+            raise GithubApiException(msg='Blob not posted.', response=_r, error_type=ExceptionType.ERROR, api='post_blob')
 
         return GithubBlob(data=_r.data)
 
@@ -145,19 +135,24 @@ class GithubAPIHandler:
 
         # exception raised if access token not set.
         if self.__access_token is None:
-            raise Exception('[E] Access token not found, use set_token to set the token and then proceed')
+            raise GithubApiException(
+                msg='Access token not found, use set_token function to set the token and then proceed',
+                error_type=ExceptionType.ERROR,
+                response=Response(status_code=self.__internal_status.program_error['status_code'], status=self.__internal_status.program_error['status'], data='{message: API Token Not Set}'),
+                api='commit_files'
+            )
         self._header['Authorization'] = f'token {self.__access_token.access_tkn}'
 
         # get branch ref
         _r: Response = ResponseHandlers.curl_get_response(url=ref_url, headers=self._header)
         if _r.status_code != 200:
-            print(f'Error in fetching data: {_r.status_code} {_r.status}')
+            raise GithubApiException(msg=f'Error while getting latest git ref for {ref_url}', api='commit_files', error_type=ExceptionType.ERROR, response=_r)
         _ref: GithubRefObject = GithubRefObject(data=_r.data)
 
         # get and store the latest git commit object from ref
         _r = ResponseHandlers.curl_get_response(url=_ref.obj['url'], headers=self._header)
         if _r.status_code != 200:
-            print('Error: was not able to get commit object')
+            raise GithubApiException(msg=f'Error while getting git commit object for {_ref.obj["url"]}', api='commit_files', error_type=ExceptionType.ERROR, response=_r)
         _commit: GitCommit = GitCommit(data=_r.data)
         self._latest_commit_sha = _commit.sha
 
@@ -165,7 +160,7 @@ class GithubAPIHandler:
         # recursive=1 at the end of the tree url helps to get tree objects for all the files with any depth in the repo.
         _r = ResponseHandlers.curl_get_response(url=_commit.tree['url'] + '?recursive=1', headers=self._header)
         if _r.status_code != 200:
-            print('Error: was not able to get tree object')
+            raise GithubApiException(msg=f'Error while getting git tree for: {_commit.tree["url"]}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         _git_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
         # update and post tree
@@ -182,21 +177,21 @@ class GithubAPIHandler:
         _posting_tree: dict = {"owner": self.owner, "repo": self.repo, "tree": tree, "base_tree": base_tree}
         _r = ResponseHandlers.curl_post_response(url=post_tree_url, headers=self._header, data=dumps(_posting_tree))
         if _r.status_code != 201:
-            print(f'Tree was not able to be updated because: {_r.status_code} {_r.status} {_r.data}')
+            raise GithubApiException(msg=f'Error while posting new git tree. url: {post_tree_url}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         _posted_tree: GithubTreeObject = GithubTreeObject(data=_r.data)
 
         # commit new tree
         commit_data = {"owner": self.owner, "repo": self.repo, "message": message, "tree": _posted_tree.sha, "parents": [self._latest_commit_sha]}
         _r = ResponseHandlers.curl_post_response(url=commit_url, headers=self._header, data=dumps(commit_data))
         if _r.status_code != 201:
-            print(f'Files were not able to be committed due to:{_r.status_code} {_r.status} {_r.data}')
+            raise GithubApiException(msg=f'Error while committing . url: {commit_url}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         _commit: GitCommit = GitCommit(data=_r.data)
 
         # update branch ref
         _ref: dict = {"sha": _commit.sha}
         _r: Response = ResponseHandlers.http_patch(url=ref_url, headers=self._header, data=dumps(_ref))
         if _r.status_code != 200:
-            print(f'[E] Error while updating ref: {_r.status_code} {_r.status} ')
+            raise GithubApiException(msg=f'Error while updating ref. url: {ref_url}', api='commit_files', response=_r, error_type=ExceptionType.ERROR)
         return GithubRefObject(data=_r.data)
 
     def get_release(self, latest: bool = True) -> list[GithubRelease]:
@@ -215,7 +210,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error caused while getting release: {res.status_code} {res.status}')
+            raise GithubApiException(msg=f'Error while getting latest release: url = {url}', api='get_release', error_type=ExceptionType.ERROR, response=res)
 
         if latest:
             return [GithubRelease(data=res.data)]
@@ -247,7 +242,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=dumps(data))
         if res.status_code != 204:
-            print(f'[E] Error caused while running workflow: {res.status_code} {res.status}')
+            raise GithubApiException(msg=f'Error while triggering workflow: url = {url}', api='trigger_workflow', error_type=ExceptionType.ERROR, response=res)
 
         return res
 
@@ -256,7 +251,7 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error causeg while fetching tags: {res.status_code} {res.status}')
+            raise GithubApiException(msg=f'Unable to fetch tags. url: {url}', response=res, api='get_tag', error_type=ExceptionType.ERROR)
 
         tags: list = loads(res.data)
         for tag in tags:
@@ -281,9 +276,68 @@ class GithubAPIHandler:
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
         if res.status_code != 200:
-            print(f'[E] Error caused in getting commit: {res.status_code} {res.status} ')
+            raise GithubApiException(msg=f'Error while getting commit: url = {url}', api='get_commit', error_type=ExceptionType.ERROR, response=res)
 
         return GithubCommit(data=res.data)
+
+    def get_milestone(self, name: str) -> Union[GithubMilestone, None]:
+        """ Gets the milestone details for the given milestone name.
+
+        **Note: implement exception handler because GithubApiException is raised for Error type warning to log this.**
+
+        Args:
+            name (str): Milestone name
+
+        Returns (GithubMilestone): GithubMilestone object or None is returned of milestone is not present for the repo.
+
+        """
+
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/milestones'
+
+        res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
+        if res.status_code != 200:
+            raise GithubApiException(msg=f'Unable to get milestone/s for url={url}', api='get_milestone', response=res, error_type=ExceptionType.ERROR)
+
+        milestones: list[dict] = loads(res.data)
+
+        for milestone in milestones:
+            if milestone['title'] == name:
+                return GithubMilestone(milestone)
+
+        # logs warning message since the passed milestone is not found.
+        logging.warning(f'Milestone {name} was not found in repo {self.owner}/{self.repo}. url: {url}.')
+        return None
+
+    def create_issue(self, title: str, body: str, milestone: str = None, assignees: list[str] = None, labels: list[str] = None) -> GithubIssue:
+        """ Creates an issue in the given repo.
+
+        Args:
+            title (str): Title of the issue.
+            body (str): Body if the issue.
+            milestone (str): Milestone name to be added to the issue.
+            assignees (list[str]): List of usernames of  users that the issue has to be assigned.
+            labels (list[str]): List of labels that has to be assigned to the issue.
+
+        Returns:
+
+        """
+
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/issues'
+        if milestone is not None:
+            milestone: GithubMilestone = self.get_milestone(name=milestone)
+            payload: dict = {"title": title, "body": body, "milestone": milestone.number, "assignees": assignees, "labels": labels}
+        else:
+            payload = {"title": title, "body": body, "milestone": None, "assignees": assignees, "labels": labels}
+
+        filtered = {k: v for k, v in payload.items() if v is not None}
+        payload.clear()
+        payload.update(filtered)
+
+        res: Response = ResponseHandlers.curl_post_response(url=url, data=dumps(payload), headers=self._header)
+        if res.status_code != 201:
+            raise GithubApiException(msg='Unable to raise issue.', api='create_issue', response=res, error_type=ExceptionType.ERROR)
+
+        return GithubIssue(data=res.data)
 
 
 class GithubAppApi:
@@ -314,7 +368,7 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_get_response(url, self.headers)
         if res.status_code != 200:
-            print(f'App installation was not received: {res.status_code} {res.status} {res.data}')
+            raise GithubAppApiException(msg='Couldn\'t get app installation', response=res, error_type=ExceptionType.ERROR, api='get_app_installations')
 
         _data: list = loads(res.data)
         for d in _data:
@@ -348,7 +402,7 @@ class GithubAppApi:
 
         res = ResponseHandlers.curl_post_response(url=url, headers=self.headers, data=dumps(payload))
         if res.status_code != 201:
-            print(f'[E] Token was not created: {res.status_code} {res.for_status}: {res.data}')
+            raise GithubAppApiException(msg='Unable to create a access token', response=res, error_type=ExceptionType.ERROR, api='create_access_token')
         return GithubAccessToken(data=res.data)
 
 

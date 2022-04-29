@@ -2,9 +2,8 @@ import os.path
 from json import load, dumps
 from logging import info
 from os import environ
-from lib import Response
-from lib.data import Repository, GithubRelease, Webhook, GithubCommit, Message, GitTree, TreeType
-from lib.handlers import GithubAPIHandler, GithubAccessToken, GithubAppApi
+from lib.data import Repository, GithubRelease, Webhook, GithubCommit, Message, GitTree, TreeType, GithubApiException, GithubAppApiException, ExceptionType
+from lib.handlers import GithubAPIHandler, GithubAccessToken, GithubAppApi, Response, Exception_Handler
 
 
 class Jobs:
@@ -37,41 +36,52 @@ class Jobs:
         github_api_target: GithubAPIHandler = GithubAPIHandler(owner=target_repos.owner, repo=target_repos.name, branch=website_repo.branch)
 
         # get release data
-        release: list[GithubRelease] = github_api_website.get_release()
+        try:
+            release: list[GithubRelease] = github_api_website.get_release()
 
-        # get tag commit
-        tag_commit: dict = github_api_website.get_tag(tag_name=release[0].tag).commit
+            # get tag commit
+            tag_commit: dict = github_api_website.get_tag(tag_name=release[0].tag).commit
 
-        commit: GithubCommit = github_api_website.get_commit(sha=tag_commit['sha'])
+            commit: GithubCommit = github_api_website.get_commit(sha=tag_commit['sha'])
 
-        if commit.files is None or commit.files == []:
-            return self._response
+            if commit.files is None or commit.files == []:
+                return self._response
 
-        target_access_tkn: GithubAccessToken = g_app_api.create_access_token(org=target_repos.owner, repos=[target_repos.name], permissions=None)
-        for f in commit.files:
-            # update blog page file
-            if f['filename'] == self.config_data['blog_page']['path']:
-                blog_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_page']['path'])
-                blog_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['target_path'], content=blog_page_file_content)
-                github_api_target.set_token(access_tkn=target_access_tkn)
+            target_access_tkn: GithubAccessToken = g_app_api.create_access_token(org=target_repos.owner, repos=[target_repos.name], permissions=None)
+            for f in commit.files:
+                # update blog page file
+                if f['filename'] == self.config_data['blog_page']['path']:
+                    blog_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_page']['path'])
+                    blog_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['target_path'], content=blog_page_file_content)
+                    github_api_target.set_token(access_tkn=target_access_tkn)
 
-                target_ref = github_api_target.commit_files(files=[blog_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
-                info(f'[I] New Blog Page File Committed url:{target_ref.url}')
-                payload.append(f'New Blog Page File Committed url:{target_ref.url}')
-                self._response.status_code = 200
+                    target_ref = github_api_target.commit_files(files=[blog_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
+                    info(f'[I] New Blog Page File Committed url:{target_ref.url}')
+                    payload.append(f'New Blog Page File Committed url:{target_ref.url}')
+                    self._response.status_code = 200
 
-            # update blog page file
-            elif f['filename'] == self.config_data['blog_post_page']['path']:
-                blog_post_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_post_page']['path'])
-                blog_post_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['target_path'], content=blog_post_page_file_content)
-                github_api_target.set_token(access_tkn=target_access_tkn)
+                # update blog page file
+                elif f['filename'] == self.config_data['blog_post_page']['path']:
+                    blog_post_page_file_content: str = github_api_website.get_raw_data(path=self.config_data['blog_post_page']['path'])
+                    blog_post_page_tree: GitTree = GitTree(tree_type=TreeType.BLOB, path=self.config_data['blog_page']['target_path'], content=blog_post_page_file_content)
+                    github_api_target.set_token(access_tkn=target_access_tkn)
 
-                target_ref = github_api_target.commit_files(files=[blog_post_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
-                info(f'[I] New Blog Post Page File Committed url:{target_ref.url}')
-                payload.append(f'New Blog Page File Committed url:{target_ref.url}')
-                self._response.status_code = 200
+                    target_ref = github_api_target.commit_files(files=[blog_post_page_tree], message=f'New Release: {release[0].tag} \n link: https://github.com/{website_repo.owner}/{website_repo.name}/releases/tag/{release[0].tag}')
+                    info(f'[I] New Blog Post Page File Committed url:{target_ref.url}')
+                    payload.append(f'New Blog Page File Committed url:{target_ref.url}')
+                    self._response.status_code = 200
 
-        if payload:
-            self._response.data = dumps({"message": payload})
+            if payload:
+                self._response.data = dumps({"message": payload})
+        except GithubApiException as exe:
+            __exception_handler: Exception_Handler = Exception_Handler(exception=exe)
+
+            __exception_handler.handle(exception_type=ExceptionType.ERROR, message='API Exception Occurred')
+            return exe.response
+
+        except GithubAppApiException as exe:
+            __exception_handler: Exception_Handler = Exception_Handler(exception=exe)
+            __exception_handler.handle(exception_type=ExceptionType.ERROR, message='API Exception Occurred')
+            return exe.response
 
         return self._response
