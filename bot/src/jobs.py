@@ -83,5 +83,5 @@ class Jobs:
             __exception_handler: Exception_Handler = Exception_Handler(exception=exe)
             __exception_handler.handle(exception_type=ExceptionType.ERROR, message='API Exception Occurred')
             return exe.response
-        
+
         return self._response

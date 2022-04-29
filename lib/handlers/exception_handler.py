@@ -17,15 +17,14 @@ class Exception_Handler:
     def _exit_execution():
         exit()
 
-    # todo: add flag to send email, if flag is set to true to group of users, email code should be added to utils.py
     def handle(self, exception_type, message):
         if exception_type is ExceptionType.CLOSE:
             self._exit_execution()
         elif exception_type is ExceptionType.WARNING:
             print(f'{exception_type.value} {message}')
         elif exception_type is ExceptionType.ERROR:
-            __body: str = f'{self.__exception.response.data}'
-            self.__g_api.create_issue(title=f'[Runtime Issue] Issue in {self.__exception.api}', body=__body, labels=['bug'])
+            __body: str = f'App function stopped due to malfunction of `{self.__exception.api}`.\n ## Response: \nStatus: `{self.__exception.response.status_code} {self.__exception.response.status}` ``` json\n{self.__exception.response.data}\n``` <details>\n<summary>Logs</summary>\n{self.__exception.log_output}\n</details> '
+            self.__g_api.create_issue(title=f'[BUG] Issue in {self.__exception.api}', body=__body, labels=['bug'], milestone='P1')
 
 
 if __name__ == '__main__':

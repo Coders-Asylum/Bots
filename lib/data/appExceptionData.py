@@ -1,4 +1,6 @@
 from enum import Enum
+from io import StringIO
+
 from colorama import Fore
 import logging as log
 
@@ -24,6 +26,8 @@ class AppException(Exception):
         self.__api = kwargs['api']
         self.log(kwargs['msg'])
         super().__init__(self, kwargs['msg'])
+        self.__log_stream = StringIO()
+        log.basicConfig(level=log.DEBUG, stream=self.__log_stream)
 
     def log(self, msg):
         """ Logs exception message into logger.
@@ -62,6 +66,15 @@ class AppException(Exception):
 
         """
         return self.__api
+
+    @property
+    def log_output(self) -> str:
+        """ returns log output.
+
+        Returns: all logged output as string
+
+        """
+        return self.__log_stream.getvalue()
 
 
 class GithubAppApiException(AppException):
