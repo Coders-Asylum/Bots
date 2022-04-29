@@ -1,31 +1,32 @@
-from enum import Enum
-import logging as log
 from sys import exit
-from colorama import Fore
 
-
-class ExceptionType(Enum):
-    CLOSE = Fore.RED + '[!] Program execution stopped due to a fatal error.'
+from lib.data import ExceptionType, BotConfig
+from lib.data.appExceptionData import AppException
+from lib.handlers import GithubAPIHandler
 
 
 class Exception_Handler:
+    __config: BotConfig = BotConfig()
+    __g_api: GithubAPIHandler = GithubAPIHandler(owner=__config.repo_owner, repo=__config.repo_name, branch='master')
+    __exception: AppException
 
-    def __init__(self):
-        pass
+    def __init__(self, exception: AppException = None):
+        self.__exception = exception
 
     @staticmethod
     def _exit_execution():
         exit()
 
-    # todo: add flag to send email, if flag is set to true to group of users, email code should be added to utils.py
     def handle(self, exception_type, message):
-        print(Fore.BLUE + '[I] ' + message)
         if exception_type is ExceptionType.CLOSE:
-            log.exception(f'[E] {message}')
-            log.info(f'[I] {exception_type.value}')
             self._exit_execution()
+        elif exception_type is ExceptionType.WARNING:
+            print(f'{exception_type.value} {message}')
+        elif exception_type is ExceptionType.ERROR:
+            __body: str = f'App function stopped due to malfunction of `{self.__exception.api}`.\n ## Response: \nStatus: `{self.__exception.response.status_code} {self.__exception.response.status}` ``` json\n{self.__exception.response.data}\n``` <details>\n<summary>Logs</summary>\n{self.__exception.log_output}\n</details> '
+            self.__g_api.create_issue(title=f'[BUG] Issue in {self.__exception.api}', body=__body, labels=['bug'], milestone='P1')
 
 
 if __name__ == '__main__':
     exe = Exception_Handler()
-    exe.handle(ExceptionType.CLOSE, 'Log')
+    exe.handle(ExceptionType.WARNING, 'Log')

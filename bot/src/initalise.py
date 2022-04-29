@@ -1,5 +1,5 @@
-from lib.handlers import Exception_Handler, ExceptionType
-
+from lib.handlers import Exception_Handler
+from lib.data import ExceptionType
 from lib import install_package
 
 

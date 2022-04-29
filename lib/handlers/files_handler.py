@@ -20,7 +20,7 @@ class FileHandler:
         """
         Updates the file by adding from last line of the file
         :param file_path: File path where the file needs to be created or exits with file name and extension
-        :param contents: content that is to populated/appended from the end of the file file
+        :param contents: content that is to populated/appended from the end of the file
         :return: None
         """
         makedirs(path.dirname(file_path), exist_ok=True)

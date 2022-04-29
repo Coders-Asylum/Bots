@@ -3,9 +3,8 @@ from re import match
 from requests.structures import CaseInsensitiveDict
 
 from lib.data import *
-from lib.handlers import GithubAccessToken
+from lib.handlers import GithubAccessToken, Response
 from tests.mocks.github_api_mocks import GithubAPIMock, Status
-from lib import Response
 from json import dumps, loads
 
 
@@ -41,6 +40,8 @@ def mocked_token() -> GithubAccessToken:
 
 
 class MockedResponseHandlers:
+    """ Returns mocked responses for testing Github rest(http) api.
+    """
     # commit files urls
     git_commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/commits\/c30dbe34699b8e7e522885bc9d2a4d9d141c9382'
     git_post_tree_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/git\/trees'
@@ -55,11 +56,26 @@ class MockedResponseHandlers:
     workflow_trigger_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/actions\/workflows\/\w+.yml\/dispatches'
     tag_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/tags'
     commit_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/commits\/10f68682850d598a90ed6f5ea237f5b140a5f4f3'
+    milestone_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/milestones'
+    create_issue_url: str = r'https:\/\/api.github.com\/repos\/Coders-Asylum\/fuzzy-train\/issues'
 
     gapi_success = GithubAPIMock(for_status=Status.SUCCESS)
     gapi_unauthorized = GithubAPIMock(for_status=Status.UNAUTHORIZED)
+    gapi_res_not_found = GithubAPIMock(for_status=Status.RES_NOT_FOUND)
 
     def mocked_http_get_response(self, *args, **kwargs) -> Response:
+        """ Mocked responses for HTTP get request
+
+        - Fist args should be url or kwargs "url" and pass the api url.
+        - Second args should be for_status or kwargs "for_status" and pass Status.xxx
+
+        Args:
+            *args: list arguments
+            **kwargs: keyword arguments
+
+        Returns: HTTP api response as a Response object
+
+        """
         if args is None or len(args) == 0:
             url = kwargs['url']
         else:
@@ -81,10 +97,57 @@ class MockedResponseHandlers:
             return self.gapi_success.get_tag()
         elif bool(match(self.commit_url, url)):
             return self.gapi_success.get_commit()
+        elif bool(match(self.milestone_url, url)):
+            return self.gapi_success.get_milestone()
         else:
             return self.gapi_success.response
 
+    def mocked_http_get_res_found_response(self, *args, **kwargs) -> Response:
+        """ Mocked responses for HTTP get request with 404 error code
+
+        Args:
+            *args: list arguments
+            **kwargs: keyword arguments
+
+        Returns: HTTP api response as a Response object
+
+        """
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+        else:
+            url = args[0]
+
+        if bool(match(self.git_commit_url, url)):
+            return self.gapi_res_not_found.get_git_commit()
+        elif bool(match(self.git_tree_url, url)):
+            return self.gapi_res_not_found.get_git_tree()
+        elif bool(match(self.git_ref_url, url)):
+            return self.gapi_res_not_found.get_latest_ref()
+        elif bool(match(self.file_url, url)):
+            return self.gapi_res_not_found.get_raw_data()
+        elif bool(match(self.latest_release_url, url)):
+            return self.gapi_res_not_found.get_latest_release()
+        elif bool(match(self.release_url, url)):
+            return self.gapi_res_not_found.get_latest_release(latest=False)
+        elif bool(match(self.tag_url, url)):
+            return self.gapi_res_not_found.get_tag()
+        elif bool(match(self.commit_url, url)):
+            return self.gapi_res_not_found.get_commit()
+        elif bool(match(self.milestone_url, url)):
+            return self.gapi_res_not_found.get_milestone()
+        else:
+            return self.gapi_res_not_found.response
+
     def mocked_http_post_response(self, *args, **kwargs):
+        """ Mocked responses for HTTP post request.
+
+                Args:
+                    *args: list arguments
+                    **kwargs: keyword arguments
+
+                Returns: HTTP api response as a Response object
+
+                """
         url: str
         data: str
         headers: CaseInsensitiveDict
@@ -106,8 +169,45 @@ class MockedResponseHandlers:
             return self.gapi_success.post_git_tree()
         elif bool(match(self.git_post_commit_url, url)):
             return self.gapi_success.post_git_commit()
+        elif bool(match(self.create_issue_url, url)):
+            return self.gapi_success.create_issue()
         else:
             return self.gapi_success.response
+
+    def mocked_http_post_res_not_response(self, *args, **kwargs):
+        """ Mocked responses for HTTP post request with 404 error code
+
+               Args:
+                   *args: list arguments
+                   **kwargs: keyword arguments
+
+               Returns: HTTP api response as a Response object
+        """
+        url: str
+        data: str
+        headers: CaseInsensitiveDict
+
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+            data = kwargs['data']
+            headers = kwargs['headers']
+        else:
+            url = args[0]
+            headers = args[1]
+            data = args[2]
+
+        if bool(match(self.blob_post_url, url)):
+            return self.gapi_res_not_found.post_blob()
+        elif bool(match(self.workflow_trigger_url, url)):
+            return self.gapi_res_not_found.trigger_workflow()
+        elif bool(match(self.git_post_tree_url, url)):
+            return self.gapi_res_not_found.post_git_tree()
+        elif bool(match(self.git_post_commit_url, url)):
+            return self.gapi_res_not_found.post_git_commit()
+        elif bool(match(self.create_issue_url, url)):
+            return self.gapi_res_not_found.create_issue()
+        else:
+            return self.gapi_res_not_found.response
 
     def mocked_http_patch_response(self, *args, **kwargs):
         url: str
@@ -126,6 +226,24 @@ class MockedResponseHandlers:
             return self.gapi_success.patch_git_ref()
         else:
             return self.gapi_success.response
+
+    def mocked_http_patch_res_not_found_response(self, *args, **kwargs):
+        url: str
+        data: str
+        headers: CaseInsensitiveDict
+
+        if args is None or len(args) == 0:
+            url = kwargs['url']
+            data = kwargs['data']
+            headers = kwargs['headers']
+        else:
+            url = args[0]
+            headers = args[1]
+            data = args[2]
+        if bool(match(self.git_ref_url, url)):
+            return self.gapi_res_not_found.patch_git_ref()
+        else:
+            return self.gapi_res_not_found.response
 
 
 class MockedGithubAPIHandler:
@@ -152,7 +270,7 @@ class MockedGithubAPIHandler:
     def commit_files(self, *args, **kwargs) -> GithubRefObject:
         return GithubRefObject(data=self.g_api_mock.get_latest_ref().data)
 
-    def get_raw_data(self,*args, **kwargs) -> str:
+    def get_raw_data(self, *args, **kwargs) -> str:
         return self.g_api_mock.get_raw_data()
 
 
