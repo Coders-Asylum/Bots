@@ -532,6 +532,8 @@ class GithubAPIMock:
 
     def get_latest_release(self, latest: bool = True) -> Response:
         if self.for_status is Status.SUCCESS and latest is True:
+            self.response.status_code = self.success['status']
+            self.response.status = self.success['msg']
             self.response.data = dumps(
                 {
                     "url": "https://api.github.com/repos/Coders-Asylum/fuzzy-train/releases/62842233",
@@ -576,6 +578,8 @@ class GithubAPIMock:
                 })
 
         elif self.for_status is Status.SUCCESS and latest is False:
+            self.response.status_code = self.success['status']
+            self.response.status = self.success['msg']
             self.response.data = dumps(
                 [
                     {
