@@ -3,7 +3,7 @@ from datetime import datetime
 from azure.functions import HttpRequest, HttpResponse
 from json import dumps
 from lib.handlers import Response
-from src import Jobs
+from .src import Jobs
 from lib.data import Message, Webhook
 
 

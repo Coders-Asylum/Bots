@@ -196,7 +196,7 @@ class GithubCommit:
         self.sha = _j['sha']
         self.parents = _j['parents']
         self.files = _j['files']
-
+        
         
 class GithubMilestone(object):
     id: int
