@@ -1,5 +1,6 @@
 """
 Data class library for Github Objects.
+
 Data classes are used to hold data extracted from API responses.
 """
 
