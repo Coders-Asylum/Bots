@@ -318,7 +318,7 @@ class GithubAPIHandler:
             assignees (list[str]): List of usernames of  users that the issue has to be assigned.
             labels (list[str]): List of labels that has to be assigned to the issue.
 
-        Returns:
+        Returns: GithubIssue object 
 
         """
 
