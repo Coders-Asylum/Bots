@@ -4,7 +4,7 @@ from typing import Union
 from lib.data.constants import Status
 from lib.handlers.response_handler import ResponseHandlers, Response
 from lib.handlers.authHandler import generate_jwt_token, GithubAccessToken
-from lib.data import *
+from lib.data import GitCommit, AccessType, GithubPermissions, GithubMilestone, ExceptionType, GithubApiException, GithubAppApiException, GithubAppInstallations, GithubBlob, GithubCommit, GithubIssue, GithubRefObject, GithubRelease, GitTree, GithubTreeObject, GithubTag
 from datetime import datetime
 from requests.structures import CaseInsensitiveDict
 from json import loads, dumps
