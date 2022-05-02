@@ -351,6 +351,8 @@ class GithubAppApi:
     exp_in_min: int = 5
 
     def __init__(self, app_id: str):
+        """ Constructor
+        """
         self._appId = app_id
         self.payload = {"iat": self._time, "exp": self._time + (60 * self.exp_in_min), "iss": app_id}
         self.headers["Accept"] = "application/vnd.github.v3+json"
