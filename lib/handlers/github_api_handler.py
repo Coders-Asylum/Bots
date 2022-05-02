@@ -355,6 +355,7 @@ class GithubAppApi:
         self.payload = {"iat": self._time, "exp": self._time + (60 * self.exp_in_min), "iss": app_id}
         self.headers["Accept"] = "application/vnd.github.v3+json"
         self.headers["Authorization"] = "Bearer " + generate_jwt_token(payload=self.payload)
+        self.__internal_status = Status()
 
     def get_app_installations(self) -> list[GithubAppInstallations]:
         """
@@ -384,16 +385,22 @@ class GithubAppApi:
             repos (list[str]): List of repos for which the access token needs to be generated. *These repos must be from single organization*
             permissions (AccessTokenPermission): Permissions against which the access token needs to be generated. If nothing is passed then the default permissions assigned to the app will be assigned to the repos.
         """
-        app_installations = self.get_app_installations()
-        _index: int = -1
-        for i in range(len(app_installations)):
-            if app_installations[i].org == org:
-                _index = i
-                break
-            elif i == len(app_installations) - 1 and app_installations[i].org != org:
-                raise Exception(f'App not installed for the Org:{org}')
+        app_installations = enumerate(self.get_app_installations())
+        __installation = None
 
-        url = app_installations[_index].acc_tkn_url
+        for count, installation in app_installations:
+            if installation.org == org:
+                __installation = installation
+                break
+            elif __installation is None and installation.org != org:
+                raise GithubAppApiException(
+                    msg=f'App not installed for the Org:{org}',
+                    api='create_access_token',
+                    response=Response(status_code=self.__internal_status.program_error['status'], status=self.__internal_status.program_error['msg'], data=f'{"message":"App not found for Org- {org}, so access token cannot be created."}'),
+                    error_type=ExceptionType.WARNING
+                )
+
+        url = __installation.acc_tkn_url
 
         if permissions is None:
             payload: dict = {"repositories": repos}
