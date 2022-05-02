@@ -289,7 +289,6 @@ class GithubAPIHandler:
             name (str): Milestone name
 
         Returns (GithubMilestone): GithubMilestone object or None is returned of milestone is not present for the repo.
-
         """
 
         url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/milestones'
