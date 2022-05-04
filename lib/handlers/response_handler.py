@@ -10,10 +10,11 @@ class Response:
     _response: HttpResponse = None
 
     def __init__(self, status_code: int, status: str, data: str):
+        self.__header: dict = {'Content-Type': 'application/json'}
         self.status_code = status_code
         self.data = data
         self.status = status
-        self._response = HttpResponse(status_code=status_code, body=data)
+        self._response = HttpResponse(status_code=status_code, body=data, headers=self.__header)
 
     def disintegrated(self) -> HttpResponse:
         """HttpResponse made by striping data from current object
