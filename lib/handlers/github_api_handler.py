@@ -105,7 +105,7 @@ class GithubAPIHandler:
 
         Args:
             data (str): Contents of the blob that has to be posted.
-            
+
         Returns: 
             GithubBlob object.
         
