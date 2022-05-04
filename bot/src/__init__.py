@@ -3,4 +3,4 @@
 """
 
 from .jobs import Jobs
-from .initalise import install_package, initialise
+# from .initalise import install_package, initialise

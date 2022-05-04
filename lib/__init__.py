@@ -7,7 +7,6 @@ This library has functions that interact with external APIs.
 This library also has functions and modules that interact with Github API.
 """
 
-from .utils import install_package
 from .output import Output
 
 # handlers
