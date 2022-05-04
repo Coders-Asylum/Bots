@@ -1,5 +1,3 @@
-from sys import exit
-
 from lib.data import ExceptionType, BotConfig
 from lib.data.appExceptionData import AppException
 from lib.handlers import GithubAPIHandler
@@ -14,12 +12,12 @@ class Exception_Handler:
         self.__exception = exception
 
     @staticmethod
-    def _exit_execution():
+    def __exit_execution():
         exit()
 
     def handle(self, exception_type, message):
         if exception_type is ExceptionType.CLOSE:
-            self._exit_execution()
+            self.__exit_execution()
         elif exception_type is ExceptionType.WARNING:
             print(f'{exception_type.value} {message}')
         elif exception_type is ExceptionType.ERROR:

@@ -52,7 +52,7 @@ class TestGithubAPIHandler4xxFailed(TestCase):
         mock_func.side_effect = self.mockedResponse.mocked_http_post_res_not_response
         expected_blob: Response = self.g_mock_res_not_found.post_blob()
         with self.assertRaises(GithubApiException) as api_exception:
-            self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=mocked_token())
+            self.g.post_blob(data=self.expected_contents)
 
         self.assertEqual(api_exception.exception.response.data, expected_blob.data)
         self.assertEqual(api_exception.exception.response.status, expected_blob.status)
@@ -251,7 +251,8 @@ class TestGithubAPIHandler(TestCase):
     def test_post_blob(self, mock_func):  # Data that will be posted to the Github server to create a blob.
         mock_func.side_effect = self.mockedResponse.mocked_http_post_response
         expected_blob: Response = self.g_mock_success.post_blob()
-        actual_blob = self.g.post_blob(owner=self.owner, repo=self.repo, data=self.expected_contents, access_token=mocked_token())
+        self.g.set_token(access_tkn=mocked_token())
+        actual_blob = self.g.post_blob(data=self.expected_contents)
         self.assertEqual(loads(expected_blob.data)['url'], actual_blob.url)
         self.assertEqual(loads(expected_blob.data)['sha'], actual_blob.sha)
 

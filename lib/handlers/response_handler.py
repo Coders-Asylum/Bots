@@ -1,4 +1,3 @@
-from subprocess import run
 from requests import get, structures, post, patch
 from azure.functions import HttpResponse
 
@@ -81,20 +80,20 @@ class ResponseHandlers:
         else:
             return Response(status_code=_http_get.status_code, data='No Data', status=_http_get.reason)
 
-    @staticmethod
-    def shell_response(command, output=False):
-        if output is False:
-            _c = run(command)
-            if _c.returncode == 0:
-                return Response(_c.returncode, 'ok', 'None')
-            else:
-                return Response(_c.returncode, 'error', 'None')
-        else:
-            _c = run(command, capture_output=True)
-            if _c.returncode == 0:
-                return Response(_c.returncode, 'ok', str(_c))
-            else:
-                return Response(_c.returncode, 'error', str(_c))
+    # @staticmethod
+    # def shell_response(command, output=False):
+    #     if output is False:
+    #         _c = run(command)
+    #         if _c.returncode == 0:
+    #             return Response(_c.returncode, 'ok', 'None')
+    #         else:
+    #             return Response(_c.returncode, 'error', 'None')
+    #     else:
+    #         _c = run(command, capture_output=True)
+    #         if _c.returncode == 0:
+    #             return Response(_c.returncode, 'ok', str(_c))
+    #         else:
+    #             return Response(_c.returncode, 'error', str(_c))
 
     # @staticmethod
     # def function_response(response: Response) -> func.HttpResponse:
