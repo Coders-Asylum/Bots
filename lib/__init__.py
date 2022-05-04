@@ -1,11 +1,12 @@
 # __init__.py
 """
 This is package contains all API and Exception specific code.
-This library has functions that interact with external APIs
-Thus library also has functions and modules that interact with Github API
+
+This library has functions that interact with external APIs.
+
+This library also has functions and modules that interact with Github API.
 """
 
-from .utils import install_package
 from .output import Output
 
 # handlers
