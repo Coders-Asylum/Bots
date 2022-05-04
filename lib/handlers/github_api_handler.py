@@ -12,8 +12,10 @@ from json import loads, dumps
 
 class AccessTokenPermission:
     """
-       Permissions that the access token will be assigned for
+       Permissions that the access token will be assigned for.
+       
        These are the permissions that are available in `properties for permission parameter <https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app--parameters>`
+       
        To know about the permission look in to this part of the `Github api <https://docs.github.com/en/rest/reference/permissions-required-for-github-apps>`
     """
     _permissions: dict = {}
@@ -71,18 +73,19 @@ class GithubAPIHandler:
         self.__internal_status = Status()
 
     def set_token(self, access_tkn: GithubAccessToken) -> None:
-        """Sets new token
+        """
+        Sets new token
 
         Args:
             access_tkn: New GithubAccessToken
 
         Returns: None
-
         """
         self.__access_token = access_tkn
 
     def get_raw_data(self, path: str) -> str:
-        """Returns raw contents of the file specified in the path from the branch specified.
+        """
+        Returns raw contents of the file specified in the path from the branch specified.
 
         Args:
             path: path to file on the branch with filename and extension
@@ -96,20 +99,19 @@ class GithubAPIHandler:
             raise GithubApiException(msg='Error while getting file contents', api='get_raw_data', response=_r, error_type=ExceptionType.ERROR)
         return _r.data
 
-    def post_blob(self, owner: str, repo: str, data: str, access_token: GithubAccessToken):
+    def post_blob(self, data: str) -> GithubBlob:
         """
+        Posts a passed data as blob in Github git for the repository.
 
         Args:
-            owner:
-            repo:
-            data:
-            access_token:
+            data (str): Contents of the blob that has to be posted.
 
-        Returns:
-
+        Returns: 
+            GithubBlob object.
+        
         """
-        url: str = f'https://api.github.com/repos/{owner}/{repo}/git/blobs'
-        self._header['Authorization'] = f'token {access_token.access_tkn}'
+        url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/git/blobs'
+        self._header['Authorization'] = f'token {self.__access_token}'
         _data: str = dumps({"content": data})
 
         _r: Response = ResponseHandlers.curl_post_response(url=url, headers=self._header, data=_data)
@@ -119,7 +121,8 @@ class GithubAPIHandler:
         return GithubBlob(data=_r.data)
 
     def commit_files(self, files: list[GitTree], message: str = 'New commit') -> GithubRefObject:
-        """To commit files into the repository.
+        """
+        To commit files into the repository.
 
         Args:
             files (list[GitTree]: Files that needs to be committed
@@ -127,6 +130,8 @@ class GithubAPIHandler:
 
         Returns: GitHub Ref object after new committed files.
 
+        Raises:
+            GithubApiException
         """
         tree: list[dict] = []
         ref_url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/git/refs/heads/{self.branch}'
@@ -195,13 +200,16 @@ class GithubAPIHandler:
         return GithubRefObject(data=_r.data)
 
     def get_release(self, latest: bool = True) -> list[GithubRelease]:
-        """Gets the repository releases
+        """
+        Gets the repository releases
 
         Args:
             latest (bool): To get the only latest release from the repository. Defaults to True
 
         Returns: list of GitHub Releases
 
+        Raise:
+            GithubApiException
         """
         if latest:
             url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/releases/latest'
@@ -221,7 +229,8 @@ class GithubAPIHandler:
             return _l
 
     def trigger_workflow(self, name: str, ref: str = 'master', inputs: dict = None):
-        """ Triggers the specified workflow using an HTTP call.
+        """
+        Triggers the specified workflow using an HTTP call.
 
         Args:
             name (str): file name with extension of the workflow to be triggered.
@@ -247,6 +256,16 @@ class GithubAPIHandler:
         return res
 
     def get_tag(self, tag_name: str) -> GithubTag:
+        """
+        Gets the mentioned tag properties and returns them in a `GithubTag` data class.
+
+        Args:
+            tag_name: name the tag for which the details has to be fetched.
+
+        Returns: GithubTag object.
+
+        Raises: GithubApiException.
+        """
         url: str = f'https://api.github.com/repos/{self.owner}/{self.repo}/tags'
 
         res: Response = ResponseHandlers.curl_get_response(url=url, headers=self._header)
@@ -262,7 +281,8 @@ class GithubAPIHandler:
         return GithubTag(tags[0])
 
     def get_commit(self, sha: str) -> GithubCommit:
-        """Gets Github Commit data using API.
+        """
+        Gets Github Commit data using API.
 
         **Note: this gets the Github Commit object and not Git Commit object**
 
@@ -281,7 +301,8 @@ class GithubAPIHandler:
         return GithubCommit(data=res.data)
 
     def get_milestone(self, name: str) -> Union[GithubMilestone, None]:
-        """ Gets the milestone details for the given milestone name.
+        """
+        Gets the milestone details for the given milestone name.
 
         **Note: implement exception handler because GithubApiException is raised for Error type warning to log this.**
 
@@ -308,7 +329,8 @@ class GithubAPIHandler:
         return None
 
     def create_issue(self, title: str, body: str, milestone: str = None, assignees: list[str] = None, labels: list[str] = None) -> GithubIssue:
-        """ Creates an issue in the given repo.
+        """
+        Creates an issue in the given repo.
 
         Args:
             title (str): Title of the issue.
