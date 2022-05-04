@@ -1,3 +1,3 @@
 from setuptools import setup
 
-setup(name='lib', version="0.1.0a", packages=['lib', 'lib.handlers','lib.data'])
+setup(name='lib', version="1.0.0", packages=['lib', 'lib.handlers','lib.data'])
