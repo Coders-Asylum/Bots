@@ -3,10 +3,10 @@ from lib.handlers import ResponseHandlers, Response
 from shlex import split
 
 
-def install_package(package):
-    args = split('pip3 install {} --retries'.format(package))
-    _r = ResponseHandlers.shell_response(command=args, output=False)
-    return Response.status_code
+# def install_package(package):
+#     args = split('pip3 install {} --retries'.format(package))
+#     _r = ResponseHandlers.shell_response(command=args, output=False)
+#     return Response.status_code
 
 
 class ColoredShellFormatter(Formatter):
@@ -17,15 +17,15 @@ class ColoredShellFormatter(Formatter):
     magenta = "\x1b[0;35m"
     reset = "\x1b[0m"
 
-    format: str = "%(asctime)s:[%(name)s][%(levelname)s]:%(message)s (%(filename)s:%(lineno)d)"
-    format_debug: str = "%(asctime)s:[%(name)s][%(levelname)s]:%(message)s (%(filename)s:%(lineno)d): [%(threadName)s- %(thread)d] [%(process)d]"
+    __format: str = "%(asctime)s:[%(name)s][%(levelname)s]:%(message)s (%(filename)s:%(lineno)d)"
+    __format_debug: str = "%(asctime)s:[%(name)s][%(levelname)s]:%(message)s (%(filename)s:%(lineno)d): [%(threadName)s- %(thread)d] [%(process)d]"
 
     FORMATS = {
-        DEBUG: grey + format_debug + reset,
-        INFO: grey + format + reset,
-        WARNING: yellow + format + reset,
-        ERROR: red + format + reset,
-        CRITICAL: bold_red + format + reset
+        DEBUG: grey + __format_debug + reset,
+        INFO: grey + __format + reset,
+        WARNING: yellow + __format + reset,
+        ERROR: red + __format + reset,
+        CRITICAL: bold_red + __format + reset
     }
 
     def format(self, record):
