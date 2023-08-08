@@ -3,7 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions==1.9.0
-requests==2.27.1
+requests==2.31.0
 colorama==0.4.4
 pyjwt
 cryptography
