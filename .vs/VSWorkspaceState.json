@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.circleci",
+    "\\.github",
+    "\\.github\\workflows",
+    "\\bot",
+    "\\bot\\src"
+  ],
+  "SelectedNode": "\\bot\\function.json",
+  "PreviewInSolutionExplorer": false
+}
