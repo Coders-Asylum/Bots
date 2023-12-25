@@ -38,7 +38,7 @@ jobs:
       - codecov/upload:
           file: ./test/coverage/coverage.cobertura.xml.xml
           flags: unittests
-          token: $CODECOV_TOKEN
+          token: "${CODECOV_TOKEN}"
 
 
 # Invoke jobs via workflows
@@ -47,4 +47,4 @@ workflows:
   run-tests-workflow:
     jobs:
       - run-unittests
-
+      
