@@ -27,4 +27,7 @@
   <ItemGroup>
     <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
+  <PropertyGroup>
+    <CoverletOutput>./tests/coverage</CoverletOutput>
+</PropertyGroup>
 </Project>
