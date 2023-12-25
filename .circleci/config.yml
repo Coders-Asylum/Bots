@@ -12,13 +12,13 @@ workflows:
   setup-workflow:
     jobs:
       - path-filtering/filter:
-        base-revision: origin/master
-        config-path: .circleci/workflows.yml
-        mapping: |
-        *.cs: run-tests true .circleci/workflows.yml
-        *.csproj: run-tests true .circleci/workflows.yml
-        *.sln: run-tests true .circleci/workflows.yml
-        doc/**: generate-docs true .circleci/workflows.yml
-        README.md: generate-docs true .circleci/workflows.yml
-        .circleci/config.yml: generate-docs true .circleci/workflows.yml
+          base-revision: origin/master
+          config-path: .circleci/workflows.yml
+          mapping: |
+            ./**/*.cs: run-tests true 
+            *.csproj: run-tests true 
+            *.sln: run-tests true 
+            doc/**: generate-docs true 
+            README.md: generate-docs true 
+            .circleci/config.yml: generate-docs true
 
