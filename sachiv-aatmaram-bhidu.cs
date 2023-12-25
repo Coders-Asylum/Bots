@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Sachiv.Function
 {
-    public class Sachiv_Aatmaram_Bhidu(ILoggerFactory loggerFactory)
+    public class SachivAatmaramBhidu(ILoggerFactory loggerFactory)
     {
-        private readonly ILogger _logger = loggerFactory.CreateLogger<Sachiv_Aatmaram_Bhidu>();
+        private readonly ILogger _logger = loggerFactory.CreateLogger<SachivAatmaramBhidu>();
 
         [Function("sachiv")]
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req)
