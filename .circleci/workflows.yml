@@ -40,14 +40,13 @@ jobs:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
           paths:
             - ~/.nuget/packages
-      
       - run:
           name: "Run Unit tests in tests/ folder and generate coverage"
           command: "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
       - codecov/upload:
           file: ./test/coverage/coverage.cobertura.xml.xml
           flags: unittests
-          token: ${CODECOV_TOKEN}
+          token: CODECOV_TOKEN
 
 
 # Invoke jobs via workflows
