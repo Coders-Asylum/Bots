@@ -12,7 +12,7 @@ workflows:
     jobs:
       - path-filtering/filter:
           base-revision: origin/master
-          config-path: .circleci/workflows.yml
+          config-path: .circleci/ci_config.yml
           mapping: |
             .*\.cs: run-tests true 
             \.csproj: run-tests true 
