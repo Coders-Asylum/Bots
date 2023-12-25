@@ -7,7 +7,6 @@ setup: true
 orbs:
   path-filtering: circleci/path-filtering@1.0.0
 
-
 workflows:
   setup-workflow:
     jobs:
