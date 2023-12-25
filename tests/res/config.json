@@ -1,0 +1,16 @@
+{
+    "app_config": {
+        "app_name": "test_app",
+        "app_version": "1.0.0",
+        "app_description": "testing if app can read the config file",
+        "app_author": "watcher",
+        "app_author_email": "app.sample@hotmail.com"
+    },
+    "some_text_config": "some_value",
+    "some_list_config": [
+        "some_list_value_1",
+        "some_list_value_2",
+        "some_list_value_3"
+    ],
+    "some_bool_config": true
+}
