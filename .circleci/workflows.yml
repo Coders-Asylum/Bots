@@ -42,7 +42,7 @@ jobs:
             - ~/.nuget/packages
       - run:
           name: "Run Unit tests in tests/ folder and generate coverage"
-          command: "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
+          command: dotnet test .  /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
       - codecov/upload:
           file: ./test/coverage/coverage.cobertura.xml.xml
           flags: unittests
