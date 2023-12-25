@@ -14,10 +14,10 @@ workflows:
           base-revision: origin/master
           config-path: .circleci/workflows.yml
           mapping: |
-            *.cs: run-tests true 
-            *.csproj: run-tests true 
-            *.sln: run-tests true 
-            doc/**: generate-docs true 
+            .*\.cs: run-tests true 
+            \.csproj: run-tests true 
+            \.sln: run-tests true 
+            doc/.*: generate-docs true 
             README.md: generate-docs true 
             .circleci/config.yml: generate-docs true
 
