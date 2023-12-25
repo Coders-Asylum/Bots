@@ -1,0 +1,7 @@
+{
+    "name": "this_is_a_test",
+    "version": "1.0.0",
+    "description": "this is a test",
+    "main": "index.js",
+    "logo": "https://github.com/octokit/octokit.net/blob/main/octokit-dotnet_2.png"
+}

@@ -1,0 +1,59 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+parameters:
+  run-tests:
+    type: boolean
+    default: false
+  generate-docs:
+    type: boolean
+    default: false
+
+orbs:
+  codecov: codecov/codecov@3.3.0
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:   
+  run-unittests:
+  # if needed lets move to a large resource class
+    resource_class: medium 
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:8.0
+    steps:
+      - checkout
+      - run:
+          name: "DOTNET Version"
+          command: "dotnet --version"
+      # restore cached nuget packages
+      - restore_cache:
+          key: nuget-cache-{{ checksum "Bots.csproj" }}
+      - run:
+          name: "Install Packages"
+          command: dotnet restore  
+      # run build to check for errors
+      - run:
+          name: "Build Project"
+          command: dotnet build
+      # cache nuget packages
+      - save_cache:
+          key: nuget-cache-{{ checksum "Bots.csproj" }}
+          paths:
+            - ~/.nuget/packages
+      - run:
+          name: "Run Unit tests in tests/ folder and generate coverage"
+          command: "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
+      - codecov/upload:
+          file: ./test/coverage/coverage.cobertura.xml.xml
+          flags: unittests
+          token: CODECOV_TOKEN
+
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  run-tests-workflow:
+    when: << pipeline.parameters.run-tests >>
+    jobs:
+      - run-unittests
+
