@@ -1,11 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\.github\\workflows",
     "\\bot",
     "\\tests",
-    "\\tests\\res"
+    "\\tests\\res",
+    "\\tests\\src"
   ],
-  "SelectedNode": "\\Bots.sln",
+  "SelectedNode": "\\tests\\src\\ConfigurationTests.cs",
   "PreviewInSolutionExplorer": false
 }
