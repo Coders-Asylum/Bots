@@ -1,8 +1,9 @@
 // write tests using xunit
 
 using System.Text.Json;
-using Bot.Src.Config;
+using Bot.Src;
 using Xunit;
+
 
 namespace tests.src
 {
@@ -11,8 +12,8 @@ namespace tests.src
 
         const string configPathEnv1 = "CONFIG_PATH";
         const string configPathEnv2 = "CONFIG_PATH_2";
-        const string configPath1 = "../res/config.json";
-        const string configPath2 = "../res/config2.json";
+        const string configPath1 = "tests/res/config.json";
+        const string configPath2 = "tests/res/config2.json";
         
         /// <summary>
         /// Tests that the config is loaded from the local config file.
@@ -22,8 +23,6 @@ namespace tests.src
         public void TestLoadConfig()
         {
             // Arrange
-            // class under test
-            Configuration config = new();
             // set config path env variable
             Environment.SetEnvironmentVariable(configPathEnv1, configPath1);
             string configPath = Environment.GetEnvironmentVariable(configPathEnv1) ?? throw new Exception("CONFIG_PATH env variable not found");
@@ -31,10 +30,11 @@ namespace tests.src
             Dictionary<string, dynamic> expectedConfig = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(configFileContents) ?? throw new Exception("Config file found is empty");
 
             // Act
-            config.LoadConfig();
+            Dictionary<string, dynamic> actualConfig = Configuration.LocalConfig;
 
             // Assert
-            Assert.Equal(expectedConfig, config.localConfig);
+            Assert.Equivalent(expectedConfig, actualConfig);
+            
         }
     }
 }
