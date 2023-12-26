@@ -265,3 +265,7 @@ __pycache__/
 
 # PEM files
 *.pem
+
+# coverage file
+*.coverage
+coverage.xml
