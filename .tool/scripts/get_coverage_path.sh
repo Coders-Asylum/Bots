@@ -1,5 +1,5 @@
 
-cd ./tests/results
+baseDir="./tests/results"
 # List all directories within the base directory that match a GUID pattern
 guidDirs=$(ls -d $baseDir/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
 
