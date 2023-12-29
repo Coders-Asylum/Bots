@@ -11,7 +11,6 @@ workflows:
   setup-workflow:
     jobs:
       - path-filtering/filter:
-          base-revision: origin/master
           config-path: .circleci/workflows.yml
           mapping: |
             .*\.cs: run-tests true 
