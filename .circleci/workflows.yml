@@ -45,7 +45,7 @@ jobs:
           command: dotnet test Bots.csproj --collect "Code Coverage;Format=Cobertura" --no-build -v normal -s .runsettings
       - run:
           name: "Get coverage file path"
-          command: chmod +x ../tool/scripts/get_coverage_path.sh && ../tool/scripts/get_coverage_path.sh
+          command: chmod +x .tool/scripts/get_coverage_path.sh && ../tool/scripts/get_coverage_path.sh
       - codecov/upload:
           file: $COVERAGE_FILE_PATH
           flags: unittests
