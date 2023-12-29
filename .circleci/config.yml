@@ -21,4 +21,5 @@ workflows:
             doc/.* generate-docs true 
             README.md generate-docs true 
             .circleci/config.yml generate-docs true
+            .circleci/config.yml run-tests true
 
