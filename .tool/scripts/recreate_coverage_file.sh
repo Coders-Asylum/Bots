@@ -21,6 +21,6 @@ printf "\U2603 Found Coverage file at: $coverageFilePath \n"
 
 printf "\U2603 Copying contents from $coverageFilePath \U27A0 $baseDir/coverage.xml \n"
 # create the file outside of results directory by coping contents of coverage.xml
-cp $coverageFilePath $baseDir/coverage.xml
+cp "$coverageFilePath" "$baseDir/coverage.xml"
 
 printf "\U2603 Coverage file ready at $baseDir/coverage.xml. \n"
