@@ -2,7 +2,6 @@
 
 baseDir="tests/results"
 
-
 # list all directories and subdirectories
 ls -R $baseDir
 
@@ -15,8 +14,7 @@ latestGuidDir=$(echo "$dirs" | sort -r | head -n1)
 coverageFilePath="./$latestGuidDir/coverage.xml"
 
 # set this as env var
-echo 'export COVERAGE_FILE_PATH=$coverageFilePath' >> $BASH_ENV
+echo 'export COVERAGE_FILE_PATH="$coverageFilePath"' >>"$BASH_ENV"
 
-
-# print the coverage file path.
-echo "Coverage file path:$COVERAGE_FILE_PATH"
+# # print the coverage file path.
+# echo "Coverage file path:$COVERAGE_FILE_PATH"
