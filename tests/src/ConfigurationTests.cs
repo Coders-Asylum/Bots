@@ -3,7 +3,7 @@
 using System.Text.Json;
 using Bot.Src;
 using Xunit;
-
+using Moq;
 
 namespace tests.src
 {
@@ -14,13 +14,27 @@ namespace tests.src
         const string configPathEnv2 = "CONFIG_PATH_2";
         const string configPath1 = "tests/res/config.json";
         const string configPath2 = "tests/res/config2.json";
-        
+        const string emptyJsonFilePath = "tests/res/empty.json";
+        const string invalidJsonFilePath = "tests/res/error.json";
+
+
+        /// <summary>
+        /// Test has been loaded flag is set to true after static constructor is called.
+        /// </summary>
+        [Fact]
+        public void TestHasBeenLoadedFlagIsSetToTrue()
+        {
+            // Arrange
+            // Act
+            // Assert
+            Assert.True(Configuration.HasBeenLoaded);
+        }
         /// <summary>
         /// Tests that the config is loaded from the local config file.
         /// </summary>
         /// <exception cref="Exception"></exception>
         [Fact]
-        public void TestLoadConfig()
+        public void TestLoacalConfigIsLoaded()
         {
             // Arrange
             // set config path env variable
@@ -34,14 +48,15 @@ namespace tests.src
 
             // Assert
             Assert.Equivalent(expectedConfig, actualConfig);
-            
+
         }
 
         /// <summary>
         /// Test that once config is loaded, it is not loaded again.
         /// </summary>
         [Fact]
-        public void TestLocalConfigIsLoadedOnce(){
+        public void TestLocalConfigIsLoadedOnce()
+        {
             // Arrange
             // set config path env variable
             Environment.SetEnvironmentVariable(configPathEnv1, configPath1);
@@ -60,14 +75,55 @@ namespace tests.src
             // TESTS
             // Assert equivalent to expectedConfig1
             Assert.Equivalent(expectedConfig1, actualConfig);
-            // Assert HasBeenLoaded is true
-            Assert.True(Configuration.HasBeenLoaded);
             // not equivalent to expectedConfig2
             Assert.NotEqual(expectedConfig2, actualConfig);
             // test if second time loaded config is equivalent to first time loaded.
             Assert.Equivalent(expectedConfig1, actualConfig2);
         }
 
-        
+        /// <summary>
+        /// Exception is thrown if config path env variable is not found.
+        /// </summary>
+        [Fact]
+        public void TestLoadConfigThrowsExceptionIfConfigPathEnvVariableNotFound()
+        {
+            // Arrange
+            // unset config path env variable
+            Environment.SetEnvironmentVariable(configPathEnv1, null);
+
+            // Act
+            // Assert
+            Assert.Throws<Exception>(() => Configuration.LoadConfig());
+        }
+
+        /// <summary>
+        /// Exception is thrown if config file contents is null.
+        /// </summary>
+        [Fact]
+        public void TestLoadConfigThrowsExceptionIfConfigFileContentsIsNull()
+        {
+            // Arrange
+            // set config path env variable
+            Environment.SetEnvironmentVariable(configPathEnv1, emptyJsonFilePath);
+            // Act
+            // Assert
+            Assert.Throws<Exception>(() => Configuration.LoadConfig());
+        }
+
+        /// <summary>
+        /// Exception is thrown if config file is not valid json.
+        /// </summary>
+        [Fact]
+        public void TestLoadConfigThrowsExceptionIfConfigFileIsNotValidJson()
+        {
+            // Arrange
+            // set config path env variable
+            Environment.SetEnvironmentVariable(configPathEnv1, invalidJsonFilePath);
+            // Act
+            // Assert
+            Assert.Throws<Exception>(() => Configuration.LoadConfig());
+        }
+
+
     }
 }

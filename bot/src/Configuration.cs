@@ -11,8 +11,13 @@ namespace Bot.Src
         private static readonly bool _hasBeenLoaded;
         static Configuration()
         {
-            LoadConfig();
-            _hasBeenLoaded = true;
+            if (!_hasBeenLoaded)
+            {
+                // Any thing that must be loaded once, must be called before this line.
+                _hasBeenLoaded = true;
+            }
+
+
         }
 
         /// <summary>
@@ -26,11 +31,22 @@ namespace Bot.Src
         public static void LoadConfig()
         {
             //read from env variable
-            if (_localConfig == null || _localConfig.Count == 0)
+            string configPath = Environment.GetEnvironmentVariable("CONFIG_PATH") ?? throw new Exception("CONFIG_PATH env variable not found");
+            string configFileContents = File.ReadAllText(configPath);
+            if (configFileContents == "" || configFileContents == null)
             {
-                string configPath = Environment.GetEnvironmentVariable("CONFIG_PATH") ?? throw new Exception("CONFIG_PATH env variable not found");
-                string configFileContents = File.ReadAllText(configPath);
-                _localConfig = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(configFileContents) ?? throw new Exception("Config file found is empty");
+                // todo: @Maverick099 to look if error really needs to be thrown here.
+                throw new Exception("Config file found is empty.");
+            }
+            try
+            {
+                _localConfig = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(configFileContents) ?? [];
+
+            }
+            catch (Exception e)
+            {
+                // wrap the exception in a more meaningful with actual exception message
+                throw new Exception($"Config file is not valid json file.Error:{e.Message}");
             }
         }
 
@@ -42,11 +58,12 @@ namespace Bot.Src
         {
             get
             {
-                if (!_hasBeenLoaded)
+                if (_localConfig == null || _localConfig.Count == 0)
                 {
                     LoadConfig();
                 }
-                return _localConfig;
+
+                return _localConfig ?? [];
             }
         }
 
