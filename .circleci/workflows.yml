@@ -49,7 +49,9 @@ jobs:
             - ~/.nuget/packages
       - run:
           name: "Run Unit tests in tests/ folder and generate coverage"
-          command: dotnet test Bots.csproj --collect "Code Coverage;Format=Cobertura" --no-build -v normal -s .runsettings
+          command: | 
+            coverageFilePath=$( dotnet test Bots.csproj --collect "Code Coverage;Format=Cobertura" --no-build -v normal -s .runsettings | tail -1)
+            export COVERAGE_FILE_PATH=$(echo $coverageFilePath)
       - run:
           name: "Get coverage file path"
           command: chmod +x .tool/scripts/get_coverage_path.sh && .tool/scripts/get_coverage_path.sh
