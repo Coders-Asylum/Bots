@@ -6,6 +6,8 @@ baseDir="tests/results"
 # list all directories and subdirectories
 ls -R $baseDir
 
+ls -R
+
 # Capture all directories.
 dirs=$(ls -d $baseDir/*)
 
