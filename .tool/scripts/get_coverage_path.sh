@@ -1,7 +1,12 @@
 #!/bin/sh
 
 baseDir="tests/results"
-# List all directories within the base directory that match a GUID pattern
+
+
+# list all directories and subdirectories
+ls -R $baseDir
+
+# Capture all directories.
 dirs=$(ls -d $baseDir/*)
 
 # Extract the latest directory using regex matching based on modification time
