@@ -29,7 +29,8 @@ jobs:
       - run:
           name: "Install gpg packages."
           command: |
-            apt-get install gpg
+            apt-get update
+            apt-get install -qq -y gpg
             gpg --version
       # restore cached nuget packages
       - restore_cache:
