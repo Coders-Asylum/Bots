@@ -24,52 +24,48 @@ jobs:
       - image: mcr.microsoft.com/dotnet/sdk:8.0
     steps:
       - checkout
+      
       - run:
           name: "DOTNET Version"
           command: "dotnet --version"
           # install gpg packages needed by codecov uploader.
+      
       - run:
           name: "Install gpg packages."
           command: |
             apt-get update
             apt-get install -qq -y gpg
             gpg --version
+      
       # restore cached nuget packages
       - restore_cache:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
+      
       - run:
           name: "Install Packages"
           command: dotnet restore  
+      
       # run build to check for errors
       - run:
           name: "Build Project"
           command: dotnet build
+      
       # cache nuget packages
       - save_cache:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
           paths:
             - ~/.nuget/packages
+      
       - run:
           name: "Run Unit tests in tests/ folder and generate coverage"
           command: dotnet test Bots.csproj --collect "Code Coverage;Format=Cobertura" --no-build -v normal -s .runsettings
+      
       - run:
-          name: "Get coverage file path"
-          command: |
-            baseDir="tests/results"
-            ls -R $baseDir
-            dirs=$(ls -d $baseDir/*)
-            latestGuidDir=$(echo "$dirs" | sort -r | head -n1)
-            coverageFilePath="./$latestGuidDir/coverage.xml"
-            echo "coverageFilePath=$coverageFilePath"
-            echo 'export COVERAGE_FILE_PATH=$coverageFilePath' >> $BASH_ENV
-            echo . ~/.profile >> $BASH_ENV
-      - run:
-          name: "Upload coverage to codecov"
-          command: |
-            source ~/.profile 
-            echo ${COVERAGE_FILE_PATH}
+          name: "Extract coverage file outside of default folder"
+          command: chmod +x .tool/scripts/recreate_coverage_file.sh && .tool/scripts/recreate_coverage_file.sh
+        
       - codecov/upload:
-          file: "./tests/results/" 
+          file: "./tests/results/coverage.xml" 
           flags: unittests
           token: CODECOV_TOKEN
 
