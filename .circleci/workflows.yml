@@ -27,7 +27,7 @@ jobs:
           command: "dotnet --version"
       - run:
           name: "Install gpg"
-          command: sudo apt-get install gnupg gpg && gpg --version
+          command: sudo apt-get install gnupg gpg
       # restore cached nuget packages
       - restore_cache:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
