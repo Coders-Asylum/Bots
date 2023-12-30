@@ -58,12 +58,13 @@ jobs:
             dirs=$(ls -d $baseDir/*)
             latestGuidDir=$(echo "$dirs" | sort -r | head -n1)
             coverageFilePath="./$latestGuidDir/coverage.xml"
+            echo "coverageFilePath=$coverageFilePath"
             echo 'export COVERAGE_FILE_PATH="$coverageFilePath"' >> "$BASH_ENV"
       - run:
           name: "Upload coverage to codecov"
-          command: echo "coveragePath=$COVERAGE_FILE_PATH"
+          command: echo "coveragePath=${COVERAGE_FILE_PATH}"
       - codecov/upload:
-          file: ${COVERAGE_FILE_PATH}
+          file: "${COVERAGE_FILE_PATH}"
           flags: unittests
           token: CODECOV_TOKEN
 
