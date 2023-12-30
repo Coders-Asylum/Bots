@@ -52,7 +52,13 @@ jobs:
           command: dotnet test Bots.csproj --collect "Code Coverage;Format=Cobertura" --no-build -v normal -s .runsettings
       - run:
           name: "Get coverage file path"
-          command: chmod +x .tool/scripts/get_coverage_path.sh && .tool/scripts/get_coverage_path.sh
+          command: |
+            baseDir="tests/results"
+            ls -R $baseDir
+            dirs=$(ls -d $baseDir/*)
+            latestGuidDir=$(echo "$dirs" | sort -r | head -n1)
+            coverageFilePath="./$latestGuidDir/coverage.xml"
+            echo 'export COVERAGE_FILE_PATH="$coverageFilePath"' >> "$BASH_ENV"
       - run:
           name: "Upload coverage to codecov"
           command: echo "coveragePath=$COVERAGE_FILE_PATH"
