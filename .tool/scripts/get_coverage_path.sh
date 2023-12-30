@@ -15,7 +15,8 @@ latestGuidDir=$(echo "$dirs" | sort -r | head -n1)
 coverageFilePath="./$latestGuidDir/coverage.xml"
 
 # set this as env var
-export COVERAGE_FILE_PATH="$coverageFilePath"
+echo 'export COVERAGE_FILE_PATH=$coverageFilePath' >> $BASH_ENV
+
 
 # print the coverage file path.
 echo "Coverage file path:$COVERAGE_FILE_PATH"
