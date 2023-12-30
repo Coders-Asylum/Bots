@@ -36,5 +36,38 @@ namespace tests.src
             Assert.Equivalent(expectedConfig, actualConfig);
             
         }
+
+        /// <summary>
+        /// Test that once config is loaded, it is not loaded again.
+        /// </summary>
+        [Fact]
+        public void TestLocalConfigIsLoadedOnce(){
+            // Arrange
+            // set config path env variable
+            Environment.SetEnvironmentVariable(configPathEnv1, configPath1);
+            string configFileContents1 = File.ReadAllText(configPath1);
+            string configFileContents2 = File.ReadAllText(configPath2);
+
+            Dictionary<string, dynamic> expectedConfig1 = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(configFileContents1) ?? throw new Exception("Config file found is empty");
+            Dictionary<string, dynamic> expectedConfig2 = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(configFileContents2) ?? throw new Exception("Config file found is empty");
+            // Act
+            Dictionary<string, dynamic> actualConfig = Configuration.LocalConfig;
+            // set config path env varible again for different config file
+            Environment.SetEnvironmentVariable(configPathEnv1, configPath2);
+            // load config again.
+            Dictionary<string, dynamic> actualConfig2 = Configuration.LocalConfig;
+
+            // TESTS
+            // Assert equivalent to expectedConfig1
+            Assert.Equivalent(expectedConfig1, actualConfig);
+            // Assert HasBeenLoaded is true
+            Assert.True(Configuration.HasBeenLoaded);
+            // not equivalent to expectedConfig2
+            Assert.NotEqual(expectedConfig2, actualConfig);
+            // test if second time loaded config is equivalent to first time loaded.
+            Assert.Equivalent(expectedConfig1, actualConfig2);
+        }
+
+        
     }
 }
