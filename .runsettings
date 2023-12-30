@@ -16,7 +16,7 @@
         <!--<TestAdaptersPaths>%SystemDrive%\Temp\foo;%SystemDrive%\Temp\bar</TestAdaptersPaths>-->
         <TreatTestAdapterErrorsAsWarnings>false</TreatTestAdapterErrorsAsWarnings>
         <!-- Path relative to solution directory -->
-        <ResultsDirectory>.\tests\results</ResultsDirectory>
+        <ResultsDirectory>tests/results</ResultsDirectory>
 
         <!-- 0 = As many processes as possible, limited by number of cores on machine, 1 = Sequential (1 process), 2-> Given number of processes up to limit by number of cores on machine-->
         <!-- <MaxCpuCount>1</MaxCpuCount> -->
