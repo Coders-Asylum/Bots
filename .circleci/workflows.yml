@@ -25,9 +25,14 @@ jobs:
       - run:
           name: "DOTNET Version"
           command: "dotnet --version"
+          # install gpg packages needed by codecov uploader.
       - run:
-          name: "Install gpg"
-          command: sudo apt-get install gnupg gpg
+          name: "Install gpg packages."
+          command: |
+            apt-get install gnupg 
+            apt get install gnupg2
+            apt-get install gpg
+            gpg --version
       # restore cached nuget packages
       - restore_cache:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
