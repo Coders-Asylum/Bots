@@ -64,7 +64,7 @@ jobs:
           name: "Upload coverage to codecov"
           command: echo "coveragePath=${COVERAGE_FILE_PATH}"
       - codecov/upload:
-          file: "${COVERAGE_FILE_PATH}"
+          file: "./tests/results/" 
           flags: unittests
           token: CODECOV_TOKEN
 
