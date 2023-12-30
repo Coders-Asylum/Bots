@@ -3,10 +3,10 @@ using Sentry;
 namespace Bot.Initialise
 {
 
-    public static class Sentry
+    public class Sentry
     {
 
-        public static void Main()
+        static Sentry()
         {
 
             // Initialise the bot
@@ -17,6 +17,7 @@ namespace Bot.Initialise
             // Initialise the API
             // Initialise the webserver
             // Initialise the websockets
+
             // Initialise the database
         }
     }
