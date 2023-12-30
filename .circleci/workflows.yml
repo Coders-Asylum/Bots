@@ -16,7 +16,6 @@ orbs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:   
   run-unittests:
-    shell: /bin/sh -leo pipefail
     environment:
       BASH_ENV: /etc/profile
   # if needed lets move to a large resource class
@@ -62,7 +61,8 @@ jobs:
             latestGuidDir=$(echo "$dirs" | sort -r | head -n1)
             coverageFilePath="./$latestGuidDir/coverage.xml"
             echo "coverageFilePath=$coverageFilePath"
-            echo 'export COVERAGE_FILE_PATH=$coverageFilePath' >> "$BASH_ENV"
+            echo 'export COVERAGE_FILE_PATH=$coverageFilePath' >> $BASH_ENV
+            echo 'source $BASH_ENV' >> $HOME/.profile
       - run:
           name: "Upload coverage to codecov"
           command: echo ${COVERAGE_FILE_PATH}
