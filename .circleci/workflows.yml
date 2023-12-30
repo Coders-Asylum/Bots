@@ -53,6 +53,9 @@ jobs:
       - run:
           name: "Get coverage file path"
           command: chmod +x .tool/scripts/get_coverage_path.sh && .tool/scripts/get_coverage_path.sh
+      - run:
+          name: "Upload coverage to codecov"
+          command: echo $COVERAGE_FILE_PATH
       - codecov/upload:
           file: ${COVERAGE_FILE_PATH}
           flags: unittests
