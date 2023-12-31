@@ -27,9 +27,11 @@ namespace tests.src
         public void TestHasBeenLoadedFlagIsSetToTrue()
         {
             // Arrange
+            Environment.SetEnvironmentVariable(configPathEnv1, configPath1);
             // Act
             // Assert
             Assert.True(Configuration.HasBeenLoaded);
+            Assert.NotNull(Configuration.LocalConfig);
         }
         /// <summary>
         /// Tests that the config is loaded from the local config file.
