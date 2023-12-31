@@ -1,23 +1,24 @@
+// Copyright (c) 2023 the CODERS Asylum project authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
 using System.Text.Json;
 
 namespace Bot.Src
 {
     public static class Configuration
     {
-        private static Dictionary<string, dynamic> _localConfig = new();
+        private static Dictionary<string, dynamic> _localConfig = [];
         /// <summary>
         /// A flag to check if the config has been loaded.
         /// </summary>
         private static readonly bool _hasBeenLoaded;
+
         static Configuration()
         {
-            if (!_hasBeenLoaded)
-            {
-                // Any thing that must be loaded once, must be called before this line.
-                _hasBeenLoaded = true;
-            }
-
-
+            LoadConfig();
+            // call all the funtions before this line.
+            _hasBeenLoaded = true;
         }
 
         /// <summary>
