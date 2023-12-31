@@ -59,11 +59,6 @@ namespace Bot.Src
         {
             get
             {
-                if (_localConfig == null || _localConfig.Count == 0)
-                {
-                    LoadConfig();
-                }
-
                 return _localConfig ?? [];
             }
         }
