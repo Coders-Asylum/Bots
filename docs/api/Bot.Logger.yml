@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: Bot.Logger
+  commentId: N:Bot.Logger
+  id: Bot.Logger
+  children:
+  - Bot.Logger.Logger
+  langs:
+  - csharp
+  - vb
+  name: Bot.Logger
+  nameWithType: Bot.Logger
+  fullName: Bot.Logger
+  type: Namespace
+  assemblies:
+  - Bots
+references:
+- uid: Bot.Logger.Logger
+  commentId: T:Bot.Logger.Logger
+  href: Bot.Logger.Logger.html
+  name: Logger
+  nameWithType: Logger
+  fullName: Bot.Logger.Logger
