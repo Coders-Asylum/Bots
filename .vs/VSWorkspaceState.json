@@ -2,10 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\bot",
+    "\\bot\\src",
     "\\tests",
     "\\tests\\res",
     "\\tests\\src"
   ],
-  "SelectedNode": "\\tests\\src\\ConfigurationTests.cs",
+  "SelectedNode": "\\Bots.sln",
   "PreviewInSolutionExplorer": false
 }
