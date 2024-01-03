@@ -5,9 +5,8 @@
 using System.Text.Json;
 using Bot.Src;
 using Xunit;
-using Moq;
 
-namespace tests.src
+namespace Tests.Src
 {
     public class ConfigurationTests
     {
