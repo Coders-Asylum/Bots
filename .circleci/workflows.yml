@@ -16,35 +16,56 @@ orbs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:   
   run-unittests:
+    environment:
+      BASH_ENV: /etc/profile
   # if needed lets move to a large resource class
     resource_class: medium 
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:8.0
     steps:
       - checkout
+      
       - run:
           name: "DOTNET Version"
           command: "dotnet --version"
+          # install gpg packages needed by codecov uploader.
+      
+      - run:
+          name: "Install gpg packages."
+          command: |
+            apt-get update
+            apt-get install -qq -y gpg
+            gpg --version
+      
       # restore cached nuget packages
       - restore_cache:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
+      
       - run:
           name: "Install Packages"
           command: dotnet restore  
+      
       # run build to check for errors
       - run:
           name: "Build Project"
           command: dotnet build
+      
       # cache nuget packages
       - save_cache:
           key: nuget-cache-{{ checksum "Bots.csproj" }}
           paths:
             - ~/.nuget/packages
+      
       - run:
           name: "Run Unit tests in tests/ folder and generate coverage"
-          command: "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
+          command: dotnet test Bots.csproj --collect "Code Coverage;Format=Cobertura" --no-build -v normal -s .runsettings
+      
+      - run:
+          name: "Extract coverage file outside of default folder"
+          command: chmod +x .tool/scripts/recreate_coverage_file.sh && .tool/scripts/recreate_coverage_file.sh
+        
       - codecov/upload:
-          file: ./test/coverage/coverage.cobertura.xml.xml
+          file: "./tests/results/coverage.xml" 
           flags: unittests
           token: CODECOV_TOKEN
 

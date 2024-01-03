@@ -1,0 +1,6 @@
+// File with errored JSON 
+{
+    {
+        "P": "error"
+    }
+}
