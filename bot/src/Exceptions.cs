@@ -11,24 +11,24 @@ namespace Bot.Exceptions
     ///    Custom error codes to be used in <see cref="AppException"/>
     ///    Use these codes to construct custom error messages.
     /// </summary>
-    public class ErrorCodes
+    public static class ErrorCodes
     {
         /// <value>
         /// Error code for invalid input
         /// </value>
-        public static string InvalidInput = "INVALID_INPUT";
+        public static readonly string InvalidInput = "INVALID_INPUT";
         /// <value>
         /// Error code for unauthorized access
         /// </value>
-        public static string UnauthorizedAccess = "UNAUTHORIZED_ACCESS";
+        public static readonly string UnauthorizedAccess = "UNAUTHORIZED_ACCESS";
         /// <value>
         /// Error code for database errors
         /// </value>
-        public static string DatabaseError = "DATABASE_ERROR";
+        public static readonly string DatabaseError = "DATABASE_ERROR";
         /// <value>
         /// Error code for internal errors
         /// </value>
-        public static string InternalError = "INTERNAL_ERROR";
+        public static readonly string InternalError = "INTERNAL_ERROR";
     }
 
     /// <summary>
@@ -39,8 +39,6 @@ namespace Bot.Exceptions
     public class AppException : Exception
     {
 
-
-        private readonly ILogger _logger;
         private readonly Exception? _error;
 
         private readonly Dictionary<string, string> _errorResponse;
@@ -49,13 +47,12 @@ namespace Bot.Exceptions
         /// <param name="message"> Error custom message to make it easier for clients to understnad</param>
         /// <param name="error">The actual captured internal error,if any</param>
         /// <param name="statusCode">An HTTP status code for this error, will be returned as response. Defaults to 500</param>
-        /// <param name="loggerFactory"> </param>
+        /// <param name="logger"> A logger instance to be passed</param>
         public AppException(string code, string message, Exception? error, int statusCode, ILogger logger) : base($"[ERROR]{code}::{message}" + (error != null ? $"\n-InternalError: {error.Message}" : ""), error)
         {
             Code = code;
             StatusCode = statusCode;
             _error = error;
-            _logger = logger;
             _errorResponse = new Dictionary<string, string>
             {
                 {"code", code },
@@ -63,7 +60,7 @@ namespace Bot.Exceptions
                 {"innerError", error?.Message ?? "INNER_ERROR_NOT_AVAILABLE"},
                 {"stackTrace", error?.StackTrace ?? "STACK_TRACE_NOT_AVAILABLE"}
             };
-            _logger.LogError("[ERROR]{code}::{message}- InternalError: {error.Message}", code, message, _error?.Message ?? "ERROR_MESSAGE_NOT_AVAILABLE");
+            logger.LogError("[ERROR]{code}::{message}- InternalError: {error.Message}", code, message, _error?.Message ?? "ERROR_MESSAGE_NOT_AVAILABLE");
         }
 
 
