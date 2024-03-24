@@ -5,3 +5,8 @@ test
 .venv
 tests
 docs
+.github
+.idea
+.vscode
+.vs
+.tool

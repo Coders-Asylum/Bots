@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
+using Bots.Src.Utils;
 using Microsoft.Extensions.Logging;
 
 namespace Bot.Exceptions
@@ -48,7 +49,7 @@ namespace Bot.Exceptions
         /// <param name="error">The actual captured internal error,if any</param>
         /// <param name="statusCode">An HTTP status code for this error, will be returned as response. Defaults to 500</param>
         /// <param name="logger"> A logger instance to be passed</param>
-        public AppException(string code, string message, Exception? error, int statusCode, ILogger logger) : base($"[ERROR]{code}::{message}" + (error != null ? $"\n-InternalError: {error.Message}" : ""), error)
+        public AppException(string code, string message, Exception? error, int statusCode, ILogger logger) : base($"[ERROR]{code}::{message}" + (error != null ? $"- InternalError: {error.Message}" : ""), error)
         {
             Code = code;
             StatusCode = statusCode;
@@ -82,6 +83,33 @@ namespace Bot.Exceptions
             return _errorResponse;
         }
 
+    }
+
+
+    /// <summary>
+    ///   Exceptions caught with the module and function details.
+    ///   Use this class to throw exceptions from within module and function details.
+    /// <example>
+    ///    <code>
+    ///    throw new ModuleException("MODULE_NAME", "FUNCTION_NAME", "ERROR_MESSAGE", exception);
+    ///    </code>
+    ///  </example>
+    ///</summary>
+    /// <remarks>
+    ///  <para>
+    ///  This class is used to throw exceptions from within module and function details.
+    ///  </para>
+    ///  <para>
+    /// <remarks>
+    ///   Constructs a new instance of the <see cref="AppModuleException"/> class.
+    /// </remarks>
+    /// <param name="module">The module name.</param>
+    /// <param name="function">The function name.</param>
+    /// <param name="message">The error message.</param>
+    /// <param name="error">The actual captured internal error,if any</param>
+    /// </summary>
+    public class AppModuleException(string module, string function, string message, Exception? error) : AppException(ErrorCodes.InternalError, $"[{module}][{function}]:{message}", error, HTTPStatus.INTERNAL_SERVER_ERROR, new Logger<AppModuleException>(new LoggerFactory()))
+    {
     }
 
 }

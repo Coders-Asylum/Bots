@@ -3,16 +3,22 @@
 // that can be found in the LICENSE file.
 
 using System.Text.Json;
+using Bot.Exceptions;
 
 namespace Bot.Src
 {
-    public static class Configuration
+    public class Configuration(string appId)
     {
         private static Dictionary<string, dynamic> _localConfig = [];
         /// <summary>
         /// A flag to check if the config has been loaded.
         /// </summary>
         private static readonly bool _hasBeenLoaded;
+
+        /// <summary>
+        /// appid of the bot.
+        /// </summary>
+        private readonly static string _appid;
 
         static Configuration()
         {
@@ -72,6 +78,22 @@ namespace Bot.Src
             get
             {
                 return _hasBeenLoaded;
+            }
+        }
+
+        /// <summary>
+        /// Application id of the bot.
+        /// </summary>
+        public static string AppId
+        {
+            get
+            {
+                if (_appid == null || _appid == "")
+                {
+                    throw new AppModuleException("Configuration", "AppId", "AppId is not set or found null.", null);
+                }
+                return _appid;
+
             }
         }
     }

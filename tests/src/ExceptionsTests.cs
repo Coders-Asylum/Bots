@@ -191,4 +191,26 @@ namespace Tests.Src
         }
 
     }
+
+
+    public class AppModuleExceptionTests
+    {
+        [Fact]
+        public void TestAppModuleExceptionConstructor()
+        {
+            // Arrange
+            string module = "TestModule";
+            string function = "TestFunction";
+            string message = "TestMessage";
+            Exception error = new Exception("TestException");
+            // Act
+            AppModuleException exception = new AppModuleException(module, function, message, error);
+
+            // Assert
+            Assert.Equal(ErrorCodes.InternalError, exception.Code);
+            Assert.StartsWith($"[ERROR]INTERNAL_ERROR::[{module}][{function}]:{message}", exception.Message);
+            Assert.Equal(error, exception.InnerException);
+            Assert.Equal(500, exception.StatusCode);
+        }
+    }
 }
