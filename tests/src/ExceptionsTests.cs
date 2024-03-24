@@ -208,7 +208,7 @@ namespace Tests.Src
 
             // Assert
             Assert.Equal(ErrorCodes.InternalError, exception.Code);
-            Assert.Equal($"[{module}][{function}]:{message}", exception.Message);
+            Assert.StartsWith($"[ERROR]INTERNAL_ERROR::[{module}][{function}]:{message}", exception.Message);
             Assert.Equal(error, exception.InnerException);
             Assert.Equal(500, exception.StatusCode);
         }
