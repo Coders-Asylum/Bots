@@ -1,39 +1,90 @@
 ### YamlMime:TableOfContent
-items:
-- uid: Bot.Exceptions
-  name: Bot.Exceptions
+- name: Bot.Exceptions
+  href: Bot.Exceptions.md
   items:
-  - uid: Bot.Exceptions.AppException
-    name: AppException
-  - uid: Bot.Exceptions.ErrorCodes
-    name: ErrorCodes
-- uid: Bot.Logger
-  name: Bot.Logger
+  - name: Classes
+  - name: AppException
+    href: Bot.Exceptions.AppException.md
+  - name: AppModuleException
+    href: Bot.Exceptions.AppModuleException.md
+  - name: ErrorCodes
+    href: Bot.Exceptions.ErrorCodes.md
+- name: Bot.Lib.Handlers
+  href: Bot.Lib.Handlers.md
   items:
-  - uid: Bot.Logger.Logger
-    name: Logger
-- uid: Bot.Src
-  name: Bot.Src
+  - name: Classes
+  - name: PullRequestHandler
+    href: Bot.Lib.Handlers.PullRequestHandler.md
+  - name: Enums
+  - name: GitHubEvents
+    href: Bot.Lib.Handlers.GitHubEvents.md
+- name: Bot.Logger
+  href: Bot.Logger.md
   items:
-  - uid: Bot.Src.Configuration
-    name: Configuration
-- uid: Bots
-  name: Bots
+  - name: Classes
+  - name: Logger
+    href: Bot.Logger.Logger.md
+- name: Bot.Src
+  href: Bot.Src.md
   items:
-  - uid: Bots.FunctionExecutorHostBuilderExtensions
-    name: FunctionExecutorHostBuilderExtensions
-  - uid: Bots.WorkerHostBuilderFunctionMetadataProviderExtension
-    name: WorkerHostBuilderFunctionMetadataProviderExtension
-- uid: Sachiv.Function
-  name: Sachiv.Function
+  - name: Classes
+  - name: Configuration
+    href: Bot.Src.Configuration.md
+- name: Bot.Src.Interfaces
+  href: Bot.Src.Interfaces.md
   items:
-  - uid: Sachiv.Function.SachivAatmaramBhidu
-    name: SachivAatmaramBhidu
-- uid: Tests.Src
-  name: Tests.Src
+  - name: Interfaces
+  - name: IHandler
+    href: Bot.Src.Interfaces.IHandler.md
+- name: Bot.Src.Utils
+  href: Bot.Src.Utils.md
   items:
-  - uid: Tests.Src.ConfigurationTests
-    name: ConfigurationTests
-  - uid: Tests.Src.LoggerTests
-    name: LoggerTests
-memberLayout: SamePage
+  - name: Classes
+  - name: Authentication
+    href: Bot.Src.Utils.Authentication.md
+- name: Bots
+  href: Bots.md
+  items:
+  - name: Classes
+  - name: FunctionExecutorHostBuilderExtensions
+    href: Bots.FunctionExecutorHostBuilderExtensions.md
+  - name: WorkerHostBuilderFunctionMetadataProviderExtension
+    href: Bots.WorkerHostBuilderFunctionMetadataProviderExtension.md
+- name: Bots.Src.Utils
+  href: Bots.Src.Utils.md
+  items:
+  - name: Structs
+  - name: Algorithms
+    href: Bots.Src.Utils.Algorithms.md
+  - name: Constants
+    href: Bots.Src.Utils.Constants.md
+  - name: HTTPStatus
+    href: Bots.Src.Utils.HTTPStatus.md
+- name: Sachiv.Function
+  href: Sachiv.Function.md
+  items:
+  - name: Classes
+  - name: SachivAatmaramBhidu
+    href: Sachiv.Function.SachivAatmaramBhidu.md
+- name: Tests.Src
+  href: Tests.Src.md
+  items:
+  - name: Classes
+  - name: AppExceptionTests
+    href: Tests.Src.AppExceptionTests.md
+  - name: AppModuleExceptionTests
+    href: Tests.Src.AppModuleExceptionTests.md
+  - name: ConfigurationTests
+    href: Tests.Src.ConfigurationTests.md
+  - name: ErrorCodesTests
+    href: Tests.Src.ErrorCodesTests.md
+  - name: LoggerTests
+    href: Tests.Src.LoggerTests.md
+- name: Tests.Src.Utils
+  href: Tests.Src.Utils.md
+  items:
+  - name: Classes
+  - name: AuthTests
+    href: Tests.Src.Utils.AuthTests.md
+  - name: ConstantsTests
+    href: Tests.Src.Utils.ConstantsTests.md

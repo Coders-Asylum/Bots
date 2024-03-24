@@ -9,37 +9,8 @@
           ]
         }
       ],
-      "dest": "api"
+      "dest": "api",
+      "outputFormat": "markdown"
     }
-  ],
-  "build": {
-    "content": [
-      {
-        "files": [
-          "**/*.{md,yml}"
-        ],
-        "exclude": [
-          "_site/**"
-        ]
-      }
-    ],
-    "resource": [
-      {
-        "files": [
-          "images/**"
-        ]
-      }
-    ],
-    "output": "_site",
-    "template": [
-      "default",
-      "modern"
-    ],
-    "globalMetadata": {
-      "_appName": "Bot",
-      "_appTitle": "Bot",
-      "_enableSearch": true,
-      "pdf": true
-    }
-  }
+  ]
 }
