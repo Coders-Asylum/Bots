@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: Sachiv.Function
+  commentId: N:Sachiv.Function
+  id: Sachiv.Function
+  children:
+  - Sachiv.Function.SachivAatmaramBhidu
+  langs:
+  - csharp
+  - vb
+  name: Sachiv.Function
+  nameWithType: Sachiv.Function
+  fullName: Sachiv.Function
+  type: Namespace
+  assemblies:
+  - Bots
+references:
+- uid: Sachiv.Function.SachivAatmaramBhidu
+  commentId: T:Sachiv.Function.SachivAatmaramBhidu
+  href: Sachiv.Function.SachivAatmaramBhidu.html
+  name: SachivAatmaramBhidu
+  nameWithType: SachivAatmaramBhidu
+  fullName: Sachiv.Function.SachivAatmaramBhidu
