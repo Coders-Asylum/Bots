@@ -50,7 +50,7 @@ namespace Bot.Exceptions
         /// <param name="error">The actual captured internal error,if any</param>
         /// <param name="statusCode">An HTTP status code for this error, will be returned as response. Defaults to 500</param>
         /// <param name="logger"> A logger instance to be passed</param>
-        public AppException(string code, string message, Exception? error, int statusCode, ILogger logger) : base($"[ERROR]{code}::{message}" + (error != null ? $"\n-InternalError: {error.Message}" : ""), error)
+        public AppException(string code, string message, Exception? error, int statusCode, ILogger logger) : base($"[ERROR]{code}::{message}" + (error != null ? $"- InternalError: {error.Message}" : ""), error)
         {
             Code = code;
             StatusCode = statusCode;
