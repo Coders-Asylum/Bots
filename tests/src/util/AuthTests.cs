@@ -7,6 +7,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Bot.Src.Utils;
+using System.Security.Cryptography;
+using System.Security.Claims;
 
 
 namespace Tests.Src.Utils
@@ -15,18 +17,53 @@ namespace Tests.Src.Utils
 
     public class AuthTests
     {
+        // Arrange
+        private readonly string appId = "test_app_id";
+        private readonly SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes("ThisIsASecretKeyForEncryption32_"));
+        private readonly SigningCredentials hmac256SignedCredentials;
+
+        private readonly string pemKey;
+
+        public AuthTests()
+        {
+            hmac256SignedCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            using RSA rsa = RSA.Create();
+            pemKey = rsa.ExportRSAPrivateKeyPem();
+        }
+
+        [Fact]
+    public void TestGenerateSignedJWTToken()
+    {
+        // Arrange
+        var claims = new List<Claim>
+        {
+            new ("claim1", "value1"),
+            new ("claim2", "value2"),
+            new ("claim3", "value3")
+        };
+
+        // Act
+        string token = Authentication.GenerateSignedJWTToken(claims, pemKey);
+        var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+
+        // Assert
+        Assert.Equal("RS256", jwtToken.Header.Alg);
+        foreach (var claim in claims)
+        {
+            Assert.Equal(claim.Value, jwtToken.Claims.First(c => c.Type == claim.Type).Value);
+        }
+    }
+
         [Fact]
         public void TestIsTokenExpired()
         {
-            // Arrange
-            SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes("ThisIsASecretKeyForEncryption32_"));
-            SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
+
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Expires = DateTime.UtcNow.AddMinutes(-1), // Expired token
-                SigningCredentials = credentials,
+                SigningCredentials = hmac256SignedCredentials,
                 NotBefore = DateTime.UtcNow.AddMinutes(-5), // Not valid before 5 minutes ago
 
             };
@@ -38,6 +75,19 @@ namespace Tests.Src.Utils
 
             // Assert
             Assert.True(isExpired);
+        }
+
+        [Fact]
+        public void TestGithubAppJWTToken()
+        {
+            // Act
+            string token = Authentication.GithubAppJWTToken(appId, pemKey);
+            JwtSecurityToken jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+
+            // Assert
+            Assert.Equal(appId, jwtToken.Claims.First(claim => claim.Type == "iss").Value);
+            Assert.True(long.Parse(jwtToken.Claims.First(claim => claim.Type == "iat").Value) <= DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            Assert.True(long.Parse(jwtToken.Claims.First(claim => claim.Type == "exp").Value) >= DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         }
     }
 

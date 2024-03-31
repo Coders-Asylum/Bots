@@ -5,7 +5,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Timers;
 using Microsoft.IdentityModel.Tokens;
+//
 
 namespace Bot.Src.Utils
 {
@@ -19,20 +21,16 @@ namespace Bot.Src.Utils
 
         }
         /// <summary>
-        /// Generates the singned JWT token, Using the private key.
+        /// Generates the singned JWT token, Using the private pem key string, so algoritm is RSA256.
         /// </summary>
-        public static string GenerateSignedJWTToken(string payload, string privateKey)
+        public static string GenerateSignedJWTToken(IEnumerable<Claim> claims, string privateKey)
         {
             RSA decodedPEMKey = DecodePrivatePEMKey(privateKey);
             RsaSecurityKey securityKey = new(decodedPEMKey);
             SigningCredentials credentials = new(securityKey, SecurityAlgorithms.RsaSha256);
-            Array claims = new[]{
-                new Claim(JwtRegisteredClaimNames.Sub, payload)
-                };
-
-            JwtSecurityToken token = new(issuer: "");
-
-            return "";
+            JwtSecurityToken token = new(claims: claims, signingCredentials: credentials);
+            // the generated bearer token
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         /// <summary>
@@ -55,6 +53,20 @@ namespace Bot.Src.Utils
             RSA rsa = RSA.Create();
             rsa.ImportFromPem(privateKey);
             return rsa;
+        }
+
+        public static string GithubAppJWTToken(string appid, string privateKey)
+        {
+            DateTime now = DateTime.UtcNow;
+            // delete a minitue from the current time to allow clock drift.
+            long unixTime = new DateTimeOffset(now.AddMinutes(-1)).ToUnixTimeSeconds();
+            IEnumerable<Claim> claims =
+            [
+                new(JwtRegisteredClaimNames.Iat, unixTime.ToString()),
+                new (JwtRegisteredClaimNames.Exp, (unixTime + (60 * 10)).ToString()), // 10 minutes
+                new(JwtRegisteredClaimNames.Iss, appid)
+            ];
+            return GenerateSignedJWTToken(claims, privateKey);
         }
 
     }
