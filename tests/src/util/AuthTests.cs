@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Bot.Src.Utils;
 using System.Security.Cryptography;
+using System.Security.Claims;
 
 
 namespace Tests.Src.Utils
@@ -29,6 +30,30 @@ namespace Tests.Src.Utils
             using RSA rsa = RSA.Create();
             pemKey = rsa.ExportRSAPrivateKeyPem();
         }
+
+        [Fact]
+    public void TestGenerateSignedJWTToken()
+    {
+        // Arrange
+        var claims = new List<Claim>
+        {
+            new ("claim1", "value1"),
+            new ("claim2", "value2"),
+            new ("claim3", "value3")
+        };
+
+        // Act
+        string token = Authentication.GenerateSignedJWTToken(claims, pemKey);
+        var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+
+        // Assert
+        Assert.Equal("RS256", jwtToken.Header.Alg);
+        foreach (var claim in claims)
+        {
+            Assert.Equal(claim.Value, jwtToken.Claims.First(c => c.Type == claim.Type).Value);
+        }
+    }
+
         [Fact]
         public void TestIsTokenExpired()
         {

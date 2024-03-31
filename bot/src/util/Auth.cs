@@ -60,12 +60,12 @@ namespace Bot.Src.Utils
             DateTime now = DateTime.UtcNow;
             // delete a minitue from the current time to allow clock drift.
             long unixTime = new DateTimeOffset(now.AddMinutes(-1)).ToUnixTimeSeconds();
-            IEnumerable<Claim> claims = new Claim[]
-            {
+            IEnumerable<Claim> claims =
+            [
                 new(JwtRegisteredClaimNames.Iat, unixTime.ToString()),
                 new (JwtRegisteredClaimNames.Exp, (unixTime + (60 * 10)).ToString()), // 10 minutes
                 new(JwtRegisteredClaimNames.Iss, appid)
-            };
+            ];
             return GenerateSignedJWTToken(claims, privateKey);
         }
 
